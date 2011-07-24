@@ -29,6 +29,9 @@
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/src&quot;"/>
 </option>
 <option id="gnu.cpp.compiler.option.other.other.925707600" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -std=c++0x `pkg-config --cflags gtk+-2.0`" valueType="string"/>
+<option id="gnu.cpp.compiler.option.preprocessor.def.806232055" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+<listOptionValue builtIn="false" value="PHOENIX_GTK"/>
+</option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1619265655" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1079962912" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug">
@@ -57,7 +60,7 @@
 </toolChain>
 </folderInfo>
 <sourceEntries>
-<entry excluding="phoenix/reference|phoenix/test|phoenix/qt|phoenix/windows" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+<entry excluding="phoenix/core/layout/vertical-layout.cpp|phoenix/core/layout/horizontal-layout.cpp|phoenix/core/layout/fixed-layout.cpp|phoenix/core/core.cpp|phoenix/phoenix.cpp|phoenix/gtk/action/separator.cpp|phoenix/gtk/action/radio-item.cpp|phoenix/gtk/action/menu.cpp|phoenix/gtk/action/item.cpp|phoenix/gtk/action/check-item.cpp|phoenix/gtk/action/action.cpp|phoenix/gtk/widget/widget.cpp|phoenix/gtk/widget/viewport.cpp|phoenix/gtk/widget/vertical-slider.cpp|phoenix/gtk/widget/text-edit.cpp|phoenix/gtk/widget/radio-box.cpp|phoenix/gtk/widget/progress-bar.cpp|phoenix/gtk/widget/list-view.cpp|phoenix/gtk/widget/line-edit.cpp|phoenix/gtk/widget/label.cpp|phoenix/gtk/widget/horizontal-slider.cpp|phoenix/gtk/widget/hex-edit.cpp|phoenix/gtk/widget/combo-box.cpp|phoenix/gtk/widget/check-box.cpp|phoenix/gtk/widget/canvas.cpp|phoenix/gtk/widget/button.cpp|phoenix/gtk/window.cpp|phoenix/gtk/timer.cpp|phoenix/gtk/settings.cpp|phoenix/gtk/message-window.cpp|phoenix/gtk/gtk.cpp|phoenix/gtk/font.cpp|phoenix/reference|phoenix/test|phoenix/qt|phoenix/windows" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 </sourceEntries>
 </configuration>
 </storageModule>
@@ -174,6 +177,9 @@
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/src/phoenix&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/src&quot;"/>
 </option>
+<option id="gnu.cpp.compiler.option.preprocessor.def.884966101" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+<listOptionValue builtIn="false" value="PHOENIX_GTK"/>
+</option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.716467360" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.release.560543556" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.release">
@@ -202,7 +208,7 @@
 </toolChain>
 </folderInfo>
 <sourceEntries>
-<entry excluding="phoenix/reference|phoenix/test|phoenix/qt|phoenix/windows" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+<entry excluding="phoenix/core/layout/vertical-layout.cpp|phoenix/core/layout/horizontal-layout.cpp|phoenix/core/layout/fixed-layout.cpp|phoenix/core/core.cpp|phoenix/phoenix.cpp|phoenix/gtk/action/separator.cpp|phoenix/gtk/action/radio-item.cpp|phoenix/gtk/action/menu.cpp|phoenix/gtk/action/item.cpp|phoenix/gtk/action/check-item.cpp|phoenix/gtk/action/action.cpp|phoenix/gtk/widget/widget.cpp|phoenix/gtk/widget/viewport.cpp|phoenix/gtk/widget/vertical-slider.cpp|phoenix/gtk/widget/text-edit.cpp|phoenix/gtk/widget/radio-box.cpp|phoenix/gtk/widget/progress-bar.cpp|phoenix/gtk/widget/list-view.cpp|phoenix/gtk/widget/line-edit.cpp|phoenix/gtk/widget/label.cpp|phoenix/gtk/widget/horizontal-slider.cpp|phoenix/gtk/widget/hex-edit.cpp|phoenix/gtk/widget/combo-box.cpp|phoenix/gtk/widget/check-box.cpp|phoenix/gtk/widget/canvas.cpp|phoenix/gtk/widget/button.cpp|phoenix/gtk/window.cpp|phoenix/gtk/timer.cpp|phoenix/gtk/settings.cpp|phoenix/gtk/message-window.cpp|phoenix/gtk/gtk.cpp|phoenix/gtk/font.cpp|phoenix/reference|phoenix/test|phoenix/qt|phoenix/windows" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 </sourceEntries>
 </configuration>
 </storageModule>
