@@ -36,6 +36,14 @@ enum : unsigned {
   MinimumSize =  0u,
 };
 
+enum class MOVE_FLAG : unsigned {
+  ENTER,
+  LEAVE,
+  MOVE,
+  LEFT_DOWN,
+  LEFT_UP
+};
+
 struct Geometry {
   signed x, y;
   unsigned width, height;
@@ -231,6 +239,10 @@ struct Widget : Object {
   void setVisible(bool visible = true);
   bool visible();
 
+  //Added: there's a circular dependency if we try to subclass Widget and 
+  //       access "state" in our own code.
+  //const Geometry& getGeometry();
+
   Widget();
   Widget(pWidget &p);
   struct State;
@@ -250,8 +262,14 @@ struct Button : private nall::base_from_member<pButton&>, Widget {
 };
 
 struct Canvas : private nall::base_from_member<pCanvas&>, Widget {
+  nall::function<void (unsigned int, unsigned int, MOVE_FLAG)> onMotion; //Change: we need a way to track the mouse
+
   uint32_t* buffer();
-  void update();
+
+  //Added: needed to avoid buffer overflows, etc.
+  const Geometry& bufferSize();
+
+  virtual void update();  //Second change: made virtual
 
   Canvas();
   pCanvas &p;

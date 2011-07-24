@@ -38,6 +38,9 @@ void pWidget::setGeometry(const Geometry &geometry) {
   gtk_widget_set_size_request(gtkWidget, width, height);
 }
 
+/*const Geometry &geometry getGeometry() {
+}*/
+
 void pWidget::setVisible(bool visible) {
   if(widget.state.abstract) visible = false;
   gtk_widget_set_visible(gtkWidget, visible);
