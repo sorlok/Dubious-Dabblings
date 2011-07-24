@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include <phoenix.hpp>
+#include <phoenix/phoenix.hpp>
 
 #include "phoenix_ext/CanvasExt.hpp"
 

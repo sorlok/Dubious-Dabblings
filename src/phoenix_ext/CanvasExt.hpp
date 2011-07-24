@@ -1,6 +1,6 @@
 #pragma once
 
-#include <phoenix.hpp>
+#include <phoenix/phoenix.hpp>
 
 #include "PremultImage.hpp"
 
