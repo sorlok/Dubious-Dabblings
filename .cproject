@@ -57,7 +57,7 @@
 </toolChain>
 </folderInfo>
 <sourceEntries>
-<entry excluding="phoenix/qt|phoenix/windows" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+<entry excluding="phoenix/reference|phoenix/test|phoenix/qt|phoenix/windows" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 </sourceEntries>
 </configuration>
 </storageModule>
@@ -202,7 +202,7 @@
 </toolChain>
 </folderInfo>
 <sourceEntries>
-<entry excluding="phoenix/qt|phoenix/windows" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+<entry excluding="phoenix/reference|phoenix/test|phoenix/qt|phoenix/windows" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 </sourceEntries>
 </configuration>
 </storageModule>
