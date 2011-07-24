@@ -1,0 +1,10 @@
+#Ignore built items
+Debug/
+Release/
+
+#Ignore object files
+*.o
+
+#Ignore gedit backup files
+*~
+
