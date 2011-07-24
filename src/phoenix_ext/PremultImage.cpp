@@ -57,6 +57,11 @@ uint32_t& PremultImage::operator[] (size_t x)
 	return buffer_[x];
 }
 
+const uint32_t* PremultImage::getPixels()
+{
+	return buffer_;
+}
+
 
 uint32_t PremultImage::Premultiply(uint8_t a, uint8_t r, uint8_t g, uint8_t b)
 {

@@ -37,7 +37,8 @@ struct Application : Window {
     PremultImage& bkgrd = myCanvas.getBufferedImage();
 
     //Draw something simple onto the background
-    bkgrd.resetSize({0, 0, 300, 200});
+    //NOTE: This is big enough that it's slow to draw. Try implementing memcpy for speedup.
+    bkgrd.resetSize({0, 0, 900, 600});
 
     unsigned int w = bkgrd.getSize().width;
     unsigned int h = bkgrd.getSize().height;

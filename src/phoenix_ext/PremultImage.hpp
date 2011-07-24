@@ -36,6 +36,7 @@ public:
 	///Useful if you want to access array elements directly.
 	///Remember! These will be premultiplied values!
 	uint32_t& operator[] (size_t x);
+	const uint32_t* getPixels();
 
 
 	///Helper: convert A,R,G,B to premultiplied RGB
