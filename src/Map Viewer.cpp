@@ -54,6 +54,9 @@ struct Application : Window {
     };
 
     onSize = [this]() {
+    	//TODO: Currently, "sizing" also includes dragging the window. This is pretty
+    	//      bad for performance; dragging shouldn't destroy the buffer() pointer.
+    	//      Will have to edit the Canvas class to fix.... I might not do this for a while.
     	myCanvas.update();
     };
 
