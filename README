@@ -3,3 +3,9 @@ No guarantees that anything works at all; just sharing the source in case anyone
 Will happily take comments.
 ~Seth
 
+NOTE:
+To build, you should cd into "src/phoenix" and then run "make". This will create the phoenix library in "src/phoenix/build". At that point, Eclipse will be able to link to the project properly.
+
+NOTE:
+Phoenix can target QT or Windows, but I have it hard-wired to GTK, since I'm currently extending the library. Once I've stabilized my changes, I'll port the improvements over to QT and Windows, then fiddle with getting this all to work in Eclipse.
+
