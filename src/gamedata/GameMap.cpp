@@ -221,8 +221,9 @@ void GameMap::InitTMXMap(GameMap& map, const std::string& path)
 	//Iterate through the map. Convert the GIDs to zero-offset variants
 	// NOTE: negative numbers (esp. -1) mean "no tile".
 	int firstGID = tileset.GetFirstGid();
-	numCols = tmxMap.GetWidth() / tileset.GetTileWidth();
-	numRows = tmxMap.GetHeight() / tileset.GetTileHeight();
+	//NOTE: Tiled wastes a lot of width/height on empty cell values, but oh well.
+	numCols = tmxMap.GetWidth();   // / tileset.GetTileWidth();
+	numRows = tmxMap.GetHeight();  // / tileset.GetTileHeight();
 	map.mapSizeInTiles = {0, 0, numCols, numRows};
 	map.maplayer.insert(map.maplayer.begin(), numRows, vector<int>());
 	for (size_t tileY=0; tileY<numCols; tileY++) {
@@ -264,6 +265,7 @@ void GameMap::PaintImage(PremultImage& image)
 	for (size_t tileY=0; tileY<tileH; tileY++) {
 		for (size_t tileX=0; tileX<tileW; tileX++) {
 			if (maplayer[tileY][tileX]>=0) {
+				std::cout <<"   Tile[" <<tileX <<"," <<tileY <<" : " <<maplayer[tileY][tileX] <<"\n";
 				PaintTile(tileX, tileY, maplayer[tileY][tileX], image);
 			}
 		}
