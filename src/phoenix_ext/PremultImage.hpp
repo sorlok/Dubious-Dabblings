@@ -24,7 +24,7 @@ public:
 	PremultImage();
 	~PremultImage();
 
-	void resetSize(const phoenix::Geometry& size);
+	void resetSize(const phoenix::Geometry& size, std::vector<uint8_t> fill=std::vector<uint8_t>({0x00, 0x00, 0x00}));
 	const phoenix::Geometry& getSize() const;
 
 	///Simple drawing. (Really, you should use images, or write to the buffer directly)
@@ -36,14 +36,18 @@ public:
 	///Useful if you want to access array elements directly.
 	///Remember! These will be premultiplied values!
 	uint32_t& operator[] (size_t x);
-	const uint32_t* getPixels();
+	uint32_t* getPixels();
 
 
 	///Helper: convert A,R,G,B to premultiplied RGB
 	static uint32_t Premultiply(uint8_t a, uint8_t r, uint8_t g, uint8_t b);
+	static uint32_t Premultiply(uint32_t argb);
 
 	//Helper: combine two pixel values into one:
 	static void Combine(uint32_t& base, uint32_t brush);
+
+	//Helper: convert a vector (likely an initializer list) to ARGB
+	static uint32_t DecodeColor(const std::vector<uint8_t>& color);
 
 
 private:

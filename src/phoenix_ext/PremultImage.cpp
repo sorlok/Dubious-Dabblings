@@ -21,7 +21,7 @@ PremultImage::~PremultImage()
 }
 
 
-void PremultImage::resetSize(const Geometry& size)
+void PremultImage::resetSize(const Geometry& size, std::vector<uint8_t> fill)
 {
 	//Delete the old one
 	if (buffer_) {
@@ -36,6 +36,9 @@ void PremultImage::resetSize(const Geometry& size)
 		return;
 	}
 
+	//Get the background color:
+	uint32_t color = PremultImage::DecodeColor(fill);
+
 	std::cout <<"Resize: " <<size.width <<"," <<size.height <<"\n";
 
 	//Allocate the new one
@@ -43,7 +46,7 @@ void PremultImage::resetSize(const Geometry& size)
 
 	//As fun as it might be to allocate the image with garbage
 	//  pixel data, I suppose we should zero it (grumble grumble)
-	std::fill_n(buffer_, dim, 0x000000);
+	std::fill_n(buffer_, dim, color);
 }
 
 const phoenix::Geometry& PremultImage::getSize() const
@@ -57,7 +60,7 @@ uint32_t& PremultImage::operator[] (size_t x)
 	return buffer_[x];
 }
 
-const uint32_t* PremultImage::getPixels()
+uint32_t* PremultImage::getPixels()
 {
 	return buffer_;
 }
@@ -70,6 +73,11 @@ uint32_t PremultImage::Premultiply(uint8_t a, uint8_t r, uint8_t g, uint8_t b)
     b = (a * b + 127) / 255;
 
     return /*(a << 24) |*/ (r << 16) | (g << 8) | b;
+}
+
+uint32_t PremultImage::Premultiply(uint32_t argb)
+{
+	return PremultImage::Premultiply(((argb>>24)&0xFF), ((argb>>16)&0xFF), ((argb>>8)&0xFF), (argb&0xFF));
 }
 
 void PremultImage::Combine(uint32_t& base, uint32_t brush)
@@ -89,25 +97,29 @@ void PremultImage::Combine(uint32_t& base, uint32_t brush)
 	base = (nall::min(r0, 0xFF) << 16) | (nall::min(g0, 0xFF) << 8) | nall::min(b0, 0xFF);
 }
 
+uint32_t PremultImage::DecodeColor(const vector<uint8_t>& color)
+{
+	auto it = color.begin();
+	if (color.size()==1) {
+		return Premultiply(0xFF, color[0], color[0], color[0]);
+	} else if (color.size()==2) {
+		return Premultiply(color[0], color[1], color[1], color[1]);
+	} else if (color.size()==3) {
+		return Premultiply(0xFF, color[0], color[1], color[2]);
+	} else if (color.size()==4) {
+		return Premultiply(color[0], color[1], color[2], color[3]);
+	} else {
+		throw std::logic_error("Color requires 1, 2, 3, or 4 components");
+	}
+}
+
 
 void PremultImage::fillRect(const Geometry& rectangle, vector<uint8_t> color)
 {
 	std::cout <<"Filling rectangle [" <<rectangle.x <<"," <<rectangle.y <<"," <<rectangle.width <<"," <<rectangle.height <<"]\n";
 
 	//Get the color
-	uint32_t color_;
-	auto it = color.begin();
-	if (color.size()==1) {
-		color_ = Premultiply(0xFF, color[0], color[0], color[0]);
-	} else if (color.size()==2) {
-		color_ = Premultiply(color[0], color[1], color[1], color[1]);
-	} else if (color.size()==3) {
-		color_ = Premultiply(0xFF, color[0], color[1], color[2]);
-	} else if (color.size()==4) {
-		color_ = Premultiply(color[0], color[1], color[2], color[3]);
-	} else {
-		throw std::logic_error("Color requires 1, 2, 3, or 4 components");
-	}
+	uint32_t color_ = PremultImage::DecodeColor(color);
 
 	//Fill the rectangle; ensure we never stray outside the buffer's boundaries.
 	//TODO: We should make judicious use of multiple memcpy calls...
