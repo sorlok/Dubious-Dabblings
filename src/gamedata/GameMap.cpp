@@ -30,8 +30,12 @@ void custom_png_read(png_structp pngPtr, png_bytep data, png_size_t length)
 } //End anon namespace
 
 
-uint32_t* GameMap::LoadPNGFile(const string& path)
+uint32_t* GameMap::LoadPNGFile(const string& path, unsigned int& imgWidth, unsigned int& imgHeight)
 {
+	//Set initial return values
+	imgWidth = 0;
+	imgHeight = 0;
+
 	//Open it
 	std::ifstream source(path);
 	if (source.fail()) {
@@ -82,8 +86,8 @@ uint32_t* GameMap::LoadPNGFile(const string& path)
     png_read_info(pngRead, pngInfo);
 
     //Retrive some image properties
-    png_uint_32 imgWidth =  png_get_image_width(pngRead, pngInfo);
-    png_uint_32 imgHeight = png_get_image_height(pngRead, pngInfo);
+    imgWidth =  png_get_image_width(pngRead, pngInfo);
+    imgHeight = png_get_image_height(pngRead, pngInfo);
     png_uint_32 bitdepth   = png_get_bit_depth(pngRead, pngInfo);
     png_uint_32 channels   = png_get_channels(pngRead, pngInfo);
     png_uint_32 color_type = png_get_color_type(pngRead, pngInfo);
@@ -137,10 +141,14 @@ uint32_t* GameMap::LoadPNGFile(const string& path)
     source.close();
 
     //Convert results
-    uint32_t* res = new uint32_t[dataSize/2];
-    for (size_t i=0; i<dataSize; i+=2) {
-    	//Premultiplied, of course!
-    	res[i/2] = PremultImage::Premultiply((((uint32_t)data[i])<<16) | ((uint32_t)data[i+1]));
+    uint32_t* res = new uint32_t[dataSize/4];
+    for (size_t i=0; i<dataSize; i+=4) {
+    	//uint32_t pix = ((((uint32_t)data[i])&0xFF)<<24) | ((((uint32_t)data[i+1])&0xFF)<<16) | ((((uint32_t)data[i+2])&0xFF)<<8) | (((uint32_t)data[i+3])&0xFF);
+
+    	//Strange... RGBA?
+    	uint32_t pix = ((((uint32_t)data[i+3])&0xFF)<<24) | ((((uint32_t)data[i])&0xFF)<<16) | ((((uint32_t)data[i+1])&0xFF)<<8) | (((uint32_t)data[i+2])&0xFF);
+
+    	res[i/4] = PremultImage::Premultiply(pix);
     }
 
     //Cleanup, return
@@ -178,15 +186,22 @@ void GameMap::InitTMXMap(GameMap& map, const std::string& path)
 	if (tsetName.rfind("png") != tsetName.size()-3) {throw std::runtime_error("Tileset must be a PNG image.");}
 	if (tileset.GetMargin()!=0) { throw std::runtime_error("Tilesets may not have a margin."); }
 
+	//In case they're not explicitly set:
+	unsigned int tsImgWidth;
+	unsigned int tsImgHeight;
+
 	//Load the image.
-	uint32_t* pngBuffer = GameMap::LoadPNGFile(tsImage.GetSource());
+	uint32_t* pngBuffer = GameMap::LoadPNGFile(tsImage.GetSource(), tsImgWidth, tsImgHeight);
 	if (!pngBuffer) {
 		throw std::runtime_error("Error loading PNG file.");
 	}
 
 	//Iterate over every tile; save it.
-	size_t numCols = tsImage.GetWidth() / tileset.GetTileWidth();
-	size_t numRows = tsImage.GetHeight() / tileset.GetTileHeight();
+	size_t numCols = tsImgWidth / tileset.GetTileWidth();
+	size_t numRows = tsImgHeight / tileset.GetTileHeight();
+
+	std::cout <<"Num tiles: " <<tsImgWidth <<" X " <<tileset.GetTileWidth() <<"\n";
+
 	for (size_t tileY=0; tileY<numRows; tileY++) {
 		for (size_t tileX=0; tileX<numCols; tileX++) {
 			//Prepare a new tile entry.
@@ -195,14 +210,14 @@ void GameMap::InitTMXMap(GameMap& map, const std::string& path)
 			//Get our src and dest row pointers
 			uint32_t* destRow = map.tiles.back();
 			uint32_t* srcRow = pngBuffer;
-			srcRow += tileY*tsImage.GetWidth()*tileset.GetTileHeight();
+			srcRow += tileY*tsImgWidth*tileset.GetTileHeight();
 			srcRow += tileX*tileset.GetTileWidth();
 
 			//Copy each row of pixels into this new entry.
 			for (size_t rowID=0; rowID<map.tileSize; rowID++) {
 				memcpy(destRow, srcRow, map.tileSize*sizeof(*destRow));
 				destRow += map.tileSize;
-				srcRow += tsImage.GetWidth();
+				srcRow += tsImgWidth;
 			}
 		}
 	}
@@ -229,7 +244,10 @@ void GameMap::InitTMXMap(GameMap& map, const std::string& path)
 	for (size_t tileY=0; tileY<numCols; tileY++) {
 		map.maplayer[tileY].insert(map.maplayer[tileY].begin(), numCols, -1);
 		for (size_t tileX=0; tileX<numRows; tileX++) {
-			map.maplayer[tileY][tileX] = layer.GetTile(tileX, tileY).gid - firstGID;
+			size_t tileGID = layer.GetTile(tileX, tileY).gid;
+			if (tileGID >= firstGID) {
+				map.maplayer[tileY][tileX] = tileGID - firstGID;
+			}
 		}
 	}
 
@@ -265,7 +283,6 @@ void GameMap::PaintImage(PremultImage& image)
 	for (size_t tileY=0; tileY<tileH; tileY++) {
 		for (size_t tileX=0; tileX<tileW; tileX++) {
 			if (maplayer[tileY][tileX]>=0) {
-				std::cout <<"   Tile[" <<tileX <<"," <<tileY <<" : " <<maplayer[tileY][tileX] <<"\n";
 				PaintTile(tileX, tileY, maplayer[tileY][tileX], image);
 			}
 		}

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" orientation="orthogonal" width="100" height="100" tilewidth="16" tileheight="16">
  <tileset firstgid="1" name="Test" tilewidth="16" tileheight="16">
-  <image source="map_pal.png"/>
+  <image source="../../../media/DATA/Programs/rpg2003/RTP/ChipSet/main.png"/>
  </tileset>
  <layer name="Layer 1" width="100" height="100">
   <data encoding="base64" compression="gzip">
-   H4sIAAAAAAAAA+3YsQ2AMAxFQdggq2T/5WgpUDD6RkpxJ1mioPIrQjgOAACAPYwzn3l7JrPabaXD1KNVZcerd/ToVdn12ww92uixl84WeuT02EvS4+msJ5OcH3r0q37PVlrokave9yot9Mgld3E9+n35T1UZMnoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwpwsKZHXhQJwAAA==
+   H4sIAAAAAAAAA+3YsQnDMBCGUWUDraKxMlHWdeMiRVDO/Jfg4j04cOFKH0aSxwAAALiH+chnvT2T2a1tpcPSo1VljXfv6NGrstbfZurRRo976WyhR67a46nHXyTfx6e9nkyyf+jRr3qerbTQI1e971Va6JFL7uJ69Lvyn2o3r3PI6AEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAvHWmPMR1AnAAA
   </data>
  </layer>
 </map>
