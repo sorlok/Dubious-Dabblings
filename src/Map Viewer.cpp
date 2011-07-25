@@ -3,6 +3,7 @@
 #include <phoenix/phoenix.hpp>
 
 #include "phoenix_ext/CanvasExt.hpp"
+#include "gamedata/GameMap.hpp"
 
 using namespace nall;
 using namespace phoenix;
@@ -16,13 +17,15 @@ struct Application : Window {
   Button okButton;
   Button quitButton;
   CanvasExt myCanvas;
+  GameMap myMap;
 
   void create() {
+    //Do window tasks
     setTitle("Test Application");
     setGeometry({ 128, 128, 640, 480 });
 
     helloLabel.setText("Hello, world!");
-    okButton.setText("Paint Canvas");
+    okButton.setText("Load Map");
     quitButton.setText("Quit");
 
     layout.setMargin(5);                       //layout border in pixels
@@ -37,7 +40,6 @@ struct Application : Window {
     PremultImage& bkgrd = myCanvas.getBufferedImage();
 
     //Draw something simple onto the background
-    //NOTE: This is big enough that it's slow to draw. Try implementing memcpy for speedup.
     bkgrd.resetSize({0, 0, 900, 600});
 
     unsigned int w = bkgrd.getSize().width;
@@ -45,13 +47,15 @@ struct Application : Window {
 
     bkgrd.fillRect({0, 0, w/2, h/2}, {0xFF, 0x00, 0x00});
     bkgrd.fillRect({w/4, h/4, w/2, h/2}, {0x80, 0x00, 0x00, 0xFF});
-    //myCanvas.update();  //TODO: How to call once at startup?
 
     onClose = quitButton.onTick = &OS::quit;
 
-    okButton.onTick = [this]() {
-    	//myCanvas.update();
+    okButton.onTick = [this, &bkgrd]() {
+    	GameMap::InitTMXMap(myMap, "map_test.tmx");
+    	myMap.PaintImage(bkgrd);
+    	myCanvas.update();
     };
+
 
     onSize = [this]() {
     	//TODO: Currently, "sizing" also includes dragging the window. This is pretty
@@ -68,7 +72,8 @@ struct Application : Window {
     		myCanvas.setImageOffset(Geometry(x, y, 0, 0));
     		myCanvas.update();
     	} else if (flag==MOVE_FLAG::LEAVE) {
-    		myCanvas.update(); //Clean up painting artifacts
+    		//TODO: We can remove any "highlights" or whatnot here.
+    		myCanvas.update();
     	}
     };
 
