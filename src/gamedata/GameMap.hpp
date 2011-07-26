@@ -26,7 +26,7 @@ public:
 	void PaintImage(PremultImage& image);
 	//TODO: Another function called "UpdateImage" which handles animations, cursors, etc.
 
-private:
+//private: //TODO: Better encapsulation
 	void PaintTile(size_t tileX, size_t tileY, int tileID, PremultImage& img);
 
 	std::vector<uint32_t*> tiles;

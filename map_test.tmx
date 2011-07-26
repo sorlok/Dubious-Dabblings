@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" width="30" height="20" tilewidth="16" tileheight="16">
+<map version="1.0" orientation="orthogonal" width="50" height="40" tilewidth="16" tileheight="16">
  <tileset firstgid="1" name="Test" tilewidth="16" tileheight="16">
   <image source="../../../media/DATA/Programs/rpg2003/RTP/ChipSet/main.png"/>
  </tileset>
- <layer name="Layer 1" width="30" height="20">
+ <layer name="Layer 1" width="50" height="40">
   <data encoding="base64" compression="gzip">
-   H4sIAAAAAAAAA+XRyw3CMAyAYWcDlqAswiJ0AO4cmICyRk+lS1AuoUNhCRCRFTu2FeiBwyf1md9N+wDQ/4lpgd4N7eF5XKs/Cd496hr8pHVTXaL0rFdHnNGALmis1OYaA2lFdEfz6/yUeVdLakTSWoWPmbxnoW1wIvhYGktZ43xN4ledLfHNTitoKsmtLc0pzaRVc98sdsI+bAozHUCPa3N7kZun1D0a+9p5LK3cde+/0X4bd8/bfQDVtfqBYAkAAA==
+   H4sIAAAAAAAAA9WWQU7DQAxF0xtwCUDlHJF6jpY9e5AQBwCOAKwoG+ACwIqwKb0AcAtOgEeKxcjyzNieSTpZvE2qOP/ZnjTrWdOsJ85HBRlKOPw2u8+Rw0PvMHUPnIXjvYI8ubNA7ivIlTOLqXpws5jibnGzmJpLzKF2l65H4lCriyY759JV4NBlOHA+YzvhDp0UcKCU9OkiYH6ktAfWdTOywuXkuDKg9SgNzXMNPAJPSjTOQ2VGXJ5nYAN8KpH6uvqXxpmnMiMuzxbYm/0j3Rep75bk0CDNzBHKvQ8ceEh9Xc1NY0OaWeKB+Vtg5aHxGAPaZwrmP1ZkH8OD5m4JK0Iof8j7cCAPLjfNmsrMEarRJuZrhXuW5ZxLWUYcrbSGuZb+LimxU8vEHo/pcdrICblY9pieVytnHlzmc6WP1I965viE8oeyc9etu0jPKzc3qRt1iPU+9FuuR+z902bOQ0Oo9kXGniCa7xLt2cBreJ814w1wC9wV8OXOugbtc/wZvQCvwFtBD4tTbt+/gG/gJ3H/HDgayFXS75y++3UWPbv2kfQ99k5YEOYjOZU+v9SDc/LJ9cOeavaImwO9FvNI+eU4hfbI+n9i8djFHqb4A94fsk9AHwAA
   </data>
  </layer>
 </map>

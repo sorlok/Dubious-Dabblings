@@ -19,12 +19,16 @@ struct Application : Window {
   CanvasExt myCanvas;
   GameMap myMap;
 
+  //Kinda messy, I know
+  bool loadedMapOnce;
+  Geometry scrollOffset;
+
   void create() {
     //Do window tasks
     setTitle("Test Application");
     setGeometry({ 128, 128, 640, 480 });
 
-    helloLabel.setText("Hello, world!");
+    helloLabel.setText("Map Viewer");
     okButton.setText("Load Map");
     quitButton.setText("Quit");
 
@@ -40,6 +44,8 @@ struct Application : Window {
     PremultImage& bkgrd = myCanvas.getBufferedImage();
 
     //Draw something simple onto the background
+    loadedMapOnce = false;
+    scrollOffset = {0,0,0,0};
     bkgrd.resetSize({0, 0, 900, 600});
 
     unsigned int w = bkgrd.getSize().width;
@@ -50,14 +56,31 @@ struct Application : Window {
 
     onClose = quitButton.onTick = &OS::quit;
 
-    okButton.onTick = [this, &bkgrd]() {
-    	GameMap::InitTMXMap(myMap, "map_test.tmx");
-    	myMap.PaintImage(bkgrd);
-    	myCanvas.update();
+    okButton.onTick = [this, &bkgrd, &scrollOffset]() {
+    	if (!loadedMapOnce) {
+    		GameMap::InitTMXMap(myMap, "map_test.tmx");
+    		loadedMapOnce = true;
+    		myMap.PaintImage(bkgrd);
+    		scrollOffset.x = 0;//myCanvas.bufferSize().width/2 - bkgrd.getSize().width/2;
+    		scrollOffset.y = 0;//myCanvas.bufferSize().height/2 - bkgrd.getSize().height/2;
+    		myCanvas.setImageOffset(scrollOffset);
+    		myCanvas.update();
+    	}
     };
 
+    onSize = [this, &bkgrd, &scrollOffset]() {
+    	//Update offset
+    	if (loadedMapOnce) {
+    		if (bkgrd.getSize().width < myCanvas.bufferSize().width) {
+    			scrollOffset.x = myCanvas.bufferSize().width/2 - bkgrd.getSize().width/2;
+    		}
+    		if (bkgrd.getSize().height < myCanvas.bufferSize().height) {
+    			scrollOffset.y = myCanvas.bufferSize().height/2 - bkgrd.getSize().height/2;
+    		}
+    		myCanvas.setImageOffset(scrollOffset);
+    	}
 
-    onSize = [this]() {
+
     	//TODO: Currently, "sizing" also includes dragging the window. This is pretty
     	//      bad for performance; dragging shouldn't destroy the buffer() pointer.
     	//      Will have to edit the Canvas class to fix.... I might not do this for a while.
@@ -66,11 +89,43 @@ struct Application : Window {
 
     myCanvas.onMotion = [this, &bkgrd](unsigned int localX, unsigned int localY, MOVE_FLAG flag) {
     	if (flag==MOVE_FLAG::MOVE) {
-    		int x = ((int)localX) - bkgrd.getSize().width/2;
-    		int y = ((int)localY) - bkgrd.getSize().height/2;
+    		if (loadedMapOnce) {
+    			//If the mouse is near the edges of the screen, increase the offset
+    			Geometry oldOffset = scrollOffset;
+    			if (bkgrd.getSize().width >= myCanvas.bufferSize().width) {
+    				if (localX < 32) {
+    					scrollOffset.x += myMap.tileSize/4;
+    				} else if (localX >= myCanvas.bufferSize().width - 32) {
+    					scrollOffset.x -= myMap.tileSize/4;
+    				}
 
-    		myCanvas.setImageOffset(Geometry(x, y, 0, 0));
-    		myCanvas.update();
+    				//Bound
+    				scrollOffset.x = nall::max(nall::min(0, scrollOffset.x), (int)myCanvas.bufferSize().width-(int)bkgrd.getSize().width);
+    			}
+    			if (bkgrd.getSize().height >= myCanvas.bufferSize().height) {
+    				if (localY < 32) {
+    					scrollOffset.y += myMap.tileSize/4;
+    				} else if (localY >= myCanvas.bufferSize().height - 32) {
+    					scrollOffset.y -= myMap.tileSize/4;
+    				}
+
+    				//Bound
+    				scrollOffset.y = nall::max(nall::min(0, scrollOffset.y), (int)myCanvas.bufferSize().height-(int)bkgrd.getSize().height);
+    			}
+
+    			if (oldOffset.x!=scrollOffset.x || oldOffset.y!=scrollOffset.y) {
+    				//Update
+    				myCanvas.setImageOffset(scrollOffset);
+    				myCanvas.update();
+    			}
+    		} else {
+    			//Just track the mouse
+    			int x = ((int)localX) - bkgrd.getSize().width/2;
+    			int y = ((int)localY) - bkgrd.getSize().height/2;
+
+    			myCanvas.setImageOffset(Geometry(x, y, 0, 0));
+    			myCanvas.update();
+    		}
     	} else if (flag==MOVE_FLAG::LEAVE) {
     		//TODO: We can remove any "highlights" or whatnot here.
     		myCanvas.update();
