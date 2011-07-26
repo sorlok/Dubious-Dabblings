@@ -191,7 +191,7 @@ void GameMap::InitTMXMap(GameMap& map, const std::string& path)
 	unsigned int tsImgHeight;
 
 	//Load the image.
-	uint32_t* pngBuffer = GameMap::LoadPNGFile(tsImage.GetSource(), tsImgWidth, tsImgHeight);
+	uint32_t* pngBuffer = GameMap::LoadPNGFile(tmxMap.GetFilepath() + "/" + tsImage.GetSource(), tsImgWidth, tsImgHeight);
 	if (!pngBuffer) {
 		throw std::runtime_error("Error loading PNG file.");
 	}
