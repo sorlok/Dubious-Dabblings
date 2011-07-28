@@ -42,6 +42,8 @@ struct Application : Window {
 
     //Get a reference to the canvas's buffer:
     PremultImage& bkgrd = myCanvas.getBufferedImage();
+    unsigned int lastW = 0;  //For some reason, capturing as a geometry crashes.
+    unsigned int lastH = 0;
 
     //Draw something simple onto the background
     loadedMapOnce = false;
@@ -68,7 +70,16 @@ struct Application : Window {
     	}
     };
 
-    onSize = [this, &bkgrd, &scrollOffset]() {
+    onSize = [this, &bkgrd, &scrollOffset, &lastW, &lastH]() {
+    	//Has the buffer actually been destroyed?
+    	if (myCanvas.geometry().width==lastW && myCanvas.geometry().height==lastH) {
+    		return;
+    	}
+
+    	//Save new geometry
+    	lastW = myCanvas.geometry().width;
+    	lastH = myCanvas.geometry().height;
+
     	//Update offset
     	if (loadedMapOnce) {
     		if (bkgrd.getSize().width < myCanvas.geometry().width) {
@@ -79,7 +90,6 @@ struct Application : Window {
     		}
     		myCanvas.setImageOffset(scrollOffset);
     	}
-
 
     	//TODO: Currently, "sizing" also includes dragging the window. This is pretty
     	//      bad for performance; dragging shouldn't destroy the buffer() pointer.
