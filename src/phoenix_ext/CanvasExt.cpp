@@ -28,7 +28,7 @@ void CanvasExt::updateCanvasBuffer()
 	//std::cout <<"Repaint: " <<image_.getSize().width <<"," <<image_.getSize().height <<" on: " <<bufferSize().width <<"," <<bufferSize().height <<" at: " <<offset_.x <<"," <<offset_.y <<"\n";
 
 	uint32_t* buffer_ = buffer();
-	const Geometry& geom = bufferSize();
+	const Geometry& geom = geometry();
 
 	//Source and destination pointers
 	const uint32_t* src = image_.getPixels();

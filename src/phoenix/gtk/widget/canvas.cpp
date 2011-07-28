@@ -27,10 +27,10 @@ uint32_t* pCanvas::buffer() {
   return bufferRGB;
 }
 
-const Geometry& pCanvas::bufferSize() {
+//const Geometry& pCanvas::bufferSize() {
   //Note: we could use gtkWidget->allocation.width/height, but I'm not taking any chances for now.
-  return buffer_size;
-}
+//  return buffer_size;
+//}
 
 void pCanvas::setGeometry(const Geometry &geometry) {
   if(geometry.width == canvasWidth && geometry.height == canvasHeight) return;
@@ -41,7 +41,7 @@ void pCanvas::setGeometry(const Geometry &geometry) {
 
   bufferRGB = new uint32_t[geometry.width * geometry.height]();
   bufferBGR = new uint32_t[geometry.width * geometry.height]();
-  buffer_size = geometry;
+//  buffer_size = geometry;
 
   pWidget::setGeometry(geometry);
   update();
@@ -61,7 +61,7 @@ void pCanvas::constructor() {
   canvasWidth = canvasHeight = 256;
   bufferRGB = new uint32_t[256 * 256]();
   bufferBGR = new uint32_t[256 * 256]();
-  buffer_size = {0, 0, 256, 256};
+//  buffer_size = {0, 0, 256, 256};
 
   gtkWidget = gtk_drawing_area_new();
   GdkColor color;

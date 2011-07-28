@@ -240,10 +240,6 @@ struct Widget : Object {
   void setVisible(bool visible = true);
   bool visible();
 
-  //Added: there's a circular dependency if we try to subclass Widget and 
-  //       access "state" in our own code.
-  //const Geometry& getGeometry();
-
   Widget();
   Widget(pWidget &p);
   struct State;
@@ -268,7 +264,7 @@ struct Canvas : private nall::base_from_member<pCanvas&>, Widget {
   uint32_t* buffer();
 
   //Added: needed to avoid buffer overflows, etc.
-  const Geometry& bufferSize();
+//  const Geometry& bufferSize();
 
   virtual void update();  //Second change: made virtual
 

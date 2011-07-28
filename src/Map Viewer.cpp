@@ -71,11 +71,11 @@ struct Application : Window {
     onSize = [this, &bkgrd, &scrollOffset]() {
     	//Update offset
     	if (loadedMapOnce) {
-    		if (bkgrd.getSize().width < myCanvas.bufferSize().width) {
-    			scrollOffset.x = myCanvas.bufferSize().width/2 - bkgrd.getSize().width/2;
+    		if (bkgrd.getSize().width < myCanvas.geometry().width) {
+    			scrollOffset.x = myCanvas.geometry().width/2 - bkgrd.getSize().width/2;
     		}
-    		if (bkgrd.getSize().height < myCanvas.bufferSize().height) {
-    			scrollOffset.y = myCanvas.bufferSize().height/2 - bkgrd.getSize().height/2;
+    		if (bkgrd.getSize().height < myCanvas.geometry().height) {
+    			scrollOffset.y = myCanvas.geometry().height/2 - bkgrd.getSize().height/2;
     		}
     		myCanvas.setImageOffset(scrollOffset);
     	}
@@ -92,25 +92,25 @@ struct Application : Window {
     		if (loadedMapOnce) {
     			//If the mouse is near the edges of the screen, increase the offset
     			Geometry oldOffset = scrollOffset;
-    			if (bkgrd.getSize().width >= myCanvas.bufferSize().width) {
+    			if (bkgrd.getSize().width >= myCanvas.geometry().width) {
     				if (localX < 32) {
     					scrollOffset.x += myMap.tileSize/4;
-    				} else if (localX >= myCanvas.bufferSize().width - 32) {
+    				} else if (localX >= myCanvas.geometry().width - 32) {
     					scrollOffset.x -= myMap.tileSize/4;
     				}
 
     				//Bound
-    				scrollOffset.x = nall::max(nall::min(0, scrollOffset.x), (int)myCanvas.bufferSize().width-(int)bkgrd.getSize().width);
+    				scrollOffset.x = nall::max(nall::min(0, scrollOffset.x), (int)myCanvas.geometry().width-(int)bkgrd.getSize().width);
     			}
-    			if (bkgrd.getSize().height >= myCanvas.bufferSize().height) {
+    			if (bkgrd.getSize().height >= myCanvas.geometry().height) {
     				if (localY < 32) {
     					scrollOffset.y += myMap.tileSize/4;
-    				} else if (localY >= myCanvas.bufferSize().height - 32) {
+    				} else if (localY >= myCanvas.geometry().height - 32) {
     					scrollOffset.y -= myMap.tileSize/4;
     				}
 
     				//Bound
-    				scrollOffset.y = nall::max(nall::min(0, scrollOffset.y), (int)myCanvas.bufferSize().height-(int)bkgrd.getSize().height);
+    				scrollOffset.y = nall::max(nall::min(0, scrollOffset.y), (int)myCanvas.geometry().height-(int)bkgrd.getSize().height);
     			}
 
     			if (oldOffset.x!=scrollOffset.x || oldOffset.y!=scrollOffset.y) {

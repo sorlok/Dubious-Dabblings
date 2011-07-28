@@ -105,7 +105,7 @@ Widget::Widget() : state(*new State), p(*new pWidget(*this)) { state.abstract = 
 Widget::Widget(pWidget &p) : state(*new State), p(p) { p.constructor(); }
 
 //Added
-const Geometry& Canvas::bufferSize() { return p.bufferSize(); }
+//const Geometry& Canvas::bufferSize() { return p.bufferSize(); }
 
 void Button::setText(const string &text) { state.text = text; return p.setText(text); }
 Button::Button() : state(*new State), base_from_member<pButton&>(*new pButton(*this)), Widget(base_from_member<pButton&>::value), p(base_from_member<pButton&>::value) { p.constructor(); }
