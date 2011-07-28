@@ -1,5 +1,6 @@
-static void Canvas_expose(pCanvas *self) {
+static gboolean Canvas_expose(pCanvas *self) {
   self->redraw();
+  return true;
 }
 
 uint32_t* pCanvas::buffer() {
@@ -7,6 +8,9 @@ uint32_t* pCanvas::buffer() {
 }
 
 void pCanvas::setGeometry(const Geometry &geometry) {
+  if(geometry.width == canvasWidth && geometry.height == canvasHeight) return;
+  canvasWidth = geometry.width, canvasHeight = geometry.height;
+
   delete[] bufferRGB;
   delete[] bufferBGR;
 
@@ -28,6 +32,7 @@ void pCanvas::update() {
 }
 
 void pCanvas::constructor() {
+  canvasWidth = canvasHeight = 256;
   bufferRGB = new uint32_t[256 * 256]();
   bufferBGR = new uint32_t[256 * 256]();
 
