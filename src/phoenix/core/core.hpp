@@ -231,6 +231,7 @@ struct Layout : Object {
 struct Widget : Object {
   bool enabled();
   Font& font();
+  Geometry geometry();
   Geometry minimumGeometry();
   void setEnabled(bool enabled = true);
   void setFocused();

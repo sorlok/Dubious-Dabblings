@@ -1,22 +1,14 @@
 #ifndef NALL_FILE_HPP
 #define NALL_FILE_HPP
 
-#include <stdio.h>
-#include <string.h>
-
-#if !defined(_WIN32)
-  #include <unistd.h>
-#else
-  #include <io.h>
-#endif
-
+#include <nall/platform.hpp>
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
 #include <nall/utf8.hpp>
 #include <nall/utility.hpp>
 
 namespace nall {
-  inline FILE* fopen_utf8(const char *utf8_filename, const char *mode) {
+  inline FILE* fopen_utf8(const string &utf8_filename, const char *mode) {
     #if !defined(_WIN32)
     return fopen(utf8_filename, mode);
     #else
@@ -28,6 +20,7 @@ namespace nall {
   public:
     enum class mode : unsigned { read, write, readwrite, writeread };
     enum class index : unsigned { absolute, relative };
+    enum class time : unsigned { create, modify, access };
 
     uint8_t read() {
       if(!fp) return 0xff;                       //file not open
@@ -142,47 +135,47 @@ namespace nall {
       return file_offset >= file_size;
     }
 
-    static bool exists(const char *filename) {
+    static bool exists(const string &filename) {
       #if !defined(_WIN32)
-      struct stat data;
-      stat(filename, &data);
-      return S_ISREG(data.st_mode);
+      struct stat64 data;
+      return stat64(filename, &data) == 0;
       #else
-      WIN32_FIND_DATA data;
-      HANDLE handle = FindFirstFileW(utf16_t(filename), &data);
-      if(handle != INVALID_HANDLE_VALUE) {
-        FindClose(handle);
-        if((data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
-          return true;
-        }
-      }
-      return false;
+      struct __stat64 data;
+      return _wstat64(utf16_t(filename), &data) == 0;
       #endif
     }
 
-    static unsigned size(const char *filename) {
+    static uintmax_t size(const string &filename) {
       #if !defined(_WIN32)
-      struct stat data;
-      stat(filename, &data);
-      return S_ISREG(data.st_mode) ? data.st_size : 0u;
+      struct stat64 data;
+      stat64(filename, &data);
       #else
-      WIN32_FIND_DATA data;
-      HANDLE handle = FindFirstFileW(utf16_t(filename), &data);
-      if(handle != INVALID_HANDLE_VALUE) {
-        FindClose(handle);
-        if((data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
-          return data.nFileSizeLow;
-        }
-      }
-      return 0u;
+      struct __stat64 data;
+      _wstat64(utf16_t(filename), &data);
       #endif
+      return S_ISREG(data.st_mode) ? data.st_size : 0u;
+    }
+
+    static time_t timestamp(const string &filename, file::time mode = file::time::create) {
+      #if !defined(_WIN32)
+      struct stat64 data;
+      stat64(filename, &data);
+      #else
+      struct __stat64 data;
+      _wstat64(utf16_t(filename), &data);
+      #endif
+      switch(mode) { default:
+        case file::time::create: return data.st_ctime;
+        case file::time::modify: return data.st_mtime;
+        case file::time::access: return data.st_atime;
+      }
     }
 
     bool open() {
       return fp;
     }
 
-    bool open(const char *filename, mode mode_) {
+    bool open(const string &filename, mode mode_) {
       if(fp) return false;
 
       switch(file_mode = mode_) {

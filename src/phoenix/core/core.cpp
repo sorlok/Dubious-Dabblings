@@ -93,6 +93,7 @@ RadioItem::RadioItem() : state(*new State), base_from_member<pRadioItem&>(*new p
 
 bool Widget::enabled() { return state.enabled; }
 Font& Widget::font() { return p.font(); }
+Geometry Widget::geometry() { return state.geometry; }
 Geometry Widget::minimumGeometry() { return p.minimumGeometry(); }
 void Widget::setEnabled(bool enabled) { state.enabled = enabled; return p.setEnabled(enabled); }
 void Widget::setFocused() { return p.setFocused(); }

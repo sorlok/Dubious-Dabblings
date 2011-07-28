@@ -207,7 +207,8 @@ struct pCanvas : public pWidget {
   Canvas &canvas;
   uint32_t *bufferRGB;
   uint32_t *bufferBGR;
-  Geometry buffer_size;
+  unsigned canvasWidth;
+  unsigned canvasHeight;
 
   uint32_t* buffer();
 
