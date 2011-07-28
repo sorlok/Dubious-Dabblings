@@ -36,7 +36,7 @@ struct Application : Window {
     layout.append(helloLabel, ~0, 0, 5);       //width, height, optional spacing
     controlLayout.append(okButton, ~0, 0, 5);  //width, height of  0 = use least amount of space possible to display all text
     controlLayout.append(quitButton, ~0, 0);   //width, height of ~0 = use all available width (divides when multiple controls use ~0)
-    layout.append(controlLayout);              //nested layouts inside of other layouts (can accept optional spacing parameter)
+    layout.append(controlLayout, 10);              //nested layouts inside of other layouts (can accept optional spacing parameter)
     layout.append(myCanvas, ~0, ~0, 5);
     append(layout);                            //both buttons will take 50% of available window client width
 
