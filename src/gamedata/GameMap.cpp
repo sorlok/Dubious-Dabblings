@@ -289,6 +289,30 @@ void GameMap::PaintImage(PremultImage& image)
 			}
 		}
 	}
+
+
+
+	{
+		///TEST
+		size_t aWidth, aHeight;
+		uint32_t* pngBuffer2 = GameMap::LoadPNGFile("arrow.png", aWidth, aHeight);
+		if (!pngBuffer2) {
+			throw std::runtime_error("Error loading arrow PNG file.");
+		}
+
+		const uint32_t* src = pngBuffer2;
+		uint32_t* dest = image.getPixels() + (image.getSize().height/2)*image.getSize().width + image.getSize().width/2;
+		for (size_t rowID=0; rowID<aHeight; rowID++) {
+			for (size_t x=0; x<aWidth; x++) {
+				std::cout <<"Combining: " <<nall::hex(dest[x]) <<" with " <<nall::hex(src[x]) <<"\n";
+				PremultImage::Combine(dest[x], src[x]); //Need to combine, or we don't get transparency.
+				std::cout <<"   res: " <<nall::hex(dest[x]) <<"\n";
+			}
+			//memcpy(dest, src, aWidth*sizeof(*src));
+			src += aWidth;
+			dest += image.getSize().width;
+		}
+	}
 }
 
 

@@ -72,7 +72,7 @@ uint32_t PremultImage::Premultiply(uint8_t a, uint8_t r, uint8_t g, uint8_t b)
     g = (a * g + 127) / 255;
     b = (a * b + 127) / 255;
 
-    return /*(a << 24) |*/ (r << 16) | (g << 8) | b;
+    return (a << 24) | (r << 16) | (g << 8) | b;
 }
 
 uint32_t PremultImage::Premultiply(uint32_t argb)
@@ -83,18 +83,29 @@ uint32_t PremultImage::Premultiply(uint32_t argb)
 void PremultImage::Combine(uint32_t& base, uint32_t brush)
 {
 	//TODO: We will eventually use a "color" class, so that we don't have to separate out components...
-	uint32_t r0 = ((base>>16)&0xFF);
+	/*uint32_t r0 = ((base>>16)&0xFF);
 	uint32_t g0 = ((base>>8)&0xFF);
 	uint32_t b0 = (base&0xFF);
 	uint32_t r1 = ((brush>>16)&0xFF);
 	uint32_t g1 = ((brush>>8)&0xFF);
-	uint32_t b1 = (brush&0xFF);
+	uint32_t b1 = (brush&0xFF);*/
 
-	r0 += (0xFF-r0)*r1;
-	g0 += (0xFF-g0)*g1;
-	b0 += (0xFF-b0)*b1;
+	//NOTE: Seems like we should just be able to hack it with pointers.
+	uint8_t* basePtr = reinterpret_cast<uint8_t*>(&base);
+	uint16_t a0 = *basePtr;
+	uint16_t r0 = *(basePtr+1);
+	uint16_t g0 = *(basePtr+2);
+	uint16_t b0 = *(basePtr+3);
+	uint8_t* brushPtr = reinterpret_cast<uint8_t*>(&brush);
+	uint16_t a1 = *brushPtr;
+	uint16_t r1 = *(brushPtr+1);
+	uint16_t g1 = *(brushPtr+2);
+	uint16_t b1 = *(brushPtr+3);
 
-	base = (nall::min(r0, 0xFF) << 16) | (nall::min(g0, 0xFF) << 8) | nall::min(b0, 0xFF);
+	basePtr[0] = (((a0*a0)>>8) + ((a1*(0xFF-a0))>>8)) & 0xFF;
+	basePtr[1] = ((r0 + ((r1 * (0xFF - a0))>>8)))     & 0xFF;
+	basePtr[2] = ((g0 + ((g1 * (0xFF - a0))>>8)))     & 0xFF;
+	basePtr[3] = ((b0 + ((b1 * (0xFF - a0))>>8)))     & 0xFF;
 }
 
 uint32_t PremultImage::DecodeColor(const vector<uint8_t>& color)
