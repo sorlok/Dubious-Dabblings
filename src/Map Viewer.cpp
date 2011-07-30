@@ -66,6 +66,7 @@ struct Application : Window {
     		GameMap::InitTMXMap(myMap, "map_test.tmx");
     		loadedMapOnce = true;
     		myMap.PaintImage(bkgrd);
+    		myCanvas.paintArrows();
     		scrollOffset.x = 0;//myCanvas.bufferSize().width/2 - bkgrd.getSize().width/2;
     		scrollOffset.y = 0;//myCanvas.bufferSize().height/2 - bkgrd.getSize().height/2;
     		myCanvas.setImageOffset(scrollOffset);

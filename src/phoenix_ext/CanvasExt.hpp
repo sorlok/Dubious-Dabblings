@@ -28,6 +28,7 @@ struct CanvasExt : public phoenix::Canvas {
 	void setImageOffset(const phoenix::Geometry& offset);
 
 	void loadArrowMarkings(const std::string& filename);
+	void paintArrows();
 
 	//Update!
 	virtual void update();

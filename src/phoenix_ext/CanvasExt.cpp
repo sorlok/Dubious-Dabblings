@@ -39,6 +39,37 @@ void CanvasExt::loadArrowMarkings(const std::string& filename)
 }
 
 
+void CanvasExt::paintArrows()
+{
+	//Calculate coordinates of the rectangles to center each arrow in.
+	size_t w = geometry().width;
+	size_t h = geometry().height;
+	Geometry arrowRects[4];
+	arrowRects[0] = {3*w/4, 0, w/4, h};  //Right
+	arrowRects[2] = {0, 0, w/4, h};  //Left
+	arrowRects[1] = {0, 0, w, h/4};  //Up
+	arrowRects[3] = {0, 3*h/4, w, h/4};  //Down
+
+	//Now, do it.
+	for (size_t i=0; i<4; i++) {
+		//Temp
+		if (i!=0)
+			continue;
+
+		//Adjust
+		Geometry& rect = arrowRects[i];
+		PremultImage& arrow = arrows[i];
+		rect.x += rect.width/2 - arrow.getSize().width/2;
+		rect.y += rect.height/2 - arrow.getSize().height/2;
+		rect.width = arrow.getSize().width;
+		rect.height = arrow.getSize().height;
+
+		//Paint
+		image_.paintImage(arrow, rect);
+	}
+}
+
+
 void CanvasExt::updateCanvasBuffer()
 {
 	//std::cout <<"Repaint: " <<image_.getSize().width <<"," <<image_.getSize().height <<" on: " <<bufferSize().width <<"," <<bufferSize().height <<" at: " <<offset_.x <<"," <<offset_.y <<"\n";
