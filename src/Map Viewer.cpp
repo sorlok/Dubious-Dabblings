@@ -50,6 +50,9 @@ struct Application : Window {
     scrollOffset = {0,0,0,0};
     bkgrd.resetSize({0, 0, 900, 600});
 
+    //Prepare arrows
+    myCanvas.loadArrowMarkings("arrow.png");
+
     unsigned int w = bkgrd.getSize().width;
     unsigned int h = bkgrd.getSize().height;
 

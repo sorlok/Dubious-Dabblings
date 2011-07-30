@@ -6,6 +6,15 @@
 #include <stdexcept>
 
 
+//Allows Rotations
+enum class ROTATION {
+	NONE,
+	FLIP_HORIZ,
+	FLIP_VERT,
+	CW_90_DEG
+};
+
+
 /**
  * Simple buffer of pixel data (with an additional width/height) that stores pre-multiplied
  *  pixel values. Implicitly supports alpha transparency, fairly fast to composite multiple
@@ -24,8 +33,19 @@ public:
 	PremultImage();
 	~PremultImage();
 
+	//Note: We need a better PNG class.
+	static uint32_t* LoadPNGFile(const std::string& path, unsigned int& imgWidth, unsigned int& imgHeigh);
+
+	//For loading from a file
+	void initFromImage(const std::string& path);
+	void resetSize(const phoenix::Geometry& size, uint32_t* newBuffer);
+
+	//For making it ourselves
 	void resetSize(const phoenix::Geometry& size, std::vector<uint8_t> fill=std::vector<uint8_t>({0x00, 0x00, 0x00}));
 	const phoenix::Geometry& getSize() const;
+
+	//For basing it off an existing buffer
+	void initFromBuffer(const PremultImage& src, ROTATION modify=ROTATION::NONE);
 
 	///Simple drawing. (Really, you should use images, or write to the buffer directly)
 	///The color can be {R,G,B}, or {A,R,G,B}; the premultiplication will be done automatically.
@@ -37,6 +57,7 @@ public:
 	///Remember! These will be premultiplied values!
 	uint32_t& operator[] (size_t x);
 	uint32_t* getPixels();
+	bool isEmpty();
 
 
 	///Helper: convert A,R,G,B to premultiplied RGB
@@ -51,6 +72,8 @@ public:
 
 
 private:
+	bool resetSize_(const phoenix::Geometry& size);
+
 	uint32_t* buffer_;
 	phoenix::Geometry size_;
 

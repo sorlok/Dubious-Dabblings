@@ -27,6 +27,8 @@ struct CanvasExt : public phoenix::Canvas {
 	PremultImage& getBufferedImage();
 	void setImageOffset(const phoenix::Geometry& offset);
 
+	void loadArrowMarkings(const std::string& filename);
+
 	//Update!
 	virtual void update();
 
@@ -36,6 +38,8 @@ private:
 
 	PremultImage image_;
 	phoenix::Geometry offset_;
+
+	PremultImage arrows[4];
 
 	//To avoid repainting on a move
 	//phoenix::Geometry cached_size_;

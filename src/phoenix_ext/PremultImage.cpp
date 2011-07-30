@@ -21,7 +21,98 @@ PremultImage::~PremultImage()
 }
 
 
-void PremultImage::resetSize(const Geometry& size, std::vector<uint8_t> fill)
+void PremultImage::initFromBuffer(const PremultImage& sourceImg, ROTATION modify)
+{
+	//Our result buffer will always have the same number of pixels, just perhaps
+	//   with a different width/height
+	size_t w = sourceImg.getSize().width;
+	size_t h = sourceImg.getSize().height;
+	uint32_t* result = new uint32_t[sourceImg.getSize().width*sourceImg.getSize().height];
+
+	//Calculate
+	switch (modify) {
+		case ROTATION::NONE:
+			//Simple
+			memcpy(result, sourceImg.buffer_, (w*h*sizeof(*result)));
+			break;
+
+		case ROTATION::FLIP_HORIZ:
+		{
+			//Also fairly easy; just be careful not to miss the middle column.
+			uint32_t* dest = result;
+			uint32_t* src = sourceImg.buffer_;
+			for (size_t rowID=0; rowID<h; rowID++) {
+				size_t middlePixel = h/2 + h%2;
+				for (size_t x=0; x<middlePixel; x++) {
+					std::swap(dest[w-x-1], src[x]);
+				}
+				dest += w;
+				src += w;
+			}
+
+			break;
+		}
+		case ROTATION::FLIP_VERT:
+		{
+			//Even simpler; just advance one pointer in reverse.
+			//   Just make sure not to hit the middle row with both pointers at once.
+			uint32_t* dest = result;
+			uint32_t* src = sourceImg.buffer_ + w*(h-1);
+			for (size_t rowID=0; rowID<h/2; rowID++) {
+				memcpy(dest, src, w*sizeof(*src));
+				dest += w;
+				src -= w;
+			}
+
+			break;
+		}
+
+		case ROTATION::CW_90_DEG:
+		{
+			//A bit more complex, but only because I have a frail grasp of geometry.
+			if (w != h) {
+				//We should definitely fix this later.
+				throw std::runtime_error("Can't rotate non-square images.");
+			}
+
+			//Make a new array, copy each row into its appropriate column
+			for (int y=0; y<h; y++) {
+				for (int x=0; x<w; x++) {
+					int destX = (h-1-x)*w+y;
+					int srcX = y*w+x;
+
+					//Set it (flip the y axis, of course)
+					//if (destX>=0 && destX<w*h && srcX>=0 && srcX<w*h) {
+						result[destX] = sourceImg.buffer_[srcX];
+					//}
+				}
+			}
+
+			break;
+		}
+
+		default:
+			throw std::runtime_error("Invalid rotatin flag.");
+	}
+
+	//Set it
+	resetSize({0, 0, w, h}, result);
+}
+
+
+
+void PremultImage::initFromImage(const std::string& path)
+{
+	//Load it
+	size_t w, h;
+	uint32_t* pixels = LoadPNGFile(path, w, h);
+
+	//Resize, set pixels
+	resetSize({0, 0, w, h}, pixels);
+}
+
+
+bool PremultImage::resetSize_(const Geometry& size)
 {
 	//Delete the old one
 	if (buffer_) {
@@ -29,10 +120,28 @@ void PremultImage::resetSize(const Geometry& size, std::vector<uint8_t> fill)
 		buffer_ = NULL;
 	}
 
-	//Silently return if the new size is zero
+	//If the new size is zero, don't create a new buffer.
 	size_ = size;
-	size_t dim = size.width*size.height;
-	if (dim==0) {
+	return size.width*size.height != 0;
+}
+
+
+void PremultImage::resetSize(const Geometry& size, uint32_t* newBuffer)
+{
+	if (!resetSize_(size)) {
+		return;
+	}
+
+	std::cout <<"Resize: " <<nall::hex((unsigned int)newBuffer) <<"\n";
+
+	//NOTE: We should probably have a way to check if newBuffer is the right size
+	buffer_ = newBuffer;
+}
+
+
+void PremultImage::resetSize(const Geometry& size, std::vector<uint8_t> fill)
+{
+	if (!resetSize_(size)) {
 		return;
 	}
 
@@ -42,6 +151,7 @@ void PremultImage::resetSize(const Geometry& size, std::vector<uint8_t> fill)
 	std::cout <<"Resize: " <<size.width <<"," <<size.height <<"\n";
 
 	//Allocate the new one
+	size_t dim = size.width*size.height;
 	buffer_ = new uint32_t[dim];
 
 	//As fun as it might be to allocate the image with garbage
@@ -52,6 +162,11 @@ void PremultImage::resetSize(const Geometry& size, std::vector<uint8_t> fill)
 const phoenix::Geometry& PremultImage::getSize() const
 {
 	return size_;
+}
+
+bool PremultImage::isEmpty()
+{
+	return size_.width==0 && size_.height==0;
 }
 
 
@@ -158,5 +273,152 @@ void PremultImage::fillRect(const Geometry& rectangle, vector<uint8_t> color)
 }
 
 
+
+
+//////////////////////////////////////////////////////////////
+// PNG loading code
+//////////////////////////////////////////////////////////////
+
+namespace {
+//Helper const
+const unsigned int PNGSIGSIZE = 8;
+
+//Custom PNG reader function
+void custom_png_read(png_structp pngPtr, png_bytep data, png_size_t length)
+{
+	//Cast our IO buffer to a istream* (which ifstream is) and read 'length' bytes
+	png_voidp a = png_get_io_ptr(pngPtr);
+	(reinterpret_cast<std::istream*>(a))->read((char*)data, length);
+}
+
+
+} //End anon namespace
+
+
+uint32_t* GameMap::LoadPNGFile(const string& path, unsigned int& imgWidth, unsigned int& imgHeight)
+{
+	//Set initial return values
+	imgWidth = 0;
+	imgHeight = 0;
+
+	//Open it
+	std::ifstream source(path);
+	if (source.fail()) {
+		return NULL;
+	}
+
+	//Check the PNG signature
+    png_byte pngsig[PNGSIGSIZE];
+    source.read((char*)pngsig, PNGSIGSIZE);
+    if (!source.good() || (png_sig_cmp(pngsig, 0, PNGSIGSIZE)!=0)) {
+    	source.close();
+    	return NULL;
+    }
+
+    //Create the read struct
+    png_structp pngRead = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    if (!pngRead) {
+        source.close();
+        return NULL;
+    }
+
+    //Create the info struct
+    png_infop pngInfo = png_create_info_struct(pngRead);
+    if (!pngInfo) {
+    	source.close();
+        png_destroy_read_struct(&pngRead, (png_infopp)0, (png_infopp)0);
+        return NULL;
+    }
+
+    //Annoying "jump" error recovery, since I borrowed this code from a tutorial.
+    //   TODO: Some other error recovery.
+    png_bytep* rowPtrs = NULL;
+    char* data = NULL;
+    if (setjmp(png_jmpbuf(pngRead))) {
+        //Cleanup
+        png_destroy_read_struct(&pngRead, &pngInfo,(png_infopp)0);
+        if (rowPtrs != NULL) { delete [] rowPtrs; }
+        if (data != NULL) { delete [] data; }
+        return NULL;
+    }
+
+    //Set our custom read function
+    png_set_read_fn(pngRead,(voidp)&source, custom_png_read);
+
+    //We've already read the signature, so inform libPNG to skip it.
+    // Then, read the info struct.
+    png_set_sig_bytes(pngRead, PNGSIGSIZE);
+    png_read_info(pngRead, pngInfo);
+
+    //Retrive some image properties
+    imgWidth =  png_get_image_width(pngRead, pngInfo);
+    imgHeight = png_get_image_height(pngRead, pngInfo);
+    png_uint_32 bitdepth   = png_get_bit_depth(pngRead, pngInfo);
+    png_uint_32 channels   = png_get_channels(pngRead, pngInfo);
+    png_uint_32 color_type = png_get_color_type(pngRead, pngInfo);
+
+    //Request palettes be converted into RGB
+    if (color_type==PNG_COLOR_TYPE_PALETTE) {
+    	png_set_palette_to_rgb(pngRead);
+    	channels = 3;
+    }
+
+    //Request grayscale be converted to RGB
+    if (color_type==PNG_COLOR_TYPE_GRAY) {
+        if (bitdepth < 8) {
+        	png_set_gray_1_2_4_to_8(pngRead);
+        }
+        bitdepth = 8;
+    }
+
+    //Request that a transparency set be converted to an alpha channel
+    if (png_get_valid(pngRead, pngInfo, PNG_INFO_tRNS)) {
+        png_set_tRNS_to_alpha(pngRead);
+        channels+=1;
+    }
+
+    //Round 16-bit precision down to 8
+    if (bitdepth == 16) {
+    	png_set_strip_16(pngRead);
+    }
+
+    //Array of row pointers.
+    rowPtrs = new png_bytep[imgHeight];
+
+    //Allocate a buffer.
+    size_t dataSize = imgWidth * imgHeight * bitdepth * channels / 8;
+    data = new char[dataSize];
+
+    //Length in bytes of one row
+    const unsigned int stride = imgWidth * bitdepth * channels / 8;
+
+    //Initialize row pointers
+    for (size_t i=0; i<imgHeight; i++) {
+        rowPtrs[i] = (png_bytep)data + (i * stride);
+    }
+
+    //Load all the rows one-by-one
+    png_read_image(pngRead, rowPtrs);
+
+    //Cleanup
+    delete[] (png_bytep)rowPtrs;
+    png_destroy_read_struct(&pngRead, &pngInfo, (png_infopp)0);
+    source.close();
+
+    //Convert results
+    uint32_t* res = new uint32_t[dataSize/4];
+    for (size_t i=0; i<dataSize; i+=4) {
+    	//uint32_t pix = ((((uint32_t)data[i])&0xFF)<<24) | ((((uint32_t)data[i+1])&0xFF)<<16) | ((((uint32_t)data[i+2])&0xFF)<<8) | (((uint32_t)data[i+3])&0xFF);
+
+    	//Strange... RGBA?
+    	uint32_t pix = ((((uint32_t)data[i+3])&0xFF)<<24) | ((((uint32_t)data[i])&0xFF)<<16) | ((((uint32_t)data[i+1])&0xFF)<<8) | (((uint32_t)data[i+2])&0xFF);
+
+    	res[i/4] = PremultImage::Premultiply(pix);
+    }
+
+    //Cleanup, return
+    delete [] data;
+    return res;
+}
 
 

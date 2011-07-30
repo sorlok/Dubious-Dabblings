@@ -14,9 +14,6 @@ class GameMap {
 public:
 	GameMap();
 
-	//Helper. TODO: Returning a pointer is silly. TODO: Passing in params is also a bit silly.
-	static uint32_t* LoadPNGFile(const std::string& path, unsigned int& imgWidth, unsigned int& imgHeigh);
-
 	///Load a "Tiled" TMX map.
 	static void InitTMXMap(GameMap& map, const std::string& path);
 	//TODO: More map types
@@ -33,6 +30,7 @@ public:
 	std::vector< std::vector<int> > maplayer;
 	unsigned int tileSize;
 	phoenix::Geometry mapSizeInTiles;
+
 
 
 

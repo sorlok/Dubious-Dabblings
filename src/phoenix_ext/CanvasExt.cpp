@@ -22,6 +22,17 @@ void CanvasExt::setImageOffset(const phoenix::Geometry& offset)
 	offset_ = offset;
 }
 
+void CanvasExt::loadArrowMarkings(const std::string& filename)
+{
+	//Right, Left
+	arrows[0].initFromImage(filename);
+	arrows[2].initFromBuffer(arrows[0], ROTATION::FLIP_HORIZ);
+
+	//Up, Down
+	arrows[1].initFromBuffer(arrows[0], ROTATION::CW_90_DEG);
+	arrows[3].initFromBuffer(arrows[1], ROTATION::FLIP_VERT);
+}
+
 
 void CanvasExt::updateCanvasBuffer()
 {
