@@ -31,6 +31,11 @@ void CanvasExt::loadArrowMarkings(const std::string& filename)
 	//Up, Down
 	arrows[1].initFromBuffer(arrows[0], ROTATION::CW_90_DEG);
 	arrows[3].initFromBuffer(arrows[1], ROTATION::FLIP_VERT);
+
+	//Undo buffers for all!
+	for (size_t i=0; i<4; i++) {
+		arrows[i].createUndoBuffer();
+	}
 }
 
 

@@ -56,6 +56,11 @@ public:
 	void fillRect(const phoenix::Geometry& rectangle, std::vector<uint8_t> color);
 
 
+	//An undo buffer is something of a hack for displaying buttons on a Canvas
+	//  It is deleted every time resetSize() is called.
+	void createUndoBuffer();
+
+
 	///Useful if you want to access array elements directly.
 	///Remember! These will be premultiplied values!
 	uint32_t& operator[] (size_t x);
@@ -78,6 +83,7 @@ private:
 	bool resetSize_(const phoenix::Geometry& size);
 
 	uint32_t* buffer_;
+	uint32_t* undoBuffer_;
 	phoenix::Geometry size_;
 
 };

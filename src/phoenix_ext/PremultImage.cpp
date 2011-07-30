@@ -19,6 +19,10 @@ PremultImage::~PremultImage()
 		delete [] buffer_;
 		buffer_ = NULL;
 	}
+	if (undoBuffer_) {
+		delete [] undoBuffer_;
+		undoBuffer_ = NULL;
+	}
 }
 
 
@@ -121,9 +125,24 @@ bool PremultImage::resetSize_(const Geometry& size)
 		buffer_ = NULL;
 	}
 
+	//Delete the undo buffer too
+	if (undoBuffer_) {
+		delete [] undoBuffer_;
+		undoBuffer_ = NULL;
+	}
+
 	//If the new size is zero, don't create a new buffer.
 	size_ = size;
 	return size.width*size.height != 0;
+}
+
+
+void PremultImage::createUndoBuffer()
+{
+	size_t dim = size_.width*size_.height;
+	if (dim!=0) {
+		undoBuffer_ = new uint32_t[dim];
+	}
 }
 
 
