@@ -1,8 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <iostream>
-#include <fstream>
 
 #include "phoenix_ext/PremultImage.hpp"
 

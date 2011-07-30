@@ -5,6 +5,7 @@
 using namespace phoenix;
 using std::initializer_list;
 using std::vector;
+using std::string;
 
 
 PremultImage::PremultImage() : buffer_(NULL), size_({0,0,0,0})
@@ -279,6 +280,8 @@ void PremultImage::fillRect(const Geometry& rectangle, vector<uint8_t> color)
 // PNG loading code
 //////////////////////////////////////////////////////////////
 
+#include "png.h"
+
 namespace {
 //Helper const
 const unsigned int PNGSIGSIZE = 8;
@@ -295,7 +298,7 @@ void custom_png_read(png_structp pngPtr, png_bytep data, png_size_t length)
 } //End anon namespace
 
 
-uint32_t* GameMap::LoadPNGFile(const string& path, unsigned int& imgWidth, unsigned int& imgHeight)
+uint32_t* PremultImage::LoadPNGFile(const string& path, unsigned int& imgWidth, unsigned int& imgHeight)
 {
 	//Set initial return values
 	imgWidth = 0;

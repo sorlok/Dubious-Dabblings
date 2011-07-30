@@ -2,8 +2,11 @@
 
 #include <phoenix/phoenix.hpp>
 
+#include <string>
 #include <vector>
 #include <stdexcept>
+#include <iostream>
+#include <fstream>
 
 
 //Allows Rotations
