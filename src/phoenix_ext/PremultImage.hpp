@@ -54,6 +54,7 @@ public:
 	///The color can be {R,G,B}, or {A,R,G,B}; the premultiplication will be done automatically.
 	///The color can _also_ be {G} or {A, G} for grayscale components. Fun!
 	void fillRect(const phoenix::Geometry& rectangle, std::vector<uint8_t> color);
+	void paintImage(const PremultImage& img, const phoenix::Geometry& position);
 
 
 	//An undo buffer is something of a hack for displaying buttons on a Canvas

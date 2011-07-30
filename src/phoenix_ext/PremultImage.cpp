@@ -293,6 +293,37 @@ void PremultImage::fillRect(const Geometry& rectangle, vector<uint8_t> color)
 }
 
 
+void PremultImage::paintImage(const PremultImage& img, const Geometry& position)
+{
+	if (position.x<0 || position.y<0 || position.x+img.getSize().width>=getSize().width || position.y+img.getSize().height>=getSize().height) {
+		//Again, need to fix, but undo buffers complicate things slightly.
+		throw std::runtime_error("Error: Can't draw outside image boundaries (for now).");
+	}
+
+	//Step 1: Update the undo buffer (if any)
+	const uint32_t* src = img.buffer_;
+	uint32_t* dest = buffer_ + position.y*getSize().width + position.x;
+	if (img.undoBuffer_) {
+		const uint32_t* src2 = dest;
+		uint32_t* dest2 = img.undoBuffer_;
+		for (size_t rowID=0; rowID<img.getSize().height; rowID++) {
+			memcpy(dest2, src2, img.getSize().width*sizeof(*src));
+			src2 += getSize().width;
+			dest2 += img.getSize().width;
+		}
+	}
+
+	//Step 2: Paint the image.
+	for (size_t rowID=0; rowID<img.getSize().height; rowID++) {
+		for (size_t x=0; x<img.getSize().width; x++) {
+			PremultImage::Combine(dest[x], src[x]);
+		}
+		src += img.getSize().width;
+		dest += getSize().width;
+	}
+}
+
+
 
 
 //////////////////////////////////////////////////////////////
