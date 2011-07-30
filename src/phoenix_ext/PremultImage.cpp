@@ -47,10 +47,7 @@ void PremultImage::initFromBuffer(const PremultImage& sourceImg, ROTATION modify
 			uint32_t* dest = result;
 			uint32_t* src = sourceImg.buffer_;
 			for (size_t rowID=0; rowID<h; rowID++) {
-				size_t middlePixel = h/2 + h%2;
-				for (size_t x=0; x<middlePixel; x++) {
-					std::swap(dest[w-x-1], src[x]);
-				}
+				std::reverse_copy(src, src+w, dest);
 				dest += w;
 				src += w;
 			}
@@ -63,7 +60,7 @@ void PremultImage::initFromBuffer(const PremultImage& sourceImg, ROTATION modify
 			//   Just make sure not to hit the middle row with both pointers at once.
 			uint32_t* dest = result;
 			uint32_t* src = sourceImg.buffer_ + w*(h-1);
-			for (size_t rowID=0; rowID<h/2; rowID++) {
+			for (size_t rowID=0; rowID<h; rowID++) {
 				memcpy(dest, src, w*sizeof(*src));
 				dest += w;
 				src -= w;

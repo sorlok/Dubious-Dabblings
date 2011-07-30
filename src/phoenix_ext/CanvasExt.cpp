@@ -52,10 +52,6 @@ void CanvasExt::paintArrows()
 
 	//Now, do it.
 	for (size_t i=0; i<4; i++) {
-		//Temp
-		if (i!=0)
-			continue;
-
 		//Adjust
 		Geometry& rect = arrowRects[i];
 		PremultImage& arrow = arrows[i];
