@@ -90,6 +90,12 @@ void pWindow::append(Widget &widget) {
   widget.setVisible();
 }
 
+Color pWindow::backgroundColor() {
+  if(window.state.backgroundColorOverride) return window.state.backgroundColor;
+  GdkColor color = widget->style->bg[GTK_STATE_NORMAL];
+  return { (uint8_t)(color.red >> 8), (uint8_t)(color.green >> 8), (uint8_t)(color.blue >> 8), 255 };
+}
+
 Geometry pWindow::frameMargin() {
   if(window.state.fullScreen) return { 0, menuHeight(), 0, menuHeight() + statusHeight() };
   return {
@@ -111,13 +117,13 @@ Geometry pWindow::geometry() {
   return window.state.geometry;
 }
 
-void pWindow::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
-  GdkColor color;
-  color.pixel = (red << 16) | (green << 8) | (blue << 0);
-  color.red = (red << 8) | (red << 0);
-  color.green = (green << 8) | (green << 0);
-  color.blue = (blue << 8) | (blue << 0);
-  gtk_widget_modify_bg(widget, GTK_STATE_NORMAL, &color);
+void pWindow::setBackgroundColor(const Color &color) {
+  GdkColor gdkColor;
+  gdkColor.pixel = (color.red << 16) | (color.green << 8) | (color.blue << 0);
+  gdkColor.red = (color.red << 8) | (color.red << 0);
+  gdkColor.green = (color.green << 8) | (color.green << 0);
+  gdkColor.blue = (color.blue << 8) | (color.blue << 0);
+  gtk_widget_modify_bg(widget, GTK_STATE_NORMAL, &gdkColor);
 }
 
 void pWindow::setFocused() {
