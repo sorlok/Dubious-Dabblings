@@ -3,7 +3,7 @@
 #define PREMULT_IMG_HPP
 
 #include <phoenix/phoenix.hpp>
-#include <nall/png.hpp>
+//#include <nall/png.hpp>
 
 #include <string>
 #include <vector>

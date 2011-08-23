@@ -47,6 +47,7 @@ protected:
   };
 
   static const unsigned interlace[7][4];
+
   unsigned bitpos;
 
   inline unsigned inflateSize();

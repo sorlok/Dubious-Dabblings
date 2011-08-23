@@ -1,9 +1,13 @@
 #include "PremultImage.hpp"
 
+//NOTE: Including PNG here is buggy... it seems to be the ONLY place it can be included!
+#include <nall/png.hpp>
+
 #include <iostream>
 
 using namespace phoenix;
 using nall::file;
+using nall::png;
 using std::initializer_list;
 using std::vector;
 using std::string;
@@ -347,7 +351,6 @@ void custom_png_read(png_structp pngPtr, png_bytep data, png_size_t length)
 */
 
 
-
 uint32_t* PremultImage::LoadPNGFile(const string& path, unsigned int& imgWidth, unsigned int& imgHeight)
 {
 	//Set initial return values
@@ -368,16 +371,20 @@ uint32_t* PremultImage::LoadPNGFile(const string& path, unsigned int& imgWidth, 
 	}
 
 	//Decode the image, delete the old file buffer.
-	//TMP png image;
-	//TMP image.decode(data, size);
+	png image;
+	bool decodedOk = image.decode(data, size);
 	delete[] data;
 	//image.alphaTransform(0x40c0c0);
 
+	//Check
+	if (!decodedOk) {
+		return NULL;
+	}
+
 	//Return the array of pixels
-	//TMP uint32_t* res = new uint32_t[image.size];
-	//TMP memcpy(res, image.data, image.size);
-	//TMP return res;
-	return NULL; //TMP
+	uint32_t* res = new uint32_t[image.size];
+	memcpy(res, image.data, image.size);
+	return res;
 
 	//Check the PNG signature
     /*png_byte pngsig[PNGSIGSIZE];
