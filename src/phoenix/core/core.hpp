@@ -269,13 +269,10 @@ struct Button : private nall::base_from_member<pButton&>, Widget {
 };
 
 struct Canvas : private nall::base_from_member<pCanvas&>, Widget {
-  uint32_t* buffer();
-  nall::function<void (unsigned int, unsigned int, MOVE_FLAG)> onMotion; //Possible circular dependency? Unlikely
+  nall::function<void (unsigned int, unsigned int, MOVE_FLAG)> onMotion;
 
   uint32_t* buffer();
-
-  //Added: Needs to be virtual
-  virtual void update(); 
+  virtual void update();
 
   Canvas();
   pCanvas &p;
