@@ -364,7 +364,7 @@ uint32_t* PremultImage::LoadPNGFile(const string& path, unsigned int& imgWidth, 
 	//}
 
 	//Open and read in file as a bytestream.
-	uint8_t *data;
+	/*uint8_t *data;
 	unsigned int size;
 	if (!file::read(path.c_str(), data, size)) {
 		return NULL;
@@ -373,7 +373,10 @@ uint32_t* PremultImage::LoadPNGFile(const string& path, unsigned int& imgWidth, 
 	//Decode the image, delete the old file buffer.
 	png image;
 	bool decodedOk = image.decode(data, size);
-	delete[] data;
+	delete[] data;*/
+	png image;
+	bool decodedOk = image.decode(path.c_str());
+	image.transform();
 	//image.alphaTransform(0x40c0c0);
 
 	//Check
@@ -382,8 +385,10 @@ uint32_t* PremultImage::LoadPNGFile(const string& path, unsigned int& imgWidth, 
 	}
 
 	//Return the array of pixels
-	uint32_t* res = new uint32_t[image.size];
-	memcpy(res, image.data, image.size);
+	std::cout <<"Image is: " <<image.info.width <<" x " <<image.info.height <<", depth: " <<image.info.bitDepth <<"\n";
+	std::cout <<"Allocating " <<(image.rawSize/1024) <<" x4 KB\n";
+	uint32_t* res = new uint32_t[image.rawSize];
+	memcpy(res, image.rawData, image.rawSize);
 	return res;
 
 	//Check the PNG signature
