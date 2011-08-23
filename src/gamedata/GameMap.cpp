@@ -120,6 +120,8 @@ void GameMap::InitTMXMap(GameMap& map, const std::string& path)
 //Helper: paint a tile
 void GameMap::PaintTile(size_t tileX, size_t tileY, int tileID, PremultImage& img)
 {
+	//std::cout <<"Test: " <<tileID <<" of " <<tiles.size() <<"\n";
+
 	//Get the destination location
 	uint32_t* dest = img.getPixels() + (1+tileY*(tileSize+1))*img.getSize().width + (1+tileX*(tileSize+1));
 	const uint32_t* src = tiles[tileID];

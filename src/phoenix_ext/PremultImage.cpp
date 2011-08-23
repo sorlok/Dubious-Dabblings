@@ -384,6 +384,10 @@ uint32_t* PremultImage::LoadPNGFile(const string& path, unsigned int& imgWidth, 
 		return NULL;
 	}
 
+	//Set width/height
+	imgWidth = image.info.width;
+	imgHeight = image.info.height;
+
 	//Return the array of pixels
 	std::cout <<"Image is: " <<image.info.width <<" x " <<image.info.height <<", depth: " <<image.info.bitDepth <<"\n";
 	std::cout <<"Allocating " <<(image.rawSize/1024) <<" x4 KB\n";
