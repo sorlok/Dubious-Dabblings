@@ -82,6 +82,7 @@ struct pWindow : public pObject {
   GtkWidget *statusContainer;
   GtkWidget *menu;
   GtkWidget *status;
+  GdkEventConfigure lastConfigure;
 
   void append(Layout &layout);
   void append(Menu &menu);
@@ -203,10 +204,7 @@ struct pButton : public pWidget {
 
 struct pCanvas : public pWidget {
   Canvas &canvas;
-  uint32_t *bufferRGB;
-  uint32_t *bufferBGR;
-  unsigned canvasWidth;
-  unsigned canvasHeight;
+  cairo_surface_t *surface;
 
   uint32_t* buffer();
   void setGeometry(const Geometry &geometry);
@@ -214,7 +212,6 @@ struct pCanvas : public pWidget {
 
   pCanvas(Canvas &canvas) : pWidget(canvas), canvas(canvas) {}
   void constructor();
-  void redraw();
 };
 
 struct pCheckBox : public pWidget {
