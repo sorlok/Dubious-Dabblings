@@ -1,4 +1,6 @@
-#pragma once
+//#pragma once
+#ifndef GAME_MAP_HPP
+#define GAME_MAP_HPP
 
 #include <vector>
 
@@ -35,3 +37,4 @@ public:
 };
 
 
+#endif

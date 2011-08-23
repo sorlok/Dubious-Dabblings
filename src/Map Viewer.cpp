@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <phoenix/phoenix.hpp>
+#include <nall/png.hpp>
 
 #include "phoenix_ext/CanvasExt.hpp"
 #include "gamedata/GameMap.hpp"

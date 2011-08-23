@@ -3,6 +3,7 @@
 #include <iostream>
 
 using namespace phoenix;
+using nall::file;
 using std::initializer_list;
 using std::vector;
 using std::string;
@@ -327,9 +328,9 @@ void PremultImage::paintImage(const PremultImage& img, const Geometry& position)
 // PNG loading code
 //////////////////////////////////////////////////////////////
 
-#include "png.h"
+//#include "png.h"
 
-namespace {
+/*namespace {
 //Helper const
 const unsigned int PNGSIGSIZE = 8;
 
@@ -343,6 +344,8 @@ void custom_png_read(png_structp pngPtr, png_bytep data, png_size_t length)
 
 
 } //End anon namespace
+*/
+
 
 
 uint32_t* PremultImage::LoadPNGFile(const string& path, unsigned int& imgWidth, unsigned int& imgHeight)
@@ -352,21 +355,40 @@ uint32_t* PremultImage::LoadPNGFile(const string& path, unsigned int& imgWidth, 
 	imgHeight = 0;
 
 	//Open it
-	std::ifstream source(path);
-	if (source.fail()) {
+	//std::ifstream source(path);
+	//if (source.fail()) {
+	//	return NULL;
+	//}
+
+	//Open and read in file as a bytestream.
+	uint8_t *data;
+	unsigned int size;
+	if (!file::read(path.c_str(), data, size)) {
 		return NULL;
 	}
 
+	//Decode the image, delete the old file buffer.
+	//TMP png image;
+	//TMP image.decode(data, size);
+	delete[] data;
+	//image.alphaTransform(0x40c0c0);
+
+	//Return the array of pixels
+	//TMP uint32_t* res = new uint32_t[image.size];
+	//TMP memcpy(res, image.data, image.size);
+	//TMP return res;
+	return NULL; //TMP
+
 	//Check the PNG signature
-    png_byte pngsig[PNGSIGSIZE];
+    /*png_byte pngsig[PNGSIGSIZE];
     source.read((char*)pngsig, PNGSIGSIZE);
     if (!source.good() || (png_sig_cmp(pngsig, 0, PNGSIGSIZE)!=0)) {
     	source.close();
     	return NULL;
-    }
+    }*/
 
     //Create the read struct
-    png_structp pngRead = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    /*png_structp pngRead = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     if (!pngRead) {
         source.close();
         return NULL;
@@ -467,8 +489,8 @@ uint32_t* PremultImage::LoadPNGFile(const string& path, unsigned int& imgWidth, 
     }
 
     //Cleanup, return
-    delete [] data;
-    return res;
+    delete [] data;*/
+    //return res;
 }
 
 

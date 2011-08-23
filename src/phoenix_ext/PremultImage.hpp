@@ -1,6 +1,9 @@
-#pragma once
+//#pragma once
+#ifndef PREMULT_IMG_HPP
+#define PREMULT_IMG_HPP
 
 #include <phoenix/phoenix.hpp>
+#include <nall/png.hpp>
 
 #include <string>
 #include <vector>
@@ -91,5 +94,4 @@ private:
 };
 
 
-
-
+#endif

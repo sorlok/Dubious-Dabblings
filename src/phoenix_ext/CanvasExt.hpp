@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CANVAS_EXT_HPP
+#define CANVAS_EXT_HPP
 
 #include <phoenix/phoenix.hpp>
 
@@ -46,7 +47,7 @@ private:
 	//phoenix::Geometry cached_size_;
 };
 
-
+#endif
 
 
 
