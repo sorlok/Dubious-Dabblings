@@ -188,9 +188,6 @@ struct pWidget : public pObject {
   virtual void setGeometry(const Geometry &geometry);
   void setVisible(bool visible);
 
-  //Added
-  //virtual const Geometry &geometry getGeometry();
-
   pWidget(Widget &widget) : widget(widget) {}
   void constructor();
 };
@@ -210,10 +207,6 @@ struct pCanvas : public pWidget {
   cairo_surface_t *surface;
 
   uint32_t* buffer();
-
-  //Added
-  const Geometry& bufferSize();
-
   void setGeometry(const Geometry &geometry);
   void update();
 

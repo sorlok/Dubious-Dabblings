@@ -1,8 +1,6 @@
 #ifndef PHOENIX_HPP
 #define PHOENIX_HPP
 
-//Can add "${ProjDirPath}" if needed.
-
 #include <nall/array.hpp>
 #include <nall/config.hpp>
 #include <nall/foreach.hpp>
