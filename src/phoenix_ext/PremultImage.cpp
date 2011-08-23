@@ -391,9 +391,20 @@ uint32_t* PremultImage::LoadPNGFile(const string& path, unsigned int& imgWidth, 
 	//Return the array of pixels
 	std::cout <<"Image is: " <<image.info.width <<" x " <<image.info.height <<", depth: " <<image.info.bitDepth <<"\n";
 	std::cout <<"Allocating " <<(image.rawSize/1024) <<" x4 KB\n";
-	uint32_t* res = new uint32_t[image.rawSize];
-	memcpy(res, image.rawData, image.rawSize);
-	return res;
+	std::cout <<"   Real: " <<(image.size/1024) <<" x4 KB\n";
+	std::cout <<"   Check: " <<(image.size) <<" to " <<(image.info.width*image.info.height*sizeof(image.data[0])) <<"\n";
+
+	//TEMP: For some reason, PNG flips out over a certain small file...
+	size_t size = image.info.width*image.info.height;
+	//if (size <= 15941) {
+		uint32_t* res = new uint32_t[size];
+		memcpy(res, image.data, size*sizeof(res[0]));
+		return res;
+	/*} else {
+		uint32_t* res = new uint32_t[image.rawSize];
+		memcpy(res, image.rawData, image.rawSize);
+		return res;
+	}*/
 
 	//Check the PNG signature
     /*png_byte pngsig[PNGSIGSIZE];
