@@ -20,20 +20,15 @@ static void Canvas_motion(Canvas *self, GdkEventMotion* event) {
 static void Canvas_enter(Canvas *self) {
   if(self->onMotion) self->onMotion(0, 0, MOVE_FLAG::ENTER);
 }
-
 static void Canvas_leave(Canvas *self) {
   if(self->onMotion) self->onMotion(0, 0, MOVE_FLAG::LEAVE);
 }
 
 
+
 uint32_t* pCanvas::buffer() {
   return (uint32_t*)cairo_image_surface_get_data(surface);
 }
-
-//const Geometry& pCanvas::bufferSize() {
-  //Note: we could use gtkWidget->allocation.width/height, but I'm not taking any chances for now.
-//  return buffer_size;
-//}
 
 void pCanvas::setGeometry(const Geometry &geometry) {
   if(geometry.width  == cairo_image_surface_get_width(surface)
@@ -59,19 +54,17 @@ void pCanvas::constructor() {
   gtk_widget_modify_bg(gtkWidget, GTK_STATE_NORMAL, &color);
   gtk_widget_set_double_buffered(gtkWidget, false);
   gtk_widget_add_events(gtkWidget, GDK_EXPOSURE_MASK);
-
   g_signal_connect(G_OBJECT(gtkWidget), "expose_event", G_CALLBACK(Canvas_expose), (gpointer)this);
 
   //ADDED: Mouse motion events
-  //TODO:  Since these might be expensive, the user should explicitly call something like "add events"
-  //       (which means we will also need a "remove events", and also need to check how QT and Windows do it)
-  gtk_widget_add_events(gtkWidget, GDK_POINTER_MOTION_MASK|GDK_POINTER_MOTION_HINT_MASK);  //The hint mask slows down X's mouse events to one per update.
-  g_signal_connect_swapped(G_OBJECT(gtkWidget), "motion_notify_event", G_CALLBACK(Canvas_motion), (gpointer)&canvas);
+  //TODO:  Since these might be expensive, the user should explicitly call som
+  //       (which means we will also need a "remove events", and also need to 
+  gtk_widget_add_events(gtkWidget, GDK_POINTER_MOTION_MASK|GDK_POINTER_MOTION_
+  g_signal_connect_swapped(G_OBJECT(gtkWidget), "motion_notify_event", G_CALLB
 
   //ADDED: Mouse enter/leaving events
-  gtk_widget_add_events(gtkWidget, GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK);
-  g_signal_connect_swapped(G_OBJECT(gtkWidget), "enter_notify_event", G_CALLBACK(Canvas_enter), (gpointer)&canvas);
-  g_signal_connect_swapped(G_OBJECT(gtkWidget), "leave_notify_event", G_CALLBACK(Canvas_leave), (gpointer)&canvas);
-}
+  gtk_widget_add_events(gtkWidget, GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK
+  g_signal_connect_swapped(G_OBJECT(gtkWidget), "enter_notify_event", G_CALLBA
+  g_signal_connect_swapped(G_OBJECT(gtkWidget), "leave_notify_event", G_CALLBA
 
 }

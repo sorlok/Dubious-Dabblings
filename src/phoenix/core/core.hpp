@@ -46,6 +46,7 @@ enum class MOVE_FLAG : unsigned {
   LEFT_UP
 };
 
+
 struct Geometry {
   signed x, y;
   unsigned width, height;
@@ -268,14 +269,13 @@ struct Button : private nall::base_from_member<pButton&>, Widget {
 };
 
 struct Canvas : private nall::base_from_member<pCanvas&>, Widget {
-  nall::function<void (unsigned int, unsigned int, MOVE_FLAG)> onMotion; //Change: we need a way to track the mouse
+  uint32_t* buffer();
+  nall::function<void (unsigned int, unsigned int, MOVE_FLAG)> onMotion; //Possible circular dependency? Unlikely
 
   uint32_t* buffer();
 
-  //Added: needed to avoid buffer overflows, etc.
-//  const Geometry& bufferSize();
-
-  virtual void update();  //Second change: made virtual
+  //Added: Needs to be virtual
+  virtual void update(); 
 
   Canvas();
   pCanvas &p;
