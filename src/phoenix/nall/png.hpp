@@ -173,7 +173,7 @@ bool png::decode(const uint8_t *sourceData, unsigned sourceSize) {
   return true;
 }
 
-const unsigned png::interlace[7][4] = {
+/*const unsigned png::interlace[7][4] = {
   //x-distance, y-distance, x-origin, y-origin
   { 8, 8, 0, 0 },
   { 8, 8, 4, 0 },
@@ -182,7 +182,7 @@ const unsigned png::interlace[7][4] = {
   { 2, 4, 0, 2 },
   { 2, 2, 1, 0 },
   { 1, 2, 0, 1 },
-};
+};*/
 
 unsigned png::inflateSize() {
   if(info.interlaceMethod == 0) {
