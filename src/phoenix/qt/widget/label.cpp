@@ -11,3 +11,8 @@ void pLabel::setText(const string &text) {
 void pLabel::constructor() {
   qtWidget = qtLabel = new QLabel;
 }
+
+void pLabel::destructor() {
+  if(sizable.state.layout) sizable.state.layout->remove(label);
+  delete qtLabel;
+}

@@ -30,6 +30,9 @@ void pComboBox::constructor() {
   connect(qtComboBox, SIGNAL(currentIndexChanged(int)), SLOT(onChange()));
 }
 
+void pComboBox::destructor() {
+}
+
 void pComboBox::onChange() {
   comboBox.state.selection = selection();
   if(locked == false && comboBox.onChange) comboBox.onChange();

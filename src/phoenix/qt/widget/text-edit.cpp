@@ -26,6 +26,9 @@ void pTextEdit::constructor() {
   connect(qtTextEdit, SIGNAL(textChanged()), SLOT(onChange()));
 }
 
+void pTextEdit::destructor() {
+}
+
 void pTextEdit::onChange() {
   textEdit.state.text = text();
   if(textEdit.onChange) textEdit.onChange();

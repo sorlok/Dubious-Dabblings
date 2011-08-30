@@ -2,8 +2,9 @@ static void Action_setFont(GtkWidget *widget, gpointer font);
 static void Widget_setFont(GtkWidget *widget, gpointer font);
 
 static gint Window_close(GtkWidget *widget, GdkEvent *event, Window *window) {
+  window->state.ignore = false;
   if(window->onClose) window->onClose();
-  window->setVisible(false);
+  if(window->state.ignore == false) window->setVisible(false);
   return true;
 }
 
@@ -78,25 +79,25 @@ static gboolean Window_configure(GtkWidget *widget, GdkEvent *event, Window *win
 }
 
 void pWindow::append(Layout &layout) {
-  layout.setParent(window);
   Geometry geometry = this->geometry();
   geometry.x = geometry.y = 0;
   layout.setGeometry(geometry);
 }
 
-void pWindow::append(Menu &subMenu) {
-  if(window.state.menuFont) subMenu.p.setFont(*window.state.menuFont);
-  gtk_menu_shell_append(GTK_MENU_SHELL(menu), subMenu.p.widget);
-  gtk_widget_show(subMenu.p.widget);
+void pWindow::append(Menu &menu) {
+  if(window.state.menuFont) menu.p.setFont(*window.state.menuFont);
+  else menu.p.setFont(pOS::defaultFont);
+  gtk_menu_shell_append(GTK_MENU_SHELL(this->menu), menu.p.widget);
+  gtk_widget_show(menu.p.widget);
 }
 
 void pWindow::append(Widget &widget) {
-  widget.p.parentWindow = this;
-  if(!widget.state.font && window.state.widgetFont) {
-    widget.setFont(*window.state.widgetFont);
+  if(!widget.state.font) {
+    if(window.state.widgetFont) widget.setFont(*window.state.widgetFont);
+    else widget.setFont(pOS::defaultFont);
   }
   gtk_fixed_put(GTK_FIXED(formContainer), widget.p.gtkWidget, 0, 0);
-  widget.setVisible();
+  widget.setVisible(widget.visible());
 }
 
 Color pWindow::backgroundColor() {
@@ -124,6 +125,16 @@ Geometry pWindow::geometry() {
     return { 0, menuHeight(), OS::desktopGeometry().width, OS::desktopGeometry().height - menuHeight() - statusHeight() };
   };
   return window.state.geometry;
+}
+
+void pWindow::remove(Layout &layout) {
+}
+
+void pWindow::remove(Menu &menu) {
+  menu.p.orphan();
+}
+
+void pWindow::remove(Widget &widget) {
 }
 
 void pWindow::setBackgroundColor(const Color &color) {
@@ -211,6 +222,7 @@ void pWindow::setWidgetFont(Font &font) {
 }
 
 void pWindow::constructor() {
+  memset(&lastConfigure, 0, sizeof(GdkEventConfigure));
   widget = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
   if(gdk_screen_is_composited(gdk_screen_get_default())) {

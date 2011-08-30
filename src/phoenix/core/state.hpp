@@ -28,6 +28,7 @@ struct Window::State {
   Color backgroundColor;
   bool fullScreen;
   Geometry geometry;
+  bool ignore;
   reference_array<Layout&> layout;
   reference_array<Menu&> menu;
   Font *menuFont;
@@ -46,6 +47,7 @@ struct Window::State {
     backgroundColor = { 0, 0, 0, 255 };
     fullScreen = false;
     geometry = { 128, 128, 256, 256 };
+    ignore = false;
     menuFont = 0;
     menuVisible = false;
     resizable = true;
@@ -57,13 +59,15 @@ struct Window::State {
 
 struct Action::State {
   bool enabled;
-  Window *parent;
+  Menu *menu;
   bool visible;
+  Window *window;
 
   State() {
     enabled = true;
-    parent = 0;
+    menu = 0;
     visible = true;
+    window = 0;
   }
 };
 
@@ -92,6 +96,21 @@ struct RadioItem::State {
 
   State() {
     checked = true;
+  }
+};
+
+struct Sizable::State {
+  Layout *layout;
+  Window *window;
+
+  State() {
+    layout = 0;
+    window = 0;
+  }
+};
+
+struct Layout::State {
+  State() {
   }
 };
 

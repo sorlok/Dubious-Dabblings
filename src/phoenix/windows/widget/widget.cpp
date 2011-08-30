@@ -12,6 +12,8 @@ Geometry pWidget::minimumGeometry() {
 }
 
 void pWidget::setEnabled(bool enabled) {
+  if(widget.state.abstract) enabled = false;
+  if(sizable.state.layout && sizable.state.layout->enabled() == false) enabled = false;
   EnableWindow(hwnd, enabled);
 }
 
@@ -27,14 +29,21 @@ void pWidget::setGeometry(const Geometry &geometry) {
   SetWindowPos(hwnd, NULL, geometry.x, geometry.y, geometry.width, geometry.height, SWP_NOZORDER);
 }
 
+void pWidget::setWindow(Window &window) {
+  if(hwnd) DestroyWindow(hwnd);
+  hwnd = CreateWindow(L"phoenix_label", L"", WS_CHILD, 0, 0, 0, 0, window.p.hwnd, (HMENU)id, GetModuleHandle(0), 0);
+  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&widget);
+}
+
 void pWidget::setVisible(bool visible) {
   if(widget.state.abstract) visible = false;
+  if(sizable.state.layout && sizable.state.layout->visible() == false) visible = false;
   ShowWindow(hwnd, visible ? SW_SHOWNORMAL : SW_HIDE);
 }
 
 void pWidget::constructor() {
   hwnd = 0;
-  if(widget.state.abstract) setParent(Window::None);
+  if(widget.state.abstract) setWindow(Window::None);
 }
 
 void pWidget::setDefaultFont() {
@@ -45,8 +54,9 @@ void pWidget::setDefaultFont() {
   }
 }
 
-void pWidget::setParent(Window &parent) {
-  if(hwnd) DestroyWindow(hwnd);
-  hwnd = CreateWindow(L"phoenix_label", L"", WS_CHILD, 0, 0, 0, 0, parent.p.hwnd, (HMENU)id, GetModuleHandle(0), 0);
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&widget);
+//calling Widget::setParent destroys widget and re-creates it:
+//need to re-apply visiblity and enabled status; called by each subclassed setParent() function
+void pWidget::synchronize() {
+  widget.setEnabled(widget.enabled());
+  widget.setVisible(widget.visible());
 }

@@ -8,6 +8,8 @@ Geometry pWidget::minimumGeometry() {
 }
 
 void pWidget::setEnabled(bool enabled) {
+  if(widget.state.abstract) enabled = false;
+  if(sizable.state.layout && sizable.state.layout->enabled() == false) enabled = false;
   qtWidget->setEnabled(enabled);
 }
 
@@ -16,7 +18,8 @@ void pWidget::setFocused() {
 }
 
 void pWidget::setFont(Font &font) {
-  qtWidget->setFont(*font.p.qtFont);
+  if(font.p.qtFont) qtWidget->setFont(*font.p.qtFont);
+  else qtWidget->setFont(*pOS::defaultFont.p.qtFont);
 }
 
 void pWidget::setGeometry(const Geometry &geometry) {
@@ -25,9 +28,14 @@ void pWidget::setGeometry(const Geometry &geometry) {
 
 void pWidget::setVisible(bool visible) {
   if(widget.state.abstract) visible = false;
+  if(sizable.state.layout && sizable.state.layout->visible() == false) visible = false;
   qtWidget->setVisible(visible);
 }
 
 void pWidget::constructor() {
   if(widget.state.abstract) qtWidget = new QWidget;
+}
+
+void pWidget::destructor() {
+  if(widget.state.abstract) delete qtWidget;
 }

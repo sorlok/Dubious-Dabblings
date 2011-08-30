@@ -23,6 +23,15 @@ Geometry pWindow::geometry() {
   return { 0, 0, 0, 0 };
 }
 
+void pWindow::remove(Layout &layout) {
+}
+
+void pWindow::remove(Menu &menu) {
+}
+
+void pWindow::remove(Widget &widget) {
+}
+
 void pWindow::setBackgroundColor(const Color &color) {
 }
 

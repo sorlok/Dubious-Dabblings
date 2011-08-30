@@ -1,5 +1,4 @@
 void pWindow::append(Layout &layout) {
-  layout.setParent(window);
   Geometry geometry = window.state.geometry;
   geometry.x = geometry.y = 0;
   layout.setGeometry(geometry);
@@ -7,15 +6,17 @@ void pWindow::append(Layout &layout) {
 
 void pWindow::append(Menu &menu) {
   if(window.state.menuFont) menu.p.qtMenu->setFont(*window.state.menuFont->p.qtFont);
+  else menu.p.qtMenu->setFont(*pOS::defaultFont.p.qtFont);
   qtMenu->addMenu(menu.p.qtMenu);
 }
 
 void pWindow::append(Widget &widget) {
-  if(!widget.state.font && window.state.widgetFont) {
-    widget.setFont(*window.state.widgetFont);
+  if(!widget.state.font) {
+    if(window.state.widgetFont) widget.setFont(*window.state.widgetFont);
+    else widget.setFont(pOS::defaultFont);
   }
   widget.p.qtWidget->setParent(qtContainer);
-  widget.setVisible(widget.state.visible);
+  widget.setVisible(widget.visible());
 }
 
 Color pWindow::backgroundColor() {
@@ -47,6 +48,19 @@ Geometry pWindow::geometry() {
     return { 0, menuHeight, OS::desktopGeometry().width, OS::desktopGeometry().height - menuHeight - statusHeight };
   }
   return window.state.geometry;
+}
+
+void pWindow::remove(Layout &layout) {
+}
+
+void pWindow::remove(Menu &menu) {
+  //QMenuBar::removeMenu() does not exist
+  qtMenu->clear();
+  foreach(menu, window.state.menu) append(menu);
+}
+
+void pWindow::remove(Widget &widget) {
+  widget.p.qtWidget->setParent(0);
 }
 
 void pWindow::setBackgroundColor(const Color &color) {
@@ -170,6 +184,9 @@ void pWindow::constructor() {
   setGeometry(window.state.geometry);
 }
 
+void pWindow::destructor() {
+}
+
 void pWindow::updateFrameGeometry() {
   if(window.state.fullScreen == false) for(unsigned n = 0; n < 100; n++) {
     if(qtWindow->geometry().x() > qtWindow->frameGeometry().x()) break;
@@ -186,9 +203,10 @@ void pWindow::updateFrameGeometry() {
 }
 
 void pWindow::QtWindow::closeEvent(QCloseEvent *event) {
+  self.window.state.ignore = false;
   event->ignore();
-  hide();
   if(self.window.onClose) self.window.onClose();
+  if(self.window.state.ignore == false) hide();
 }
 
 void pWindow::QtWindow::moveEvent(QMoveEvent *event) {

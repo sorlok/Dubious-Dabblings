@@ -1,4 +1,6 @@
 Geometry pFont::geometry(const string &text) {
+  if(qtFont == 0) return { 0, 0, 0, 0 };
+
   QFontMetrics metrics(*qtFont);
 
   lstring lines;
@@ -20,9 +22,18 @@ void pFont::setUnderline(bool underline) { update(); }
 
 void pFont::constructor() {
   qtFont = new QFont;
+  font.setFamily("Sans");
+  font.setSize(8);
+}
+
+void pFont::destructor() {
+  delete qtFont;
+  qtFont = 0;
 }
 
 void pFont::update() {
+  if(qtFont == 0) return;
+
   qtFont->setFamily(QString::fromUtf8(font.state.family));
   qtFont->setPointSize(font.state.size);
   qtFont->setBold(font.state.bold);

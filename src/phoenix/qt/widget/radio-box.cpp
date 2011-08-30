@@ -44,6 +44,9 @@ void pRadioBox::constructor() {
   connect(qtRadioBox, SIGNAL(toggled(bool)), SLOT(onTick()));
 }
 
+void pRadioBox::destructor() {
+}
+
 void pRadioBox::onTick() {
   if(locked == false && checked() && radioBox.onTick) radioBox.onTick();
 }

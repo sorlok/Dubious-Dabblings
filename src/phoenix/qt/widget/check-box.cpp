@@ -23,6 +23,9 @@ void pCheckBox::constructor() {
   connect(qtCheckBox, SIGNAL(stateChanged(int)), SLOT(onTick()));
 }
 
+void pCheckBox::destructor() {
+}
+
 void pCheckBox::onTick() {
   if(locked == false && checkBox.onTick) checkBox.onTick();
 }

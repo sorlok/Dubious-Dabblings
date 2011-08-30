@@ -22,17 +22,18 @@ void pRadioBox::setText(const string &text) {
 }
 
 void pRadioBox::constructor() {
-  setParent(Window::None);
+  setWindow(Window::None);
 }
 
-void pRadioBox::setParent(Window &parent) {
+void pRadioBox::setWindow(Window &window) {
   hwnd = CreateWindow(
     L"BUTTON", L"",
-    WS_CHILD | WS_TABSTOP | WS_VISIBLE | BS_RADIOBUTTON,
-    0, 0, 0, 0, parent.p.hwnd, (HMENU)id, GetModuleHandle(0), 0
+    WS_CHILD | WS_TABSTOP | BS_RADIOBUTTON,
+    0, 0, 0, 0, window.p.hwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&radioBox);
   setDefaultFont();
   if(radioBox.state.checked) setChecked();
   setText(radioBox.state.text);
+  synchronize();
 }

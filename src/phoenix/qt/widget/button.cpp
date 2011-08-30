@@ -13,6 +13,10 @@ void pButton::constructor() {
   connect(qtButton, SIGNAL(released()), SLOT(onTick()));
 }
 
+void pButton::destructor() {
+  delete qtButton;
+}
+
 void pButton::onTick() {
   if(button.onTick) button.onTick();
 }

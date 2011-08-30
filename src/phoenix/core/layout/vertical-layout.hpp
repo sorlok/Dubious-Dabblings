@@ -1,21 +1,29 @@
-struct HorizontalLayout;
-
 struct VerticalLayout : public Layout {
-  void append(HorizontalLayout &layout, unsigned spacing = 0);
-  void append(Widget &widget, unsigned width, unsigned height, unsigned spacing = 0);
+  void append(Sizable &sizable, unsigned width, unsigned height, unsigned spacing = 0);
+  void append(Sizable &sizable);
+  bool enabled();
   Geometry minimumGeometry();
-  Geometry minimumLayoutGeometry();
+  void remove(Sizable &sizable);
+  void setAlignment(double alignment);
+  void setEnabled(bool enabled = true);
   void setGeometry(const Geometry &geometry);
   void setMargin(unsigned margin);
-  void setParent(Window &parent);
-  void setVisible(bool visible);
+  void setVisible(bool visible = true);
+  void synchronize();
+  bool visible();
   VerticalLayout();
+  ~VerticalLayout();
 
 //private:
-  unsigned margin;
+  struct State {
+    double alignment;
+    bool enabled;
+    unsigned margin;
+    bool visible;
+  } state;
+
   struct Children {
-    HorizontalLayout *layout;
-    Widget *widget;
+    Sizable *sizable;
     unsigned width, height, spacing;
   };
   nall::linear_vector<Children> children;

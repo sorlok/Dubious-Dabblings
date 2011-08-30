@@ -7,3 +7,7 @@ void pViewport::constructor() {
   qtWidget->setAttribute(Qt::WA_PaintOnScreen, true);
   qtWidget->setStyleSheet("background: #000000");
 }
+
+void pViewport::destructor() {
+  delete qtWidget;
+}
