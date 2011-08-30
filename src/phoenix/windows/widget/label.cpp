@@ -10,15 +10,16 @@ void pLabel::setText(const string &text) {
 }
 
 void pLabel::constructor() {
-  setParent(Window::None);
+  setWindow(Window::None);
 }
 
-void pLabel::setParent(Window &parent) {
+void pLabel::setWindow(Window &window) {
   if(hwnd) DestroyWindow(hwnd);
-  hwnd = CreateWindow(L"phoenix_label", L"", WS_CHILD | WS_VISIBLE, 0, 0, 0, 0, parent.p.hwnd, (HMENU)id, GetModuleHandle(0), 0);
+  hwnd = CreateWindow(L"phoenix_label", L"", WS_CHILD, 0, 0, 0, 0, window.p.hwnd, (HMENU)id, GetModuleHandle(0), 0);
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&label);
   setDefaultFont();
   setText(label.state.text);
+  synchronize();
 }
 
 static LRESULT CALLBACK Label_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {

@@ -23,18 +23,19 @@ string pLineEdit::text() {
 }
 
 void pLineEdit::constructor() {
-  setParent(Window::None);
+  setWindow(Window::None);
 }
 
-void pLineEdit::setParent(Window &parent) {
+void pLineEdit::setWindow(Window &window) {
   if(hwnd) DestroyWindow(hwnd);
   hwnd = CreateWindowEx(
     WS_EX_CLIENTEDGE, L"EDIT", L"",
-    WS_CHILD | WS_TABSTOP | WS_VISIBLE | ES_AUTOHSCROLL | ES_AUTOVSCROLL,
-    0, 0, 0, 0, parent.p.hwnd, (HMENU)id, GetModuleHandle(0), 0
+    WS_CHILD | WS_TABSTOP | ES_AUTOHSCROLL | ES_AUTOVSCROLL,
+    0, 0, 0, 0, window.p.hwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&lineEdit);
   setDefaultFont();
   setEditable(lineEdit.state.editable);
   setText(lineEdit.state.text);
+  synchronize();
 }

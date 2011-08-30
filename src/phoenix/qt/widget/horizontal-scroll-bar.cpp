@@ -23,6 +23,9 @@ void pHorizontalScrollBar::constructor() {
   connect(qtScrollBar, SIGNAL(valueChanged(int)), SLOT(onChange()));
 }
 
+void pHorizontalScrollBar::destructor() {
+}
+
 void pHorizontalScrollBar::onChange() {
   horizontalScrollBar.state.position = position();
   if(horizontalScrollBar.onChange) horizontalScrollBar.onChange();

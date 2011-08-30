@@ -23,6 +23,9 @@ void pHorizontalSlider::constructor() {
   connect(qtSlider, SIGNAL(valueChanged(int)), SLOT(onChange()));
 }
 
+void pHorizontalSlider::destructor() {
+}
+
 void pHorizontalSlider::onChange() {
   horizontalSlider.state.position = position();
   if(horizontalSlider.onChange) horizontalSlider.onChange();

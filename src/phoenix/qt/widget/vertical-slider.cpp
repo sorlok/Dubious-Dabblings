@@ -23,6 +23,9 @@ void pVerticalSlider::constructor() {
   connect(qtSlider, SIGNAL(valueChanged(int)), SLOT(onChange()));
 }
 
+void pVerticalSlider::destructor() {
+}
+
 void pVerticalSlider::onChange() {
   verticalSlider.state.position = position();
   if(verticalSlider.onChange) verticalSlider.onChange();

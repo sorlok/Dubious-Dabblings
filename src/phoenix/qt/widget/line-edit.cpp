@@ -22,6 +22,9 @@ void pLineEdit::constructor() {
   connect(qtLineEdit, SIGNAL(textEdited(const QString&)), SLOT(onChange()));
 }
 
+void pLineEdit::destructor() {
+}
+
 void pLineEdit::onActivate() {
   if(lineEdit.onActivate) lineEdit.onActivate();
 }

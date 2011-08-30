@@ -11,3 +11,6 @@ void pProgressBar::constructor() {
   qtProgressBar->setRange(0, 100);
   qtProgressBar->setTextVisible(false);
 }
+
+void pProgressBar::destructor() {
+}

@@ -23,7 +23,7 @@ void pComboBox::setSelection(unsigned row) {
 }
 
 void pComboBox::constructor() {
-  setParent(Window::None);
+  setWindow(Window::None);
 }
 
 void pComboBox::setGeometry(const Geometry &geometry) {
@@ -34,16 +34,17 @@ void pComboBox::setGeometry(const Geometry &geometry) {
   SendMessage(hwnd, CB_SETITEMHEIGHT, (WPARAM)-1, adjustedHeight);
 }
 
-void pComboBox::setParent(Window &parent) {
+void pComboBox::setWindow(Window &window) {
   if(hwnd) DestroyWindow(hwnd);
   hwnd = CreateWindow(
     L"COMBOBOX", L"",
-    WS_CHILD | WS_TABSTOP | WS_VISIBLE | CBS_DROPDOWNLIST | CBS_HASSTRINGS,
+    WS_CHILD | WS_TABSTOP | CBS_DROPDOWNLIST | CBS_HASSTRINGS,
     0, 0, 0, 0,
-    parent.p.hwnd, (HMENU)id, GetModuleHandle(0), 0
+    window.p.hwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&comboBox);
   setDefaultFont();
   foreach(text, comboBox.state.text) append(text);
   setSelection(comboBox.state.selection);
+  synchronize();
 }

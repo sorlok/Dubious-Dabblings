@@ -82,6 +82,9 @@ void pHexEdit::constructor() {
   connect(qtScroll, SIGNAL(actionTriggered(int)), SLOT(onScroll()));
 }
 
+void pHexEdit::destructor() {
+}
+
 void pHexEdit::keyPressEvent(QKeyEvent *event) {
   if(!hexEdit.onRead) return;
 

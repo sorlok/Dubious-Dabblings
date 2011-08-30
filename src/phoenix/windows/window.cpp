@@ -2,7 +2,6 @@ static const unsigned FixedStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS
 static const unsigned ResizableStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME;
 
 void pWindow::append(Layout &layout) {
-  layout.setParent(window);
   Geometry geom = window.state.geometry;
   geom.x = geom.y = 0;
   layout.setGeometry(geom);
@@ -13,7 +12,11 @@ void pWindow::append(Menu &menu) {
 }
 
 void pWindow::append(Widget &widget) {
-  widget.p.setParent(window);
+  widget.p.setWindow(window);
+  if(!widget.state.font) {
+    if(window.state.widgetFont) widget.setFont(*window.state.widgetFont);
+    else widget.setFont(pOS::state->defaultFont);
+  }
 }
 
 Color pWindow::backgroundColor() {
@@ -59,6 +62,16 @@ Geometry pWindow::geometry() {
   unsigned height = (rc.bottom - rc.top) - margin.height;
 
   return { x, y, width, height };
+}
+
+void pWindow::remove(Layout &layout) {
+}
+
+void pWindow::remove(Menu &menu) {
+  updateMenu();
+}
+
+void pWindow::remove(Widget &widget) {
 }
 
 void pWindow::setBackgroundColor(const Color &color) {
@@ -166,7 +179,7 @@ void pWindow::updateMenu() {
   hmenu = CreateMenu();
 
   foreach(menu, window.state.menu) {
-    menu.p.update(window, hmenu);
+    menu.p.update(window);
     AppendMenu(hmenu, MF_STRING | MF_POPUP, (UINT_PTR)menu.p.hmenu, utf16_t(menu.state.text));
   }
 

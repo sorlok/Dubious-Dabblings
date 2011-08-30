@@ -18,6 +18,11 @@ void pCanvas::constructor() {
   qtImage = new QImage(256, 256, QImage::Format_RGB32);
 }
 
+void pCanvas::destructor() {
+  delete qtCanvas;
+  delete qtImage;
+}
+
 void pCanvas::QtCanvas::paintEvent(QPaintEvent *event) {
   QPainter painter(self.qtCanvas);
   painter.drawImage(0, 0, *self.qtImage);

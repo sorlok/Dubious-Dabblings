@@ -13,8 +13,6 @@ void pListView::append(const lstring &list) {
     utf16_t wtext(text);
     ListView_SetItemText(hwnd, row, n, wtext);
   }
-  //workaround: when there is only one column, the horizontal scrollbar will always appear without this
-  if(listView.state.headerText.size() <= 1) ListView_SetColumnWidth(hwnd, 0, LVSCW_AUTOSIZE_USEHEADER);
 }
 
 void pListView::autoSizeColumns() {
@@ -32,7 +30,6 @@ void pListView::modify(unsigned row, const lstring &list) {
     utf16_t wtext(text);
     ListView_SetItemText(hwnd, row, n, wtext);
   }
-  if(listView.state.headerText.size() <= 1) ListView_SetColumnWidth(hwnd, 0, LVSCW_AUTOSIZE_USEHEADER);
 }
 
 void pListView::reset() {
@@ -109,7 +106,8 @@ void pListView::setSelection(unsigned row) {
 
 void pListView::constructor() {
   lostFocus = false;
-  setParent(Window::None);
+  setWindow(Window::None);
+  listView.setHeaderText("");
 }
 
 void pListView::setGeometry(const Geometry &geometry) {
@@ -117,12 +115,12 @@ void pListView::setGeometry(const Geometry &geometry) {
   autoSizeColumns();
 }
 
-void pListView::setParent(Window &parent) {
+void pListView::setWindow(Window &window) {
   if(hwnd) DestroyWindow(hwnd);
   hwnd = CreateWindowEx(
     WS_EX_CLIENTEDGE, WC_LISTVIEW, L"",
-    WS_CHILD | WS_TABSTOP | WS_VISIBLE | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | LVS_NOCOLUMNHEADER,
-    0, 0, 0, 0, parent.p.hwnd, (HMENU)id, GetModuleHandle(0), 0
+    WS_CHILD | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | LVS_NOCOLUMNHEADER,
+    0, 0, 0, 0, window.p.hwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&listView);
   setDefaultFont();
@@ -133,4 +131,5 @@ void pListView::setParent(Window &parent) {
   foreach(checked, listView.state.checked, n) setChecked(n, checked);
   if(listView.state.selected) setSelection(listView.state.selection);
   autoSizeColumns();
+  synchronize();
 }

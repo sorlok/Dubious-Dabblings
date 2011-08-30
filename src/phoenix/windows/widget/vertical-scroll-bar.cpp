@@ -17,16 +17,18 @@ void pVerticalScrollBar::setPosition(unsigned position) {
 }
 
 void pVerticalScrollBar::constructor() {
-  setParent(Window::None);
+  setWindow(Window::None);
 }
 
-void pVerticalScrollBar::setParent(Window &parent) {
+void pVerticalScrollBar::setWindow(Window &window) {
   if(hwnd) DestroyWindow(hwnd);
   hwnd = CreateWindow(
-    L"SCROLLBAR", L"", WS_CHILD | WS_VISIBLE | SBS_VERT,
-    0, 0, 0, 0, parent.p.hwnd, (HMENU)id, GetModuleHandle(0), 0
+    L"SCROLLBAR", L"", WS_CHILD | SBS_VERT,
+    0, 0, 0, 0, window.p.hwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&verticalScrollBar);
+  unsigned position = verticalScrollBar.state.position;
   setLength(verticalScrollBar.state.length);
-  setPosition(verticalScrollBar.state.position);
+  setPosition(position);
+  synchronize();
 }

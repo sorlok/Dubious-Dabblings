@@ -23,6 +23,9 @@ void pVerticalScrollBar::constructor() {
   connect(qtScrollBar, SIGNAL(valueChanged(int)), SLOT(onChange()));
 }
 
+void pVerticalScrollBar::destructor() {
+}
+
 void pVerticalScrollBar::onChange() {
   verticalScrollBar.state.position = position();
   if(verticalScrollBar.onChange) verticalScrollBar.onChange();
