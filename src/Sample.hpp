@@ -2,23 +2,6 @@
 using namespace nall;
 using namespace phoenix;
 
-struct Canvas2 : public phoenix::Canvas {
-	Canvas2() {}
-
-	//NOTE: The only change here is that Canvas::update() was made virtual.
-	virtual void update() {
-		uint32_t* buffer_ = buffer();
-		const Geometry& geom = geometry();
-
-		for (size_t i=0; i<geom.width*geom.height; i++) {
-			buffer_[i] = 0xFF0000;
-		}
-
-		Canvas::update();
-	}
-};
-
-
 struct Application : Window {
   VerticalLayout vertLayout;
   HorizontalLayout horizLayout;
@@ -26,7 +9,7 @@ struct Application : Window {
   Label helloLabel;
   Button okButton;
   Button quitButton;
-  Canvas2 bigCanvas;
+  Canvas bigCanvas;
   //Button bigButton;
 
   void create() {
