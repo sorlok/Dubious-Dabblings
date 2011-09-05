@@ -12,9 +12,10 @@ using namespace phoenix;
 
 
 struct Application : Window {
-  VerticalLayout layout;
+  VerticalLayout layoutVert;
+  HorizontalLayout layoutHoriz;
+
   Label helloLabel;
-  HorizontalLayout controlLayout;
   Button okButton;
   Button quitButton;
   CanvasExt myCanvas;
@@ -27,19 +28,22 @@ struct Application : Window {
   void create() {
     //Do window tasks
     setTitle("Test Application");
-    setGeometry({ 128, 128, 640, 480 });
+    //setGeometry({ 130, 130, 650, 490 });
 
     helloLabel.setText("Map Viewer");
     okButton.setText("Load Map");
     quitButton.setText("Quit");
 
-    layout.setMargin(5);                       //layout border in pixels
-    layout.append(helloLabel, ~0, 0, 5);       //width, height, optional spacing
-    controlLayout.append(okButton, ~0, 0, 5);  //width, height of  0 = use least amount of space possible to display all text
-    controlLayout.append(quitButton, ~0, 0);   //width, height of ~0 = use all available width (divides when multiple controls use ~0)
-    layout.append(controlLayout, 0, 0, 10);              //nested layouts inside of other layouts (can accept optional spacing parameter)
-    layout.append(myCanvas, ~0, ~0, 5);
-    append(layout);                            //both buttons will take 50% of available window client width
+    //Horizontal layout
+    layoutHoriz.append(okButton, 100, 30, 5);
+    layoutHoriz.append(quitButton, 100, 30, 5);
+
+    //Vertical layout
+    layoutVert.setMargin(5);
+    layoutVert.append(helloLabel, 0, 0, 5);
+    layoutVert.append(layoutHoriz, 0, 0, 10);
+    layoutVert.append(myCanvas, ~0, ~0, 5);
+    append(layoutVert);
 
     //Get a reference to the canvas's buffer:
     PremultImage& bkgrd = myCanvas.getBufferedImage();
@@ -147,6 +151,7 @@ struct Application : Window {
     	}
     };
 
+    setGeometry({ 130, 130, 650, 490 });
     setVisible();
   }
 } application;
