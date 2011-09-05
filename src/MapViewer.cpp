@@ -1,4 +1,7 @@
-#include <iostream>
+//Minimal test for Phoenix layout error
+#include "Sample.hpp"
+
+/*#include <iostream>
 
 #include <phoenix/phoenix.hpp>
 #include <nall/png.hpp>
@@ -8,7 +11,6 @@
 
 using namespace nall;
 using namespace phoenix;
-
 
 
 struct Application : Window {
@@ -161,5 +163,5 @@ int main(int argc, char* argv[])
   application.create();
   OS::main();
   return 0;
-}
+}*/
 
