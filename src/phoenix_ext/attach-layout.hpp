@@ -7,11 +7,11 @@
 class Attachment {
 private:
 	//Type of attachments
-	enum class TYPE { DEFAULT, PERCENT, ATTACHED };
+	enum class TYPE { UNBOUND, PERCENT, ATTACHED };
 
 public:
 	//Attach an item at a given % of the parent's total width/height
-	Attachment(): type(TYPE::DEFAULT) {}
+	Attachment(): type(TYPE::UNBOUND) {}
 	Attachment(double percent, int offset=0): percent(percent), offset(offset), type(TYPE::PERCENT) {}
 
 	friend class AttachLayout;
