@@ -31,10 +31,10 @@ struct Application : Window {
     std::cout <<"Right button: " <<&rightButton <<"\n";
     std::cout <<"Big button: " <<&bigButton <<"\n";*/
 
-    layout.append(helloLabel, {0.0}, {0.0}, {0.0, 150}, {0.1});
-    layout.append(okButton, {0.0}, {0.1}, {0.0, 150}, {0.2});
-    layout.append(quitButton, {0.0, 160}, {0.1}, {0.0, 360}, {0.2});
-    layout.append(rightButton, {1.0, -150}, {0.1}, {1.0}, {0.2});
+    layout.append(helloLabel, {0.0}, {0.0});
+    layout.append(okButton, {0.0}, {0.1});
+    layout.append(quitButton, {0.0, 160}, {0.1});
+    layout.append(rightButton, {}, {0.1}, {1.0});
     layout.append(bigButton, {0.0}, {0.2}, {1.0}, {1.0});
     append(layout);
 

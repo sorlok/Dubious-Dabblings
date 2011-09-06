@@ -51,6 +51,8 @@ private:
 	phoenix::Geometry lastKnownSize;
 	bool skipGeomUpdate;
 
+	static void ComputeComponent(Attachment& left, Attachment& right, int offsetX, unsigned int maxWidth, int& resX, unsigned int& resWidth);
+
 	struct State {
 		bool enabled;
 		bool visible;

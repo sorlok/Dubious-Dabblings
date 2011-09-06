@@ -118,6 +118,16 @@ Geometry AttachLayout::minimumGeometry()
 }
 
 
+//Compute a single component.
+// NOTE: I am using "left" and "right" rather than generic names, since I find it easier to reason about these terms.
+void AttachLayout::ComputeComponent(Attachment& left, Attachment& right, int offsetX, unsigned int maxWidth, int& resX, unsigned int& resWidth)
+{
+	resX = (int)(left.percent*maxWidth + offsetX + left.offset);
+	resWidth = (int)(right.percent*maxWidth + offsetX + right.offset) - resX;
+}
+
+
+
 
 void AttachLayout::setGeometry(const Geometry& containerGeometry)
 {
@@ -139,19 +149,13 @@ void AttachLayout::setGeometry(const Geometry& containerGeometry)
 	}*/
 
 
-
 	//Apply percentage-based layout rules
 	foreach(child, children) {
-		int childX = (int)(child.left.percent*containerGeometry.width + containerGeometry.x + child.left.offset);
-		int childX2 = (int)(child.right.percent*containerGeometry.width + containerGeometry.x + child.right.offset);
-		int childY = (int)(child.top.percent*containerGeometry.height + containerGeometry.y + child.top.offset);
-		int childY2 = (int)(child.bottom.percent*containerGeometry.height + containerGeometry.y + child.bottom.offset);
-
-		Geometry childGeometry = { childX, childY, (unsigned int)(childX2-childX), (unsigned int)(childY2-childY) };
-
-		//std::cout <<"Setting item: " <<child.sizable <<" to: " <<childGeometry.x <<"," <<childGeometry.y <<" -> " <<childGeometry.width <<"," <<childGeometry.height <<"\n";
-
-		child.sizable->setGeometry(childGeometry);
+		//We compute each component in pairs..
+		Geometry res;
+		AttachLayout::ComputeComponent(child.left, child.right, containerGeometry.x, containerGeometry.width, res.x, res.width);
+		AttachLayout::ComputeComponent(child.top, child.bottom, containerGeometry.y, containerGeometry.height, res.y, res.height);
+		child.sizable->setGeometry(res);
 	}
 
 
