@@ -120,12 +120,98 @@ Geometry AttachLayout::minimumGeometry()
 
 //Compute a single component.
 // NOTE: I am using "left" and "right" rather than generic names, since I find it easier to reason about these terms.
-void AttachLayout::ComputeComponent(Attachment& left, Attachment& right, int offsetX, unsigned int maxWidth, int& resX, unsigned int& resWidth)
+void AttachLayout::ComputeComponent(Attachment& left, Attachment& right, int offsetX, unsigned int maxWidth, int& resX, unsigned int& resWidth, unsigned int minWidth,bool isHoriz, nall::linear_vector<Children>& children)
 {
-	resX = (int)(left.percent*maxWidth + offsetX + left.offset);
-	resWidth = (int)(right.percent*maxWidth + offsetX + right.offset) - resX;
+	resX = AttachLayout::Get(left, right, offsetX, maxWidth, minWidth, -1, isHoriz, Attachment::ANCHOR::RIGHT, children);
+	resWidth = (unsigned int)(AttachLayout::Get(right, left, offsetX, maxWidth, minWidth, 1, isHoriz, Attachment::ANCHOR::LEFT, children)-resX);
 }
 
+
+int AttachLayout::Get(Attachment& item, Attachment& diam, int offset, unsigned int maximum, unsigned int minimum, int sign, bool isHoriz, Attachment::ANCHOR defaultAnch, nall::linear_vector<Children>& children)
+{
+	//Simple cases
+	if (item.done) {
+		return item.res;
+	}
+	if (item.waiting) {
+		//ERROR: default to returning 0 (optional approach to problem-solving: throw something)
+		std::cout <<"ERROR: Still waiting on item.\n";
+		return 0;
+	}
+
+	//Have to figure it out
+	item.waiting = true;
+	if (item.type==Attachment::TYPE::UNBOUND) {
+		item.res = GetUnbound(item, diam, offset, maximum, minimum, sign, isHoriz, defaultAnch, children);
+	} else if (item.type==Attachment::TYPE::PERCENT) {
+		item.res = GetPercent(item, offset, maximum);
+	} else if (item.type==Attachment::TYPE::ATTACHED) {
+		item.res = GetAttached(item, diam, offset, maximum, minimum, sign, isHoriz, defaultAnch, children);
+	} else {
+		//ERROR (in case we add more types later).
+		std::cout <<"ERROR: Unknown type\n";
+		return 0;
+	}
+	item.done = true;
+	return item.res;
+}
+
+
+
+int AttachLayout::GetUnbound(Attachment& item, Attachment& diam, int offset, unsigned int maximum, unsigned int minimum, int sign, bool isHoriz, Attachment::ANCHOR defaultAnch, nall::linear_vector<Children>& children)
+{
+	//This simply depends on the item diametrically opposed to this one, plus a bit of sign manipulation
+	std::cout <<"   Unbound: " <<AttachLayout::Get(diam, item, offset, maximum, minimum, -sign, isHoriz, defaultAnch, children) <<" + " <<sign << "*" <<minimum <<"\n";
+	return AttachLayout::Get(diam, item, offset, maximum, minimum, -sign, isHoriz, defaultAnch, children) + sign*minimum;
+}
+
+
+int AttachLayout::GetPercent(Attachment& item, int offset, unsigned int maximum)
+{
+	//Simple; just remember to include the item's offset.
+	std::cout <<"   Percent: " <<item.percent <<" of " <<maximum <<" and offset: " <<offset <<"," <<item.offset <<"\n";
+	return item.percent*maximum + offset + item.offset;
+}
+
+
+//Only slightly more complex. Most of the math (figuring out the sign & default anchor) has already been done for us.
+int AttachLayout::GetAttached(Attachment& item, Attachment& diam, int offset, unsigned int maximum, unsigned int minimum, int sign, bool isHoriz, Attachment::ANCHOR defaultAnch, nall::linear_vector<Children>& children)
+{
+	//First, retrieve the component
+	Children* other = nullptr;
+	foreach(child, children)  {
+		if(child.sizable == item.refItem) {
+			other = &child;
+			break;
+		}
+	}
+
+	//Did we retrieve anything? (this should also check for a null item.refItem)
+	if (!other) {
+		//TODO: We _could_ probably allow attaching to components in a fixed/horizontal/vertical layout
+		//      manager. But I think the complexity won't gain us much, and I'd rather get this working first.
+		std::cout <<"ERROR: attached item is not managed by this layout manager.\n";
+		return 0;
+	}
+
+	//Now, it's just a matter of retrieving the value we're looking for...
+	//TODO: This is the only place that "isHoriz" is used... I'd like to try to remove it if possible since it feels like a hack.
+	//      Then again, most of this code feels like a hack in its present state. (Better TODO: clean up code!)
+	Attachment* base = nullptr;
+	Attachment::ANCHOR anch = item.anchor==Attachment::ANCHOR::DEFAULT ? defaultAnch : item.anchor;
+	if (anch==Attachment::ANCHOR::LEFT) {
+		base = isHoriz ? &other->left : &other->top;
+	} else if (anch==Attachment::ANCHOR::RIGHT) {
+		base = isHoriz ? &other->right : &other->bottom;
+	} else {
+		//Leaving this check in here for when we add ANCHOR::CENTER
+		std::cout <<"ERROR: unexpected anchor value.\n";
+		return 0;
+	}
+
+	//...and adding the offset
+	return AttachLayout::Get(*base, diam, offset, maximum, minimum, sign, isHoriz, defaultAnch, children) + item.offset;
+}
 
 
 
@@ -148,14 +234,30 @@ void AttachLayout::setGeometry(const Geometry& containerGeometry)
 		if(child.height == MinimumSize) child.height = child.sizable->minimumGeometry().height;
 	}*/
 
+	//First, reset all
+	foreach(child, children) {
+		child.left.reset();
+		child.right.reset();
+		child.top.reset();
+		child.bottom.reset();
+	}
+
 
 	//Apply percentage-based layout rules
+	std::cout <<"CHILD LAYOUT\n";
 	foreach(child, children) {
+		//First, compute the minimum width/height, in case they're needed.
+		//  (We can cheat a bit on space by stuffing these values into the result temporarily)
+		Geometry res = {0, 0, child.sizable->minimumGeometry().width, child.sizable->minimumGeometry().height};
+
+		std::cout <<"Child geometry: " <<child.sizable <<"\n";
+
 		//We compute each component in pairs..
-		Geometry res;
-		AttachLayout::ComputeComponent(child.left, child.right, containerGeometry.x, containerGeometry.width, res.x, res.width);
-		AttachLayout::ComputeComponent(child.top, child.bottom, containerGeometry.y, containerGeometry.height, res.y, res.height);
+		AttachLayout::ComputeComponent(child.left, child.right, containerGeometry.x, containerGeometry.width, res.x, res.width, res.width, true, children);
+		AttachLayout::ComputeComponent(child.top, child.bottom, containerGeometry.y, containerGeometry.height, res.y, res.height, res.height, false, children);
 		child.sizable->setGeometry(res);
+
+		std::cout <<"   Res: " <<res.x <<"," <<res.y <<" -> " <<res.width <<"," <<res.height <<"\n";
 	}
 
 
