@@ -6,7 +6,7 @@
 using namespace nall;
 using namespace phoenix;
 
-//For brefity
+//For brevity
 typedef Attachment::ANCHOR ANCHOR;
 typedef Attachment::SPECIAL SPECIAL;
 

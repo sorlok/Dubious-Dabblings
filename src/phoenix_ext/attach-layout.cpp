@@ -224,10 +224,8 @@ int AttachLayout::GetAttached(Attachment& item, Attachment& diam, LayoutData arg
 	Attachment* base = nullptr;
 	Attachment::ANCHOR anch = item.anchor==Attachment::ANCHOR::DEFAULT ? args.defaultAnch : item.anchor;
 	if (anch==Attachment::ANCHOR::LEFT) {
-		std::cout <<" (left)\n";
 		base = args.isHoriz ? &other->left : &other->top;
 	} else if (anch==Attachment::ANCHOR::RIGHT) {
-		std::cout <<" (right)\n";
 		base = args.isHoriz ? &other->right : &other->bottom;
 	} else {
 		//Leaving this check in here for when we add ANCHOR::CENTER
