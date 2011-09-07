@@ -37,8 +37,14 @@ void AttachLayout::append(Sizable &sizable) {
 }
 
 
-void AttachLayout::append(phoenix::Sizable &sizable, const Attachment& left, const Attachment& top, const Attachment& right, const Attachment& bottom)
+void AttachLayout::append(phoenix::Sizable &sizable, const Attachment& leftL, const Attachment& topL, const Attachment& rightL, const Attachment& bottomL)
 {
+	//First, a quick check: If ONE of any 2 diametrically opposed points is "special", the other should copy it.
+	Attachment left = (rightL.type==Attachment::TYPE::SPECIAL) ? rightL : leftL;
+	Attachment right = (leftL.type==Attachment::TYPE::SPECIAL) ? leftL : rightL;
+	Attachment top = (bottomL.type==Attachment::TYPE::SPECIAL) ? bottomL : topL;
+	Attachment bottom = (topL.type==Attachment::TYPE::SPECIAL) ? topL : bottomL;
+
 	//If this child already exists, update its attachment data
 	foreach(child, children)  {
 		if(child.sizable == &sizable) {
@@ -147,6 +153,8 @@ int AttachLayout::Get(Attachment& item, Attachment& diam, LayoutData args)
 		item.res = GetPercent(item, args);
 	} else if (item.type==Attachment::TYPE::ATTACHED) {
 		item.res = GetAttached(item, diam, args);
+	} else if (item.type==Attachment::TYPE::SPECIAL && item.special==Attachment::SPECIAL::CENTERED) {
+		item.res = GetCentered(item, diam, args);
 	} else {
 		//ERROR (in case we add more types later).
 		std::cout <<"ERROR: Unknown type\n";
@@ -171,6 +179,22 @@ int AttachLayout::GetPercent(Attachment& item, LayoutData args)
 	//Simple; just remember to include the item's offset.
 	std::cout <<"   Percent: " <<item.percent <<" of " <<args.containerMax <<" and offset: " <<args.offset <<"," <<item.offset <<"\n";
 	return item.percent*args.containerMax + args.offset + item.offset;
+}
+
+
+int AttachLayout::GetCentered(Attachment& item, Attachment& diam, LayoutData args)
+{
+	//NOTE: Centered items only need to be computed once
+	diam.done = true;
+
+	//First, get the centered position and width, then just expand outwards. Remember to set the diametric point to "done".
+	int point = item.percent*args.containerMax + args.offset;
+	int width = item.offset>0 ? item.offset : args.itemMin;
+
+	std::cout <<"   Centered at: " <<point <<" with size: " <<width <<"\n";
+
+	diam.res = point + width/2;
+	return point - width/2;
 }
 
 

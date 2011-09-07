@@ -8,6 +8,7 @@ using namespace phoenix;
 
 //For brefity
 typedef Attachment::ANCHOR ANCHOR;
+typedef Attachment::SPECIAL SPECIAL;
 
 
 struct Application : Window {
@@ -29,7 +30,7 @@ struct Application : Window {
     quitButton.setText("Quit");
     rightButton.setText("Rightish");
     rightButtonBack.setText("Left of Rightish");
-    bigButton.setText("This button should take all remaining width");
+    bigButton.setText("Tall and thin.");
 
     /*std::cout <<"Hello lbl: " <<&helloLabel <<"\n";
     std::cout <<"Ok button: " <<&okButton <<"\n";
@@ -52,8 +53,8 @@ struct Application : Window {
     //The next button just attaches to the left of this (we're testing right-attachments here)
     layout.append(rightButtonBack, {}, {okButton, 0, ANCHOR::TOP}, {rightButton, -10});
 
-    //The final component simply takes up all remaining horizontal/vertical space
-    layout.append(bigButton, {0.0}, {okButton, 10}, {1.0}, {1.0});
+    //The final component simply takes up all remaining vertical space, and is centered horizontally
+    layout.append(bigButton, {SPECIAL::CENTERED, 0.5, 200}, {okButton, 10}, {}, {1.0});
     append(layout);
 
     onClose = quitButton.onTick = [&layout] {

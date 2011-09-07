@@ -7,7 +7,7 @@
 class Attachment {
 private:
 	//Type of attachments
-	enum class TYPE { UNBOUND, PERCENT, ATTACHED };
+	enum class TYPE { UNBOUND, PERCENT, ATTACHED, SPECIAL };
 
 public:
 	//Ways to anchor "Attached" attachments
@@ -16,6 +16,10 @@ public:
 		LEFT=1,  TOP=1, //Semantically the same when it comes to layout.
 		RIGHT=2, BOTTOM=2, //Semantically the same when it comes to layout.
 		//TODO: I want to allow anchoring on the "center" --it should only require that "left" and "right" are both set.
+	};
+
+	enum class SPECIAL {
+		CENTERED,
 	};
 
 public:
@@ -28,8 +32,9 @@ public:
 	//Attached attachment: Attach to another component directly, with an offset and possible alignment.
 	Attachment(phoenix::Sizable& attachTo, int offset, ANCHOR attachAt=ANCHOR::DEFAULT) : refItem(&attachTo), anchor(attachAt), offset(offset), type(TYPE::ATTACHED) {}
 
-	//TODO: I want a "special" Attachment type which allows things like "centering" a component within the
-	//      parent component. Call it a version 2.0 feature.
+	//Use a special attachment type.
+	//"offset" can mean many things. Here, if not zero, it specifies the component's "width" (or whatever) in pixels
+	Attachment(SPECIAL specialType, double percent, int offset=0) : special(specialType), percent(percent), offset(offset), type(TYPE::SPECIAL) {}
 
 	//NOTE: If we are clever, we don't have to reset anything; we can just check "done" and "!done" alternatively.
 	//      This requires some attention when adding Sizables, but is otherwise easy. I just don't see a real performance boost
@@ -51,6 +56,7 @@ private:
 	//Combined state variables
 	phoenix::Sizable* refItem;
 	ANCHOR anchor;
+	SPECIAL special;
 	double percent;
 	int offset;
 	TYPE type;
@@ -61,7 +67,7 @@ class AttachLayout : public phoenix::Layout {
 public:
 	//Required functionality: Layout
 	void append(phoenix::Sizable& sizable); //Note: calling append() without any attachments might lead to funky effects.
-	void append(phoenix::Sizable& sizable, const Attachment& left, const Attachment& top, const Attachment& right=Attachment(), const Attachment& bottom=Attachment());
+	void append(phoenix::Sizable& sizable, const Attachment& leftA, const Attachment& topA, const Attachment& rightA=Attachment(), const Attachment& bottomA=Attachment());
 	void remove(phoenix::Sizable& sizable);
 	void synchronize();
 
@@ -131,6 +137,7 @@ private:
 	static int Get(Attachment& item, Attachment& diam, LayoutData args);
 	static int GetUnbound(Attachment& item, Attachment& diam, LayoutData args);
 	static int GetPercent(Attachment& item, LayoutData args);
+	static int GetCentered(Attachment& item, Attachment& diam, LayoutData args);
 	static int GetAttached(Attachment& item, Attachment& diam, LayoutData args);
 
 	struct State {
