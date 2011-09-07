@@ -15,6 +15,17 @@
 
 Window Window::None;
 
+//Font
+//====
+
+Geometry Font::geometry(const string &text) {
+  return pFont::geometry(description, text);
+}
+
+Font::Font(const string &description):
+description(description) {
+}
+
 //Object
 //======
 
@@ -80,51 +91,6 @@ void OS::initialize() {
   }
 }
 
-//Font
-//====
-
-Geometry Font::geometry(const string &text) {
-  return p.geometry(text);
-}
-
-void Font::setBold(bool bold) {
-  state.bold = bold;
-  return p.setBold(bold);
-}
-
-void Font::setFamily(const string &family) {
-  state.family = family;
-  return p.setFamily(family);
-}
-
-void Font::setItalic(bool italic) {
-  state.italic = italic;
-  return p.setItalic(italic);
-}
-
-void Font::setSize(unsigned size) {
-  state.size = size;
-  return p.setSize(size);
-}
-
-void Font::setUnderline(bool underline) {
-  state.underline = underline;
-  return p.setUnderline(underline);
-}
-
-Font::Font():
-state(*new State),
-base_from_member<pFont&>(*new pFont(*this)),
-Object(base_from_member<pFont&>::value),
-p(base_from_member<pFont&>::value) {
-  p.constructor();
-}
-
-Font::~Font() {
-  p.destructor();
-  delete &state;
-}
-
 //Timer
 //=====
 
@@ -147,6 +113,7 @@ p(base_from_member<pTimer&>::value) {
 }
 
 Timer::~Timer() {
+  p.destructor();
   delete &state;
 }
 
@@ -274,8 +241,8 @@ void Window::setGeometry(const Geometry &geometry) {
   return p.setGeometry(geometry);
 }
 
-void Window::setMenuFont(Font &font) {
-  state.menuFont = &font;
+void Window::setMenuFont(const string &font) {
+  state.menuFont = font;
   return p.setMenuFont(font);
 }
 
@@ -289,8 +256,8 @@ void Window::setResizable(bool resizable) {
   return p.setResizable(resizable);
 }
 
-void Window::setStatusFont(Font &font) {
-  state.statusFont = &font;
+void Window::setStatusFont(const string &font) {
+  state.statusFont = font;
   return p.setStatusFont(font);
 }
 
@@ -314,8 +281,8 @@ void Window::setVisible(bool visible) {
   return p.setVisible(visible);
 }
 
-void Window::setWidgetFont(Font &font) {
-  state.widgetFont = &font;
+void Window::setWidgetFont(const string &font) {
+  state.widgetFont = font;
   return p.setWidgetFont(font);
 }
 
@@ -332,6 +299,7 @@ p(base_from_member<pWindow&>::value) {
 }
 
 Window::~Window() {
+  p.destructor();
   delete &state;
 }
 
@@ -356,6 +324,7 @@ p(p) {
 }
 
 Action::~Action() {
+  p.destructor();
   delete &state;
 }
 
@@ -390,6 +359,7 @@ p(base_from_member<pMenu&>::value) {
 }
 
 Menu::~Menu() {
+  p.destructor();
   delete &state;
 }
 
@@ -404,6 +374,7 @@ p(base_from_member<pSeparator&>::value) {
 }
 
 Separator::~Separator() {
+  p.destructor();
 }
 
 //Item
@@ -423,6 +394,7 @@ p(base_from_member<pItem&>::value) {
 }
 
 Item::~Item() {
+  p.destructor();
   delete &state;
 }
 
@@ -452,6 +424,7 @@ p(base_from_member<pCheckItem&>::value) {
 }
 
 CheckItem::~CheckItem() {
+  p.destructor();
   delete &state;
 }
 
@@ -487,7 +460,10 @@ p(base_from_member<pRadioItem&>::value) {
 }
 
 RadioItem::~RadioItem() {
-  foreach(item, state.group) if(&item != this) item.state.group.remove(*this);
+  foreach(item, state.group) {
+    if(&item != this) item.state.group.remove(*this);
+  }
+  p.destructor();
   delete &state;
 }
 
@@ -511,8 +487,8 @@ p(p) {
 }
 
 Sizable::~Sizable() {
-  p.destructor();
   if(layout()) layout()->remove(*this);
+  p.destructor();
   delete &state;
 }
 
@@ -565,6 +541,7 @@ p(p) {
 Layout::~Layout() {
   if(layout()) layout()->remove(*this);
   else if(window()) window()->remove(*this);
+  p.destructor();
   delete &state;
 }
 
@@ -575,8 +552,8 @@ bool Widget::enabled() {
   return state.enabled;
 }
 
-Font& Widget::font() {
-  return p.font();
+string Widget::font() {
+  return state.font;
 }
 
 Geometry Widget::geometry() {
@@ -596,8 +573,8 @@ void Widget::setFocused() {
   return p.setFocused();
 }
 
-void Widget::setFont(Font &font) {
-  state.font = &font;
+void Widget::setFont(const string &font) {
+  state.font = font;
   return p.setFont(font);
 }
 
@@ -633,6 +610,7 @@ p(base_from_member<pWidget&>::value) {
 }
 
 Widget::~Widget() {
+  p.destructor();
   delete &state;
 }
 
@@ -704,6 +682,11 @@ p(base_from_member<pCheckBox&>::value) {
   p.constructor();
 }
 
+CheckBox::~CheckBox() {
+  p.destructor();
+  delete &state;
+}
+
 //ComboBox
 //========
 
@@ -733,6 +716,11 @@ base_from_member<pComboBox&>(*new pComboBox(*this)),
 Widget(base_from_member<pComboBox&>::value),
 p(base_from_member<pComboBox&>::value) {
   p.constructor();
+}
+
+ComboBox::~ComboBox() {
+  p.destructor();
+  delete &state;
 }
 
 //HexEdit
@@ -770,6 +758,11 @@ p(base_from_member<pHexEdit&>::value) {
   p.constructor();
 }
 
+HexEdit::~HexEdit() {
+  p.destructor();
+  delete &state;
+}
+
 //HorizontalScrollBar
 //===================
 
@@ -795,6 +788,11 @@ p(base_from_member<pHorizontalScrollBar&>::value) {
   p.constructor();
 }
 
+HorizontalScrollBar::~HorizontalScrollBar() {
+  p.destructor();
+  delete &state;
+}
+
 //HorizontalSlider
 //================
 
@@ -818,6 +816,11 @@ base_from_member<pHorizontalSlider&>(*new pHorizontalSlider(*this)),
 Widget(base_from_member<pHorizontalSlider&>::value),
 p(base_from_member<pHorizontalSlider&>::value) {
   p.constructor();
+}
+
+HorizontalSlider::~HorizontalSlider() {
+  p.destructor();
+  delete &state;
 }
 
 //Label
@@ -864,6 +867,11 @@ base_from_member<pLineEdit&>(*new pLineEdit(*this)),
 Widget(base_from_member<pLineEdit&>::value),
 p(base_from_member<pLineEdit&>::value) {
   p.constructor();
+}
+
+LineEdit::~LineEdit() {
+  p.destructor();
+  delete &state;
 }
 
 //ListView
@@ -941,6 +949,11 @@ p(base_from_member<pListView&>::value) {
   p.constructor();
 }
 
+ListView::~ListView() {
+  p.destructor();
+  delete &state;
+}
+
 //ProgressBar
 //===========
 
@@ -955,6 +968,11 @@ base_from_member<pProgressBar&>(*new pProgressBar(*this)),
 Widget(base_from_member<pProgressBar&>::value),
 p(base_from_member<pProgressBar&>::value) {
   p.constructor();
+}
+
+ProgressBar::~ProgressBar() {
+  p.destructor();
+  delete &state;
 }
 
 //RadioBox
@@ -986,6 +1004,14 @@ base_from_member<pRadioBox&>(*new pRadioBox(*this)),
 Widget(base_from_member<pRadioBox&>::value),
 p(base_from_member<pRadioBox&>::value) {
   p.constructor();
+}
+
+RadioBox::~RadioBox() {
+  foreach(item, state.group) {
+    if(&item != this) item.state.group.remove(*this);
+  }
+  p.destructor();
+  delete &state;
 }
 
 //TextEdit
@@ -1023,6 +1049,11 @@ p(base_from_member<pTextEdit&>::value) {
   p.constructor();
 }
 
+TextEdit::~TextEdit() {
+  p.destructor();
+  delete &state;
+}
+
 //VerticalScrollBar
 //=================
 
@@ -1048,6 +1079,11 @@ p(base_from_member<pVerticalScrollBar&>::value) {
   p.constructor();
 }
 
+VerticalScrollBar::~VerticalScrollBar() {
+  p.destructor();
+  delete &state;
+}
+
 //VerticalSlider
 //==============
 
@@ -1071,6 +1107,11 @@ base_from_member<pVerticalSlider&>(*new pVerticalSlider(*this)),
 Widget(base_from_member<pVerticalSlider&>::value),
 p(base_from_member<pVerticalSlider&>::value) {
   p.constructor();
+}
+
+VerticalSlider::~VerticalSlider() {
+  p.destructor();
+  delete &state;
 }
 
 //Viewport

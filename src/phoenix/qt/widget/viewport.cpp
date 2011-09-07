@@ -10,4 +10,10 @@ void pViewport::constructor() {
 
 void pViewport::destructor() {
   delete qtWidget;
+  qtWidget = 0;
+}
+
+void pViewport::orphan() {
+  destructor();
+  constructor();
 }

@@ -12,11 +12,11 @@ void pWindow::append(Menu &menu) {
 }
 
 void pWindow::append(Widget &widget) {
-  widget.p.setWindow(window);
-  if(!widget.state.font) {
-    if(window.state.widgetFont) widget.setFont(*window.state.widgetFont);
-    else widget.setFont(pOS::state->defaultFont);
-  }
+  widget.p.parentWindow = &window;
+  widget.p.orphan();
+  if(widget.state.font != "") widget.p.setFont(widget.state.font);
+  else if(window.state.widgetFont != "") widget.p.setFont(window.state.widgetFont);
+  else widget.p.setFont("Tahoma, 8");
 }
 
 Color pWindow::backgroundColor() {
@@ -72,6 +72,7 @@ void pWindow::remove(Menu &menu) {
 }
 
 void pWindow::remove(Widget &widget) {
+  widget.p.orphan();
 }
 
 void pWindow::setBackgroundColor(const Color &color) {
@@ -116,7 +117,7 @@ void pWindow::setGeometry(const Geometry &geometry) {
   locked = false;
 }
 
-void pWindow::setMenuFont(Font &font) {
+void pWindow::setMenuFont(const string &font) {
 }
 
 void pWindow::setMenuVisible(bool visible) {
@@ -131,8 +132,10 @@ void pWindow::setResizable(bool resizable) {
   setGeometry(window.state.geometry);
 }
 
-void pWindow::setStatusFont(Font &font) {
-  SendMessage(hstatus, WM_SETFONT, (WPARAM)font.p.hfont, 0);
+void pWindow::setStatusFont(const string &font) {
+  if(hstatusfont) DeleteObject(hstatusfont);
+  hstatusfont = pFont::create(font);
+  SendMessage(hstatus, WM_SETFONT, (WPARAM)hstatusfont, 0);
 }
 
 void pWindow::setStatusText(const string &text) {
@@ -154,9 +157,9 @@ void pWindow::setVisible(bool visible) {
   ShowWindow(hwnd, visible ? SW_SHOWNORMAL : SW_HIDE);
 }
 
-void pWindow::setWidgetFont(Font &font) {
+void pWindow::setWidgetFont(const string &font) {
   foreach(widget, window.state.widget) {
-    if(!widget.state.font) widget.setFont(font);
+    if(widget.state.font == "") widget.setFont(font);
   }
 }
 
@@ -166,12 +169,21 @@ void pWindow::constructor() {
   hwnd = CreateWindow(L"phoenix_window", L"", ResizableStyle, 128, 128, 256, 256, 0, 0, GetModuleHandle(0), 0);
   hmenu = CreateMenu();
   hstatus = CreateWindow(STATUSCLASSNAME, L"", WS_CHILD, 0, 0, 0, 0, hwnd, 0, GetModuleHandle(0), 0);
+  hstatusfont = 0;
+  setStatusFont("Tahoma, 8");
 
   //status bar will be capable of receiving tab focus if it is not disabled
   SetWindowLongPtr(hstatus, GWL_STYLE, GetWindowLong(hstatus, GWL_STYLE) | WS_DISABLED);
 
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&window);
   setGeometry({ 128, 128, 256, 256 });
+}
+
+void pWindow::destructor() {
+  DeleteObject(hstatusfont);
+  DestroyWindow(hstatus);
+  DestroyMenu(hmenu);
+  DestroyWindow(hwnd);
 }
 
 void pWindow::updateMenu() {

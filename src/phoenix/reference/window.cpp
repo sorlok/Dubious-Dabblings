@@ -44,7 +44,7 @@ void pWindow::setFullScreen(bool fullScreen) {
 void pWindow::setGeometry(const Geometry &geometry) {
 }
 
-void pWindow::setMenuFont(Font &font) {
+void pWindow::setMenuFont(const string &font) {
 }
 
 void pWindow::setMenuVisible(bool visible) {
@@ -53,7 +53,7 @@ void pWindow::setMenuVisible(bool visible) {
 void pWindow::setResizable(bool resizable) {
 }
 
-void pWindow::setStatusFont(Font &font) {
+void pWindow::setStatusFont(const string &font) {
 }
 
 void pWindow::setStatusText(const string &text) {
@@ -68,7 +68,7 @@ void pWindow::setTitle(const string &text) {
 void pWindow::setVisible(bool visible) {
 }
 
-void pWindow::setWidgetFont(Font &font) {
+void pWindow::setWidgetFont(const string &font) {
 }
 
 void pWindow::constructor() {

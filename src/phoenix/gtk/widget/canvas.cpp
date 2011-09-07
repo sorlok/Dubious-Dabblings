@@ -67,3 +67,12 @@ void pCanvas::constructor() {
   g_signal_connect_swapped(G_OBJECT(gtkWidget), "leave_notify_event", G_CALLBACK(Canvas_leave), (gpointer)&canvas);
 }
 
+void pCanvas::destructor() {
+  gtk_widget_destroy(gtkWidget);
+  cairo_surface_destroy(surface);
+}
+
+void pCanvas::orphan() {
+  destructor();
+  constructor();
+}

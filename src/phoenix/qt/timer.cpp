@@ -17,6 +17,7 @@ void pTimer::constructor() {
 }
 
 void pTimer::destructor() {
+  delete qtTimer;
 }
 
 void pTimer::onTimeout() {
