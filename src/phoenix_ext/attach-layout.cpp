@@ -118,16 +118,16 @@ Geometry AttachLayout::minimumGeometry()
 }
 
 
-//Compute a single component.
-// NOTE: I am using "left" and "right" rather than generic names, since I find it easier to reason about these terms.
-void AttachLayout::ComputeComponent(Attachment& left, Attachment& right, int offsetX, unsigned int maxWidth, int& resX, unsigned int& resWidth, unsigned int minWidth,bool isHoriz, nall::linear_vector<Children>& children)
+//Compute a single component. "Least" and "Greatest" are essentially "left" and "right".
+// Save into "resOrigin", "resMagnitude", which are basically "x" and "width".
+void AttachLayout::ComputeComponent(Attachment& least, Attachment& greatest, int& resOrigin, unsigned int& resMagnitude, LayoutData args)
 {
-	resX = AttachLayout::Get(left, right, offsetX, maxWidth, minWidth, -1, isHoriz, Attachment::ANCHOR::RIGHT, children);
-	resWidth = (unsigned int)(AttachLayout::Get(right, left, offsetX, maxWidth, minWidth, 1, isHoriz, Attachment::ANCHOR::LEFT, children)-resX);
+	resOrigin = AttachLayout::Get(least, greatest, args.setSign(-1).setAnchor(Attachment::ANCHOR::RIGHT));
+	resMagnitude = (unsigned int)(AttachLayout::Get(greatest, least, args.flipSign().flipAnchor())-resOrigin);
 }
 
 
-int AttachLayout::Get(Attachment& item, Attachment& diam, int offset, unsigned int maximum, unsigned int minimum, int sign, bool isHoriz, Attachment::ANCHOR defaultAnch, nall::linear_vector<Children>& children)
+int AttachLayout::Get(Attachment& item, Attachment& diam, LayoutData args)
 {
 	//Simple cases
 	if (item.done) {
@@ -142,11 +142,11 @@ int AttachLayout::Get(Attachment& item, Attachment& diam, int offset, unsigned i
 	//Have to figure it out
 	item.waiting = true;
 	if (item.type==Attachment::TYPE::UNBOUND) {
-		item.res = GetUnbound(item, diam, offset, maximum, minimum, sign, isHoriz, defaultAnch, children);
+		item.res = GetUnbound(item, diam, args);
 	} else if (item.type==Attachment::TYPE::PERCENT) {
-		item.res = GetPercent(item, offset, maximum);
+		item.res = GetPercent(item, args);
 	} else if (item.type==Attachment::TYPE::ATTACHED) {
-		item.res = GetAttached(item, diam, offset, maximum, minimum, sign, isHoriz, defaultAnch, children);
+		item.res = GetAttached(item, diam, args);
 	} else {
 		//ERROR (in case we add more types later).
 		std::cout <<"ERROR: Unknown type\n";
@@ -158,28 +158,28 @@ int AttachLayout::Get(Attachment& item, Attachment& diam, int offset, unsigned i
 
 
 
-int AttachLayout::GetUnbound(Attachment& item, Attachment& diam, int offset, unsigned int maximum, unsigned int minimum, int sign, bool isHoriz, Attachment::ANCHOR defaultAnch, nall::linear_vector<Children>& children)
+int AttachLayout::GetUnbound(Attachment& item, Attachment& diam, LayoutData args)
 {
 	//This simply depends on the item diametrically opposed to this one, plus a bit of sign manipulation
-	std::cout <<"   Unbound: " <<AttachLayout::Get(diam, item, offset, maximum, minimum, -sign, isHoriz, defaultAnch, children) <<" + " <<sign << "*" <<minimum <<"\n";
-	return AttachLayout::Get(diam, item, offset, maximum, minimum, -sign, isHoriz, defaultAnch, children) + sign*minimum;
+	std::cout <<"   Unbound: " <<AttachLayout::Get(diam, item, args.flipAnchor()) <<" + " <<args.sign << "*" <<args.itemMin <<"\n";
+	return AttachLayout::Get(diam, item, args.flipAnchor()) + args.sign*args.itemMin;
 }
 
 
-int AttachLayout::GetPercent(Attachment& item, int offset, unsigned int maximum)
+int AttachLayout::GetPercent(Attachment& item, LayoutData args)
 {
 	//Simple; just remember to include the item's offset.
-	std::cout <<"   Percent: " <<item.percent <<" of " <<maximum <<" and offset: " <<offset <<"," <<item.offset <<"\n";
-	return item.percent*maximum + offset + item.offset;
+	std::cout <<"   Percent: " <<item.percent <<" of " <<args.containerMax <<" and offset: " <<args.offset <<"," <<item.offset <<"\n";
+	return item.percent*args.containerMax + args.offset + item.offset;
 }
 
 
 //Only slightly more complex. Most of the math (figuring out the sign & default anchor) has already been done for us.
-int AttachLayout::GetAttached(Attachment& item, Attachment& diam, int offset, unsigned int maximum, unsigned int minimum, int sign, bool isHoriz, Attachment::ANCHOR defaultAnch, nall::linear_vector<Children>& children)
+int AttachLayout::GetAttached(Attachment& item, Attachment& diam, LayoutData args)
 {
 	//First, retrieve the component
 	Children* other = nullptr;
-	foreach(child, children)  {
+	foreach(child, args.children)  {
 		if(child.sizable == item.refItem) {
 			other = &child;
 			break;
@@ -198,11 +198,13 @@ int AttachLayout::GetAttached(Attachment& item, Attachment& diam, int offset, un
 	//TODO: This is the only place that "isHoriz" is used... I'd like to try to remove it if possible since it feels like a hack.
 	//      Then again, most of this code feels like a hack in its present state. (Better TODO: clean up code!)
 	Attachment* base = nullptr;
-	Attachment::ANCHOR anch = item.anchor==Attachment::ANCHOR::DEFAULT ? defaultAnch : item.anchor;
+	Attachment::ANCHOR anch = item.anchor==Attachment::ANCHOR::DEFAULT ? args.defaultAnch : item.anchor;
 	if (anch==Attachment::ANCHOR::LEFT) {
-		base = isHoriz ? &other->left : &other->top;
+		std::cout <<" (left)\n";
+		base = args.isHoriz ? &other->left : &other->top;
 	} else if (anch==Attachment::ANCHOR::RIGHT) {
-		base = isHoriz ? &other->right : &other->bottom;
+		std::cout <<" (right)\n";
+		base = args.isHoriz ? &other->right : &other->bottom;
 	} else {
 		//Leaving this check in here for when we add ANCHOR::CENTER
 		std::cout <<"ERROR: unexpected anchor value.\n";
@@ -210,7 +212,8 @@ int AttachLayout::GetAttached(Attachment& item, Attachment& diam, int offset, un
 	}
 
 	//...and adding the offset
-	return AttachLayout::Get(*base, diam, offset, maximum, minimum, sign, isHoriz, defaultAnch, children) + item.offset;
+	std::cout <<"   Attached to: " <<AttachLayout::Get(*base, diam, args) <<" + " <<item.offset <<"\n";
+	return AttachLayout::Get(*base, diam, args) + item.offset;
 }
 
 
@@ -226,15 +229,7 @@ void AttachLayout::setGeometry(const Geometry& containerGeometry)
 	//Save containerGeometry
 	lastKnownSize = containerGeometry;
 
-	//std::cout <<"SET GEOM: " <<containerGeometry.width <<"x" <<containerGeometry.height <<"\n";
-	//First, resize all children who have set their width/height to MinimumSize
-	/*auto children = this->children;
-	foreach(child, children) {
-		if(child.width  == MinimumSize) child.width  = child.sizable->minimumGeometry().width;
-		if(child.height == MinimumSize) child.height = child.sizable->minimumGeometry().height;
-	}*/
-
-	//First, reset all
+	//First, reset all children.
 	foreach(child, children) {
 		child.left.reset();
 		child.right.reset();
@@ -242,19 +237,15 @@ void AttachLayout::setGeometry(const Geometry& containerGeometry)
 		child.bottom.reset();
 	}
 
-
-	//Apply percentage-based layout rules
+	//Apply alyout rules for each child  individually.
 	std::cout <<"CHILD LAYOUT\n";
 	foreach(child, children) {
-		//First, compute the minimum width/height, in case they're needed.
-		//  (We can cheat a bit on space by stuffing these values into the result temporarily)
-		Geometry res = {0, 0, child.sizable->minimumGeometry().width, child.sizable->minimumGeometry().height};
-
 		std::cout <<"Child geometry: " <<child.sizable <<"\n";
 
 		//We compute each component in pairs..
-		AttachLayout::ComputeComponent(child.left, child.right, containerGeometry.x, containerGeometry.width, res.x, res.width, res.width, true, children);
-		AttachLayout::ComputeComponent(child.top, child.bottom, containerGeometry.y, containerGeometry.height, res.y, res.height, res.height, false, children);
+		Geometry res;
+		AttachLayout::ComputeComponent(child.left, child.right, res.x, res.width, {containerGeometry.x, containerGeometry.width, child.sizable->minimumGeometry().width, true, children});
+		AttachLayout::ComputeComponent(child.top, child.bottom, res.y, res.height, {containerGeometry.y, containerGeometry.height, child.sizable->minimumGeometry().height, false, children});
 		child.sizable->setGeometry(res);
 
 		std::cout <<"   Res: " <<res.x <<"," <<res.y <<" -> " <<res.width <<"," <<res.height <<"\n";

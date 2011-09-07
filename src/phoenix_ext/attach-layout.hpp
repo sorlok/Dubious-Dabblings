@@ -93,13 +93,45 @@ private:
 	};
 	nall::linear_vector<Children> children;
 
-	//TODO: These all share a bunch of annoying attributes like "offset", etc., which are passed from the first call to the last.
-	//      Perhaps we can group these into a common class called "args"?
-	static void ComputeComponent(Attachment& left, Attachment& right, int offsetX, unsigned int maxWidth, int& resX, unsigned int& resWidth, unsigned int minWidth, bool isHoriz, nall::linear_vector<Children>& children);
-	static int Get(Attachment& item, Attachment& diam, int offset, unsigned int maximum, unsigned int minimum, int sign, bool isHoriz, Attachment::ANCHOR defaultAnch, nall::linear_vector<Children>& children);
-	static int GetUnbound(Attachment& item, Attachment& diam, int offset, unsigned int maximum, unsigned int minimum, int sign, bool isHoriz, Attachment::ANCHOR defaultAnch, nall::linear_vector<Children>& children);
-	static int GetPercent(Attachment& item, int offset, unsigned int maximum);
-	static int GetAttached(Attachment& item, Attachment& diam, int offset, unsigned int maximum, unsigned int minimum, int sign, bool isHoriz, Attachment::ANCHOR defaultAnch, nall::linear_vector<Children>& children);
+	struct LayoutData {
+		int offset;
+		unsigned int containerMax;
+		unsigned int itemMin;
+		int sign;
+		bool isHoriz;
+		Attachment::ANCHOR defaultAnch;
+		nall::linear_vector<Children>& children;
+
+		//sign and defaultAnch aren't set until later, so let's make a slightly more useful constructor
+		LayoutData(int offset, unsigned int containerMax, unsigned int itemMin, bool isHoriz, nall::linear_vector<Children>& children) :
+			offset(offset), containerMax(containerMax), itemMin(itemMin), isHoriz(isHoriz), children(children)
+		{}
+
+		//Helper methods; makes it easier to pass this structure around without manually resetting everything.
+		LayoutData& setSign(int sign) {
+			this->sign = sign;
+			return *this;
+		}
+		LayoutData& flipSign() {
+			sign = -sign;
+			return *this;
+		}
+		LayoutData& setAnchor(const Attachment::ANCHOR& anchor) {
+			defaultAnch = anchor;
+			return *this;
+		}
+		LayoutData& flipAnchor() {
+			defaultAnch = (defaultAnch==Attachment::ANCHOR::LEFT?Attachment::ANCHOR::RIGHT:Attachment::ANCHOR::LEFT);
+			return *this;
+		}
+	};
+
+
+	static void ComputeComponent(Attachment& least, Attachment& greatest, int& resOrigin, unsigned int& resMagnitude, LayoutData args);
+	static int Get(Attachment& item, Attachment& diam, LayoutData args);
+	static int GetUnbound(Attachment& item, Attachment& diam, LayoutData args);
+	static int GetPercent(Attachment& item, LayoutData args);
+	static int GetAttached(Attachment& item, Attachment& diam, LayoutData args);
 
 	struct State {
 		bool enabled;
