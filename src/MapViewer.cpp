@@ -2,7 +2,10 @@
 //#include "Sample.hpp"
 
 //Tests for new AttachLayout
-#include "LayoutTest.hpp"
+//#include "LayoutTest.hpp"
+
+//Tests for the BSNES config menu via AttachLayout
+#include "BsnesMockup.hpp"
 
 //Main code (comment out if using one of the header-style tests, above.
 /*include <iostream>
