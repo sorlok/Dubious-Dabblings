@@ -4,6 +4,7 @@ struct FixedLayout : Layout {
   bool enabled();
   Geometry minimumGeometry();
   void remove(Sizable &sizable);
+  void reset();
   void setEnabled(bool enabled = true);
   void setGeometry(const Geometry &geometry);
   void setVisible(bool visible = true);

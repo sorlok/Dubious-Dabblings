@@ -4,6 +4,7 @@ struct VerticalLayout : public Layout {
   bool enabled();
   Geometry minimumGeometry();
   void remove(Sizable &sizable);
+  void reset();
   void setAlignment(double alignment);
   void setEnabled(bool enabled = true);
   void setGeometry(const Geometry &geometry);

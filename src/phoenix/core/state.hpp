@@ -1,18 +1,3 @@
-struct Font::State {
-  bool bold;
-  string family;
-  bool italic;
-  unsigned size;
-  bool underline;
-
-  State() {
-    bold = false;
-    italic = false;
-    size = 8;
-    underline = false;
-  }
-};
-
 struct Timer::State {
   bool enabled;
   unsigned milliseconds;
@@ -31,16 +16,16 @@ struct Window::State {
   bool ignore;
   reference_array<Layout&> layout;
   reference_array<Menu&> menu;
-  Font *menuFont;
+  string menuFont;
   bool menuVisible;
   bool resizable;
-  Font *statusFont;
+  string statusFont;
   string statusText;
   bool statusVisible;
   string title;
   bool visible;
   reference_array<Widget&> widget;
-  Font *widgetFont;
+  string widgetFont;
 
   State() {
     backgroundColorOverride = false;
@@ -48,12 +33,10 @@ struct Window::State {
     fullScreen = false;
     geometry = { 128, 128, 256, 256 };
     ignore = false;
-    menuFont = 0;
     menuVisible = false;
     resizable = true;
     statusVisible = false;
     visible = false;
-    widgetFont = 0;
   }
 };
 
@@ -117,14 +100,13 @@ struct Layout::State {
 struct Widget::State {
   bool abstract;
   bool enabled;
-  Font *font;
+  string font;
   Geometry geometry;
   bool visible;
 
   State() {
     abstract = false;
     enabled = true;
-    font = 0;
     geometry = { 0, 0, 0, 0 };
     visible = true;
   }

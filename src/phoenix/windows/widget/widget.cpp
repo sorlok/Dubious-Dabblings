@@ -2,11 +2,6 @@ bool pWidget::enabled() {
   return IsWindowEnabled(hwnd);
 }
 
-Font& pWidget::font() {
-  if(widget.state.font) return *widget.state.font;
-  return pOS::state->defaultFont;
-}
-
 Geometry pWidget::minimumGeometry() {
   return { 0, 0, 0, 0 };
 }
@@ -21,18 +16,14 @@ void pWidget::setFocused() {
   SetFocus(hwnd);
 }
 
-void pWidget::setFont(Font &font) {
-  SendMessage(hwnd, WM_SETFONT, (WPARAM)font.p.hfont, 0);
+void pWidget::setFont(const string &font) {
+  if(hfont) DeleteObject(hfont);
+  hfont = pFont::create(font);
+  SendMessage(hwnd, WM_SETFONT, (WPARAM)hfont, 0);
 }
 
 void pWidget::setGeometry(const Geometry &geometry) {
   SetWindowPos(hwnd, NULL, geometry.x, geometry.y, geometry.width, geometry.height, SWP_NOZORDER);
-}
-
-void pWidget::setWindow(Window &window) {
-  if(hwnd) DestroyWindow(hwnd);
-  hwnd = CreateWindow(L"phoenix_label", L"", WS_CHILD, 0, 0, 0, 0, window.p.hwnd, (HMENU)id, GetModuleHandle(0), 0);
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&widget);
 }
 
 void pWidget::setVisible(bool visible) {
@@ -42,16 +33,29 @@ void pWidget::setVisible(bool visible) {
 }
 
 void pWidget::constructor() {
-  hwnd = 0;
-  if(widget.state.abstract) setWindow(Window::None);
+  hfont = pFont::create("Tahoma, 8");
+  if(widget.state.abstract) {
+    hwnd = CreateWindow(L"phoenix_label", L"", WS_CHILD, 0, 0, 0, 0, parentWindow->p.hwnd, (HMENU)id, GetModuleHandle(0), 0);
+    SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&widget);
+  }
+}
+
+void pWidget::destructor() {
+  if(widget.state.abstract) {
+    DestroyWindow(hwnd);
+  }
+}
+
+void pWidget::orphan() {
+  destructor();
+  constructor();
 }
 
 void pWidget::setDefaultFont() {
-  if(widget.state.font) {
-    SendMessage(hwnd, WM_SETFONT, (WPARAM)widget.state.font->p.hfont, 0);
-  } else {
-    SendMessage(hwnd, WM_SETFONT, (WPARAM)pOS::state->defaultFont.p.hfont, 0);
-  }
+  string description = widget.state.font;
+  if(description == "") description = "Tahoma, 8";
+  hfont = pFont::create(description);
+  SendMessage(hwnd, WM_SETFONT, (WPARAM)hfont, 0);
 }
 
 //calling Widget::setParent destroys widget and re-creates it:

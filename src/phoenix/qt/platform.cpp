@@ -32,9 +32,6 @@
 #include "widget/vertical-slider.cpp"
 #include "widget/viewport.cpp"
 
-QApplication *pOS::application = 0;
-Font pOS::defaultFont;
-
 Geometry pOS::availableGeometry() {
   QRect rect = QApplication::desktop()->availableGeometry();
   return { rect.x(), rect.y(), rect.width(), rect.height() };
@@ -118,6 +115,8 @@ void pOS::processEvents() {
 void pOS::quit() {
   settings.save();
   QApplication::quit();
+  //note: QApplication cannot be deleted; or libQtGui will crash
+  qtApplication = 0;
 }
 
 void pOS::initialize() {
@@ -129,5 +128,6 @@ void pOS::initialize() {
   argv[1] = 0;
   strcpy(argv[0], "phoenix");
   char **argvp = argv;
-  application = new QApplication(argc, argvp);
+
+  qtApplication = new QApplication(argc, argvp);
 }

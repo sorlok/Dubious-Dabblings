@@ -11,11 +11,20 @@ struct Settings : public configuration {
   Settings();
 };
 
-struct pFont;
 struct pWindow;
 struct pMenu;
 struct pLayout;
 struct pWidget;
+
+struct pFont {
+  static Geometry geometry(const string &description, const string &text);
+
+  static PangoFontDescription* create(const string &description);
+  static void free(PangoFontDescription *font);
+  static Geometry geometry(PangoFontDescription *font, const string &text);
+  static void setFont(GtkWidget *widget, const string &font);
+  static void setFont(GtkWidget *widget, gpointer font);
+};
 
 struct pObject {
   Object &object;
@@ -42,22 +51,6 @@ struct pOS : public pObject {
   static void quit();
 
   static void initialize();
-};
-
-struct pFont : public pObject {
-  Font &font;
-  PangoFontDescription *gtkFont;
-  PangoLayout *gtkLayout;
-
-  Geometry geometry(const string &text);
-  void setBold(bool bold);
-  void setFamily(const string &family);
-  void setItalic(bool italic);
-  void setSize(unsigned size);
-  void setUnderline(bool underline);
-
-  pFont(Font &font) : pObject(font), font(font) {}
-  void constructor();
 };
 
 struct pTimer : public pObject {
@@ -101,15 +94,15 @@ struct pWindow : public pObject {
   void setFocused();
   void setFullScreen(bool fullScreen);
   void setGeometry(const Geometry &geometry);
-  void setMenuFont(Font &font);
+  void setMenuFont(const string &font);
   void setMenuVisible(bool visible);
   void setResizable(bool resizable);
-  void setStatusFont(Font &font);
+  void setStatusFont(const string &font);
   void setStatusText(const string &text);
   void setStatusVisible(bool visible);
   void setTitle(const string &text);
   void setVisible(bool visible);
-  void setWidgetFont(Font &font);
+  void setWidgetFont(const string &font);
 
   pWindow(Window &window) : pObject(window), window(window) {}
   void constructor();
@@ -127,7 +120,7 @@ struct pAction : public pObject {
   pAction(Action &action) : pObject(action), action(action) {}
   void constructor();
   virtual void orphan();
-  virtual void setFont(Font &font);
+  virtual void setFont(const string &font);
 };
 
 struct pMenu : public pAction {
@@ -142,7 +135,7 @@ struct pMenu : public pAction {
   void constructor();
   void destructor();
   void orphan();
-  void setFont(Font &font);
+  void setFont(const string &font);
 };
 
 struct pSeparator : public pAction {
@@ -209,16 +202,17 @@ struct pWidget : public pSizable {
   GtkWidget *gtkWidget;
 
   bool enabled();
-  Font& font();
   virtual Geometry minimumGeometry();
   void setEnabled(bool enabled);
   virtual void setFocused();
-  virtual void setFont(Font &font);
+  virtual void setFont(const string &font);
   virtual void setGeometry(const Geometry &geometry);
   void setVisible(bool visible);
 
   pWidget(Widget &widget) : pSizable(widget), widget(widget) {}
   void constructor();
+  void destructor();
+  virtual void orphan();
 };
 
 struct pButton : public pWidget {
@@ -230,6 +224,7 @@ struct pButton : public pWidget {
   pButton(Button &button) : pWidget(button), button(button) {}
   void constructor();
   void destructor();
+  void orphan();
 };
 
 struct pCanvas : public pWidget {
@@ -242,6 +237,8 @@ struct pCanvas : public pWidget {
 
   pCanvas(Canvas &canvas) : pWidget(canvas), canvas(canvas) {}
   void constructor();
+  void destructor();
+  void orphan();
 };
 
 struct pCheckBox : public pWidget {
@@ -254,6 +251,8 @@ struct pCheckBox : public pWidget {
 
   pCheckBox(CheckBox &checkBox) : pWidget(checkBox), checkBox(checkBox) {}
   void constructor();
+  void destructor();
+  void orphan();
 };
 
 struct pComboBox : public pWidget {
@@ -268,6 +267,8 @@ struct pComboBox : public pWidget {
 
   pComboBox(ComboBox &comboBox) : pWidget(comboBox), comboBox(comboBox) {}
   void constructor();
+  void destructor();
+  void orphan();
 };
 
 struct pHexEdit : public pWidget {
@@ -286,6 +287,8 @@ struct pHexEdit : public pWidget {
 
   pHexEdit(HexEdit &hexEdit) : pWidget(hexEdit), hexEdit(hexEdit) {}
   void constructor();
+  void destructor();
+  void orphan();
   unsigned cursorPosition();
   bool keyPress(unsigned scancode);
   void scroll(unsigned position);
@@ -304,6 +307,8 @@ struct pHorizontalScrollBar : public pWidget {
 
   pHorizontalScrollBar(HorizontalScrollBar &horizontalScrollBar) : pWidget(horizontalScrollBar), horizontalScrollBar(horizontalScrollBar) {}
   void constructor();
+  void destructor();
+  void orphan();
 };
 
 struct pHorizontalSlider : public pWidget {
@@ -316,6 +321,8 @@ struct pHorizontalSlider : public pWidget {
 
   pHorizontalSlider(HorizontalSlider &horizontalSlider) : pWidget(horizontalSlider), horizontalSlider(horizontalSlider) {}
   void constructor();
+  void destructor();
+  void orphan();
 };
 
 struct pLabel : public pWidget {
@@ -326,6 +333,8 @@ struct pLabel : public pWidget {
 
   pLabel(Label &label) : pWidget(label), label(label) {}
   void constructor();
+  void destructor();
+  void orphan();
 };
 
 struct pLineEdit : public pWidget {
@@ -338,6 +347,8 @@ struct pLineEdit : public pWidget {
 
   pLineEdit(LineEdit &lineEdit) : pWidget(lineEdit), lineEdit(lineEdit) {}
   void constructor();
+  void destructor();
+  void orphan();
 };
 
 struct pListView : public pWidget {
@@ -367,9 +378,10 @@ struct pListView : public pWidget {
 
   pListView(ListView &listView) : pWidget(listView), listView(listView) {}
   void constructor();
-  void create();
+  void destructor();
+  void orphan();
   void setFocused();
-  void setFont(Font &font);
+  void setFont(const string &font);
 };
 
 struct pProgressBar : public pWidget {
@@ -380,6 +392,8 @@ struct pProgressBar : public pWidget {
 
   pProgressBar(ProgressBar &progressBar) : pWidget(progressBar), progressBar(progressBar) {}
   void constructor();
+  void destructor();
+  void orphan();
 };
 
 struct pRadioBox : public pWidget {
@@ -393,6 +407,8 @@ struct pRadioBox : public pWidget {
 
   pRadioBox(RadioBox &radioBox) : pWidget(radioBox), radioBox(radioBox) {}
   void constructor();
+  void destructor();
+  void orphan();
 };
 
 struct pTextEdit : public pWidget {
@@ -408,6 +424,8 @@ struct pTextEdit : public pWidget {
 
   pTextEdit(TextEdit &textEdit) : pWidget(textEdit), textEdit(textEdit) {}
   void constructor();
+  void destructor();
+  void orphan();
 };
 
 struct pVerticalScrollBar : public pWidget {
@@ -420,6 +438,8 @@ struct pVerticalScrollBar : public pWidget {
 
   pVerticalScrollBar(VerticalScrollBar &verticalScrollBar) : pWidget(verticalScrollBar), verticalScrollBar(verticalScrollBar) {}
   void constructor();
+  void destructor();
+  void orphan();
 };
 
 struct pVerticalSlider : public pWidget {
@@ -432,6 +452,8 @@ struct pVerticalSlider : public pWidget {
 
   pVerticalSlider(VerticalSlider &verticalSlider) : pWidget(verticalSlider), verticalSlider(verticalSlider) {}
   void constructor();
+  void destructor();
+  void orphan();
 };
 
 struct pViewport : public pWidget {
@@ -441,4 +463,6 @@ struct pViewport : public pWidget {
 
   pViewport(Viewport &viewport) : pWidget(viewport), viewport(viewport) {}
   void constructor();
+  void destructor();
+  void orphan();
 };

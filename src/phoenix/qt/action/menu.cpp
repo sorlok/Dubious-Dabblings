@@ -28,8 +28,8 @@ void pMenu::remove(Action &action) {
   }
 }
 
-void pMenu::setFont(Font &font) {
-  qtMenu->setFont(*font.p.qtFont);
+void pMenu::setFont(const string &font) {
+  qtMenu->setFont(pFont::create(font));
   foreach(item, menu.state.action) item.p.setFont(font);
 }
 

@@ -1,6 +1,5 @@
 Geometry pLabel::minimumGeometry() {
-  Font &font = this->font();
-  Geometry geometry = font.geometry(label.state.text);
+  Geometry geometry = pFont::geometry(qtWidget->font(), label.state.text);
   return { 0, 0, geometry.width, geometry.height };
 }
 
@@ -10,9 +9,15 @@ void pLabel::setText(const string &text) {
 
 void pLabel::constructor() {
   qtWidget = qtLabel = new QLabel;
+  setText(label.state.text);
 }
 
 void pLabel::destructor() {
-  if(sizable.state.layout) sizable.state.layout->remove(label);
   delete qtLabel;
+  qtWidget = qtLabel = 0;
+}
+
+void pLabel::orphan() {
+  destructor();
+  constructor();
 }

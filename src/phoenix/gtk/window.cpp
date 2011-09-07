@@ -1,6 +1,3 @@
-static void Action_setFont(GtkWidget *widget, gpointer font);
-static void Widget_setFont(GtkWidget *widget, gpointer font);
-
 static gint Window_close(GtkWidget *widget, GdkEvent *event, Window *window) {
   window->state.ignore = false;
   if(window->onClose) window->onClose();
@@ -85,18 +82,17 @@ void pWindow::append(Layout &layout) {
 }
 
 void pWindow::append(Menu &menu) {
-  if(window.state.menuFont) menu.p.setFont(*window.state.menuFont);
-  else menu.p.setFont(pOS::defaultFont);
+  if(window.state.menuFont != "") menu.p.setFont(window.state.menuFont);
+  else menu.p.setFont("Sans, 8");
   gtk_menu_shell_append(GTK_MENU_SHELL(this->menu), menu.p.widget);
   gtk_widget_show(menu.p.widget);
 }
 
 void pWindow::append(Widget &widget) {
-  if(!widget.state.font) {
-    if(window.state.widgetFont) widget.setFont(*window.state.widgetFont);
-    else widget.setFont(pOS::defaultFont);
-  }
   gtk_fixed_put(GTK_FIXED(formContainer), widget.p.gtkWidget, 0, 0);
+  if(widget.state.font != "") widget.p.setFont(widget.state.font);
+  else if(window.state.widgetFont != "") widget.p.setFont(window.state.widgetFont);
+  else widget.p.setFont("Sans, 8");
   widget.setVisible(widget.visible());
 }
 
@@ -135,6 +131,7 @@ void pWindow::remove(Menu &menu) {
 }
 
 void pWindow::remove(Widget &widget) {
+  widget.p.orphan();
 }
 
 void pWindow::setBackgroundColor(const Color &color) {
@@ -181,7 +178,7 @@ void pWindow::setGeometry(const Geometry &geometry) {
   }
 }
 
-void pWindow::setMenuFont(Font &font) {
+void pWindow::setMenuFont(const string &font) {
   foreach(item, window.state.menu) item.p.setFont(font);
 }
 
@@ -194,8 +191,8 @@ void pWindow::setResizable(bool resizable) {
   gtk_statusbar_set_has_resize_grip(GTK_STATUSBAR(status), resizable);
 }
 
-void pWindow::setStatusFont(Font &font) {
-  Widget_setFont(status, (gpointer)font.p.gtkFont);
+void pWindow::setStatusFont(const string &font) {
+  pFont::setFont(status, font);
 }
 
 void pWindow::setStatusText(const string &text) {
@@ -215,9 +212,9 @@ void pWindow::setVisible(bool visible) {
   gtk_widget_set_visible(widget, visible);
 }
 
-void pWindow::setWidgetFont(Font &font) {
+void pWindow::setWidgetFont(const string &font) {
   foreach(item, window.state.widget) {
-    if(!item.state.font) item.setFont(font);
+    if(item.state.font == "") item.setFont(font);
   }
 }
 
@@ -255,6 +252,8 @@ void pWindow::constructor() {
 
   setTitle("");
   setGeometry(window.state.geometry);
+  setMenuFont("Sans, 8");
+  setStatusFont("Sans, 8");
 
   g_signal_connect(G_OBJECT(widget), "delete-event", G_CALLBACK(Window_close), (gpointer)&window);
   g_signal_connect(G_OBJECT(widget), "expose-event", G_CALLBACK(Window_expose), (gpointer)&window);

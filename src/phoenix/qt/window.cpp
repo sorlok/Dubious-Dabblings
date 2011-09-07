@@ -5,15 +5,15 @@ void pWindow::append(Layout &layout) {
 }
 
 void pWindow::append(Menu &menu) {
-  if(window.state.menuFont) menu.p.qtMenu->setFont(*window.state.menuFont->p.qtFont);
-  else menu.p.qtMenu->setFont(*pOS::defaultFont.p.qtFont);
+  if(window.state.menuFont != "") menu.p.setFont(window.state.menuFont);
+  else menu.p.setFont("Sans, 8");
   qtMenu->addMenu(menu.p.qtMenu);
 }
 
 void pWindow::append(Widget &widget) {
-  if(!widget.state.font) {
-    if(window.state.widgetFont) widget.setFont(*window.state.widgetFont);
-    else widget.setFont(pOS::defaultFont);
+  if(widget.state.font == "") {
+    if(window.state.widgetFont != "") widget.p.setFont(window.state.widgetFont);
+    else widget.p.setFont("Sans, 8");
   }
   widget.p.qtWidget->setParent(qtContainer);
   widget.setVisible(widget.visible());
@@ -60,7 +60,9 @@ void pWindow::remove(Menu &menu) {
 }
 
 void pWindow::remove(Widget &widget) {
-  widget.p.qtWidget->setParent(0);
+  //bugfix: orphan() destroys and recreates widgets (to disassociate them from their parent);
+  //attempting to create widget again after QApplication::quit() crashes libQtGui
+  if(qtApplication) widget.p.orphan();
 }
 
 void pWindow::setBackgroundColor(const Color &color) {
@@ -104,8 +106,8 @@ void pWindow::setGeometry(const Geometry &geometry_) {
   locked = false;
 }
 
-void pWindow::setMenuFont(Font &font) {
-  qtMenu->setFont(*font.p.qtFont);
+void pWindow::setMenuFont(const string &font) {
+  qtMenu->setFont(pFont::create(font));
   foreach(item, window.state.menu) item.p.setFont(font);
 }
 
@@ -125,8 +127,8 @@ void pWindow::setResizable(bool resizable) {
   qtStatus->setSizeGripEnabled(resizable);
 }
 
-void pWindow::setStatusFont(Font &font) {
-  qtStatus->setFont(*font.p.qtFont);
+void pWindow::setStatusFont(const string &font) {
+  qtStatus->setFont(pFont::create(font));
 }
 
 void pWindow::setStatusText(const string &text) {
@@ -152,7 +154,7 @@ void pWindow::setVisible(bool visible) {
   locked = false;
 }
 
-void pWindow::setWidgetFont(Font &font) {
+void pWindow::setWidgetFont(const string &font) {
   foreach(item, window.state.widget) {
     if(!item.state.font) item.setFont(font);
   }
@@ -182,9 +184,16 @@ void pWindow::constructor() {
   qtLayout->addWidget(qtStatus);
 
   setGeometry(window.state.geometry);
+  setMenuFont("Sans, 8");
+  setStatusFont("Sans, 8");
 }
 
 void pWindow::destructor() {
+  delete qtStatus;
+  delete qtContainer;
+  delete qtMenu;
+  delete qtLayout;
+  delete qtWindow;
 }
 
 void pWindow::updateFrameGeometry() {

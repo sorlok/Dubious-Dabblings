@@ -32,6 +32,12 @@ void FixedLayout::remove(Sizable &sizable) {
   }
 }
 
+void FixedLayout::reset() {
+  foreach(child, children) {
+    if(window() && dynamic_cast<Widget*>(child.sizable)) window()->remove((Widget&)*child.sizable);
+  }
+}
+
 void FixedLayout::setEnabled(bool enabled) {
   state.enabled = enabled;
   foreach(child, children) {

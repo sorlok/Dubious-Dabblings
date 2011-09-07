@@ -48,6 +48,12 @@ void HorizontalLayout::remove(Sizable &sizable) {
   }
 }
 
+void HorizontalLayout::reset() {
+  foreach(child, children) {
+    if(window() && dynamic_cast<Widget*>(child.sizable)) window()->remove((Widget&)*child.sizable);
+  }
+}
+
 void HorizontalLayout::setAlignment(double alignment) {
   state.alignment = max(0.0, min(1.0, alignment));
 }

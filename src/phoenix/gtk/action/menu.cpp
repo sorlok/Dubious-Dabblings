@@ -2,8 +2,8 @@ void pMenu::append(Action &action) {
   action.state.window = this->action.state.window;
 
   gtk_menu_shell_append(GTK_MENU_SHELL(gtkMenu), action.p.widget);
-  if(action.state.window && action.state.window->state.menuFont) {
-    action.p.setFont(*action.state.window->state.menuFont);
+  if(action.state.window && action.state.window->state.menuFont != "") {
+    action.p.setFont(action.state.window->state.menuFont);
   }
   gtk_widget_show(action.p.widget);
 }
@@ -35,7 +35,7 @@ void pMenu::orphan() {
   foreach(action, menu.state.action) append(action);
 }
 
-void pMenu::setFont(Font &font) {
+void pMenu::setFont(const string &font) {
   pAction::setFont(font);
   foreach(item, menu.state.action) item.p.setFont(font);
 }

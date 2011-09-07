@@ -44,12 +44,16 @@ void pCanvas::update() {
 
 void pCanvas::constructor() {
   bufferRGB = new uint32_t[256 * 256]();
-  setWindow(Window::None);
-}
-
-void pCanvas::setWindow(Window &window) {
-  if(hwnd) DestroyWindow(hwnd);
-  hwnd = CreateWindow(L"phoenix_canvas", L"", WS_CHILD, 0, 0, 0, 0, window.p.hwnd, (HMENU)id, GetModuleHandle(0), 0);
+  hwnd = CreateWindow(L"phoenix_canvas", L"", WS_CHILD, 0, 0, 0, 0, parentWindow->p.hwnd, (HMENU)id, GetModuleHandle(0), 0);
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&canvas);
   synchronize();
+}
+
+void pCanvas::destructor() {
+  DestroyWindow(hwnd);
+}
+
+void pCanvas::orphan() {
+  destructor();
+  constructor();
 }

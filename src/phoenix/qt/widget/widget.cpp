@@ -1,8 +1,3 @@
-Font& pWidget::font() {
-  if(widget.state.font) return *widget.state.font;
-  return pOS::defaultFont;
-}
-
 Geometry pWidget::minimumGeometry() {
   return { 0, 0, 0, 0 };
 }
@@ -17,9 +12,8 @@ void pWidget::setFocused() {
   qtWidget->setFocus(Qt::OtherFocusReason);
 }
 
-void pWidget::setFont(Font &font) {
-  if(font.p.qtFont) qtWidget->setFont(*font.p.qtFont);
-  else qtWidget->setFont(*pOS::defaultFont.p.qtFont);
+void pWidget::setFont(const string &font) {
+  qtWidget->setFont(pFont::create(font));
 }
 
 void pWidget::setGeometry(const Geometry &geometry) {
@@ -28,6 +22,7 @@ void pWidget::setGeometry(const Geometry &geometry) {
 
 void pWidget::setVisible(bool visible) {
   if(widget.state.abstract) visible = false;
+  if(sizable.state.layout == 0) visible = false;
   if(sizable.state.layout && sizable.state.layout->visible() == false) visible = false;
   qtWidget->setVisible(visible);
 }
@@ -37,5 +32,13 @@ void pWidget::constructor() {
 }
 
 void pWidget::destructor() {
-  if(widget.state.abstract) delete qtWidget;
+  if(widget.state.abstract) {
+    delete qtWidget;
+    qtWidget = 0;
+  }
+}
+
+void pWidget::orphan() {
+  destructor();
+  constructor();
 }

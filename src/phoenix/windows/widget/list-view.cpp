@@ -16,7 +16,7 @@ void pListView::append(const lstring &list) {
 }
 
 void pListView::autoSizeColumns() {
-  for(unsigned n = 0; n < listView.state.headerText.size(); n++) {
+  for(unsigned n = 0; n < max(1, listView.state.headerText.size()); n++) {
     ListView_SetColumnWidth(hwnd, n, LVSCW_AUTOSIZE_USEHEADER);
   }
 }
@@ -106,21 +106,10 @@ void pListView::setSelection(unsigned row) {
 
 void pListView::constructor() {
   lostFocus = false;
-  setWindow(Window::None);
-  listView.setHeaderText("");
-}
-
-void pListView::setGeometry(const Geometry &geometry) {
-  pWidget::setGeometry(geometry);
-  autoSizeColumns();
-}
-
-void pListView::setWindow(Window &window) {
-  if(hwnd) DestroyWindow(hwnd);
   hwnd = CreateWindowEx(
     WS_EX_CLIENTEDGE, WC_LISTVIEW, L"",
     WS_CHILD | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | LVS_NOCOLUMNHEADER,
-    0, 0, 0, 0, window.p.hwnd, (HMENU)id, GetModuleHandle(0), 0
+    0, 0, 0, 0, parentWindow->p.hwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&listView);
   setDefaultFont();
@@ -132,4 +121,18 @@ void pListView::setWindow(Window &window) {
   if(listView.state.selected) setSelection(listView.state.selection);
   autoSizeColumns();
   synchronize();
+}
+
+void pListView::destructor() {
+  DestroyWindow(hwnd);
+}
+
+void pListView::orphan() {
+  destructor();
+  constructor();
+}
+
+void pListView::setGeometry(const Geometry &geometry) {
+  pWidget::setGeometry(geometry);
+  autoSizeColumns();
 }

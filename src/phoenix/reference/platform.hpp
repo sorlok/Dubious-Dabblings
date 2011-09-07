@@ -4,6 +4,10 @@ struct pMenu;
 struct pLayout;
 struct pWidget;
 
+struct pFont {
+  static Geometry geometry(const string &description, const string &text);
+};
+
 struct pObject {
   Object &object;
   bool locked;
@@ -27,20 +31,6 @@ struct pOS : public pObject {
   static void quit();
 
   static void initialize();
-};
-
-struct pFont : public pObject {
-  Font &font;
-
-  Geometry geometry(const string &text);
-  void setBold(bool bold);
-  void setFamily(const string &family);
-  void setItalic(bool italic);
-  void setSize(unsigned size);
-  void setUnderline(bool underline);
-
-  pFont(Font &font) : pObject(font), font(font) {}
-  void constructor();
 };
 
 struct pTimer : public pObject {
@@ -77,15 +67,15 @@ struct pWindow : public pObject {
   void setFocused();
   void setFullScreen(bool fullScreen);
   void setGeometry(const Geometry &geometry);
-  void setMenuFont(Font &font);
+  void setMenuFont(const string &font);
   void setMenuVisible(bool visible);
   void setResizable(bool resizable);
-  void setStatusFont(Font &font);
+  void setStatusFont(const string &font);
   void setStatusText(const string &text);
   void setStatusVisible(bool visible);
   void setTitle(const string &text);
   void setVisible(bool visible);
-  void setWidgetFont(Font &font);
+  void setWidgetFont(const string &font);
 
   pWindow(Window &window) : pObject(window), window(window) {}
   void constructor();
@@ -172,11 +162,10 @@ struct pWidget : public pSizable {
   Widget &widget;
 
   bool enabled();
-  Font& font();
   Geometry minimumGeometry();
   void setEnabled(bool enabled);
   void setFocused();
-  void setFont(Font &font);
+  void setFont(const string &font);
   void setGeometry(const Geometry &geometry);
   void setVisible(bool visible);
 
