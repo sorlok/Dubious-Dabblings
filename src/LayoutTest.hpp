@@ -30,7 +30,7 @@ struct Application : Window {
     quitButton.setText("Quit");
     rightButton.setText("Rightish");
     rightButtonBack.setText("Left of Rightish");
-    bigButton.setText("Tall and thin.");
+    bigButton.setText("Fully centered, 300x");
 
     /*std::cout <<"Hello lbl: " <<&helloLabel <<"\n";
     std::cout <<"Ok button: " <<&okButton <<"\n";
@@ -54,7 +54,7 @@ struct Application : Window {
     layout.append(rightButtonBack, {}, {okButton, 0, ANCHOR::TOP}, {rightButton, -10});
 
     //The final component simply takes up all remaining vertical space, and is centered horizontally
-    layout.append(bigButton, {SPECIAL::CENTERED, 0.5, 200}, {okButton, 10}, {}, {1.0});
+    layout.append(bigButton, {SPECIAL::CENTERED, 0.5, 300}, {SPECIAL::CENTERED, 0.5, 300});
     append(layout);
 
     onClose = quitButton.onTick = [&layout] {
