@@ -2,6 +2,9 @@
 
 #include <phoenix.hpp>
 
+//Copyright 2011 by Seth N. Hetu
+//Shared under the terms of the ISC license
+
 
 class Attachment {
 private:
