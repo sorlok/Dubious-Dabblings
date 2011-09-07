@@ -12,7 +12,8 @@ struct Application : Window {
   AttachLayout layout;
   AttachLayout sublayout;
 
-  ListView lhs;
+  ListView configPanels;
+  Label settingsCaption;
   Label rhs1;
   Label rhs2;
   Label rhs3;
@@ -21,18 +22,22 @@ struct Application : Window {
     setTitle("BSNES Config Mockup");
     setGeometry({ 128, 128, 640, 480 });
 
-    lhs.append("Video");
-    lhs.append("Audio");
-    lhs.append("Input");
-    lhs.append("Advanced");
-    lhs.setSelection(3);
+    //Initialize components
+    configPanels.append("Video");
+    configPanels.append("Audio");
+    configPanels.append("Input");
+    configPanels.append("Advanced");
+    configPanels.setSelection(3);
+    settingsCaption.setText("Advanced Settings");
+    settingsCaption.setFont(Font("Arial, 20, Bold Italic"));
     rhs1.setText("Option 1");
     rhs2.setText("Option 2");
     rhs3.setText("Option 3");
 
-    layout.append(lhs, {0.0, 5}, {0.0, 5}, {lhs, 120}, {1.0, -5});
-    layout.append(sublayout, {lhs, 10}, {0.0}, {1.0}, {1.0});
-    sublayout.append(rhs1, {0.0}, {0.0});
+    //Perform layout
+    layout.append(configPanels, {0.0, 5}, {0.0, 5}, {configPanels, 120}, {1.0, -5});
+    layout.append(sublayout, {configPanels, 10}, {0.0}, {1.0}, {1.0});
+    sublayout.append(settingsCaption, {0.0}, {0.0});
     sublayout.append(rhs2, {0.333}, {0.0});
     sublayout.append(rhs3, {0.667}, {0.0});
     append(layout);
