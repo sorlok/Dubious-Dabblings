@@ -169,7 +169,6 @@ int AttachLayout::Get(Attachment& item, Attachment& diam, LayoutData args)
 int AttachLayout::GetUnbound(Attachment& item, Attachment& diam, LayoutData args)
 {
 	//This simply depends on the item diametrically opposed to this one, plus a bit of sign manipulation
-	std::cout <<"   Unbound: " <<AttachLayout::Get(diam, item, args.flipAnchor()) <<" + " <<args.sign << "*" <<args.itemMin <<"\n";
 	return AttachLayout::Get(diam, item, args.flipAnchor()) + args.sign*args.itemMin;
 }
 
@@ -177,23 +176,18 @@ int AttachLayout::GetUnbound(Attachment& item, Attachment& diam, LayoutData args
 int AttachLayout::GetPercent(Attachment& item, LayoutData args)
 {
 	//Simple; just remember to include the item's offset.
-	std::cout <<"   Percent: " <<item.percent <<" of " <<args.containerMax <<" and offset: " <<args.offset <<"," <<item.offset <<"\n";
 	return item.percent*args.containerMax + args.offset + item.offset;
 }
 
 
 int AttachLayout::GetCentered(Attachment& item, Attachment& diam, LayoutData args)
 {
-	//NOTE: Centered items only need to be computed once
-	diam.done = true;
-
 	//First, get the centered position and width, then just expand outwards. Remember to set the diametric point to "done".
 	int point = item.percent*args.containerMax + args.offset;
 	int width = item.offset>0 ? item.offset : args.itemMin;
 
-	std::cout <<"   Centered at: " <<point <<" with size: " <<width <<"\n";
-
 	diam.res = point + width/2;
+	diam.done = true;
 	return point - width/2;
 }
 
@@ -234,7 +228,6 @@ int AttachLayout::GetAttached(Attachment& item, Attachment& diam, LayoutData arg
 	}
 
 	//...and adding the offset
-	std::cout <<"   Attached to: " <<AttachLayout::Get(*base, diam, args) <<" + " <<item.offset <<"\n";
 	return AttachLayout::Get(*base, diam, args) + item.offset;
 }
 
@@ -260,63 +253,14 @@ void AttachLayout::setGeometry(const Geometry& containerGeometry)
 	}
 
 	//Apply alyout rules for each child  individually.
-	std::cout <<"CHILD LAYOUT\n";
 	foreach(child, children) {
-		std::cout <<"Child geometry: " <<child.sizable <<"\n";
-
 		//We compute each component in pairs..
 		Geometry res;
 		AttachLayout::ComputeComponent(child.left, child.right, res.x, res.width, {containerGeometry.x, containerGeometry.width, child.sizable->minimumGeometry().width, true, children});
 		AttachLayout::ComputeComponent(child.top, child.bottom, res.y, res.height, {containerGeometry.y, containerGeometry.height, child.sizable->minimumGeometry().height, false, children});
 		child.sizable->setGeometry(res);
-
-		std::cout <<"   Res: " <<res.x <<"," <<res.y <<" -> " <<res.width <<"," <<res.height <<"\n";
 	}
 
-
-
-	//Apply margins.
-	/*Geometry geometry = containerGeometry;
-	geometry.x      += state.margin;
-	geometry.y      += state.margin;
-	geometry.width  -= state.margin * 2;
-	geometry.height -= state.margin * 2;*/
-
-
-	//Determine how many children have set the "maximum width" counter.
-	/*unsigned minimumWidth = 0, maximumWidthCounter = 0;
-	foreach(child, children) {
-		if(child.width == MaximumSize) {
-			maximumWidthCounter++;
-		}
-		if(child.width != MaximumSize) {
-			minimumWidth += child.width;
-		}
-		minimumWidth += child.spacing;
-	}*/
-
-	//Apply the "maximum width" to children, dividing if it's been set more than once.
-	/*foreach(child, children) {
-		if(child.width  == MaximumSize) child.width  = (geometry.width - minimumWidth) / maximumWidthCounter;
-		if(child.height == MaximumSize) child.height = geometry.height;
-	}*/
-
-	//Get the maximum height of any child component.
-	/*unsigned maximumHeight = 0;
-	foreach(child, children) {
-		maximumHeight = max(maximumHeight, child.height);
-	}*/
-
-	//Apply children from left to right. Use pivot+alignment for items which are not as tall as the
-	//   maximum component. Update local copy of geometry as we go along.
-	/*foreach(child, children) {
-		unsigned pivot = (maximumHeight - child.height) * state.alignment;
-		Geometry childGeometry = { geometry.x, geometry.y + pivot, child.width, child.height };
-		child.sizable->setGeometry(childGeometry);
-
-		geometry.x += child.width + child.spacing;
-		geometry.width -= child.width + child.spacing;
-	}*/
 }
 
 

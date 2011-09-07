@@ -3,7 +3,6 @@
 #include <phoenix.hpp>
 
 
-
 class Attachment {
 private:
 	//Type of attachments
@@ -18,6 +17,7 @@ public:
 		//TODO: I want to allow anchoring on the "center" --it should only require that "left" and "right" are both set.
 	};
 
+	//Special Attach cases; currently only "centered"
 	enum class SPECIAL {
 		CENTERED,
 	};
