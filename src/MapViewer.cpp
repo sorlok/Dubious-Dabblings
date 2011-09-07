@@ -5,10 +5,10 @@
 //#include "LayoutTest.hpp"
 
 //Test "Tech Tree" mockup
-#include "TechTree.hpp"
+//#include "TechTree.hpp"
 
 //Tests for the BSNES config menu via AttachLayout
-//#include "BsnesMockup.hpp"
+#include "BsnesMockup.hpp"
 
 //Main code (comment out if using one of the header-style tests, above.
 /*include <iostream>
