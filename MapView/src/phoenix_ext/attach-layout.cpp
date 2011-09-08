@@ -43,10 +43,10 @@ void AttachLayout::append(Sizable &sizable) {
 void AttachLayout::append(phoenix::Sizable &sizable, const Attachment& leftL, const Attachment& topL, const Attachment& rightL, const Attachment& bottomL)
 {
 	//First, a quick check: If ONE of any 2 diametrically opposed points is "special", the other should copy it.
-	Attachment left = (rightL.type==Attachment::TYPE::SPECIAL) ? rightL : leftL;
-	Attachment right = (leftL.type==Attachment::TYPE::SPECIAL) ? leftL : rightL;
-	Attachment top = (bottomL.type==Attachment::TYPE::SPECIAL) ? bottomL : topL;
-	Attachment bottom = (topL.type==Attachment::TYPE::SPECIAL) ? topL : bottomL;
+	Attachment left = (rightL.type==Attachment::TYPE::SPECIAL_PERCENT||rightL.type==Attachment::TYPE::SPECIAL_ATTACHED) ? rightL : leftL;
+	Attachment right = (leftL.type==Attachment::TYPE::SPECIAL_PERCENT||leftL.type==Attachment::TYPE::SPECIAL_ATTACHED) ? leftL : rightL;
+	Attachment top = (bottomL.type==Attachment::TYPE::SPECIAL_PERCENT||bottomL.type==Attachment::TYPE::SPECIAL_ATTACHED) ? bottomL : topL;
+	Attachment bottom = (topL.type==Attachment::TYPE::SPECIAL_PERCENT||topL.type==Attachment::TYPE::SPECIAL_ATTACHED) ? topL : bottomL;
 
 	//If this child already exists, update its attachment data
 	foreach(child, children)  {
@@ -219,7 +219,7 @@ int AttachLayout::GetCenteredAttached(Attachment& item, Attachment& diam, Layout
 	//This is only mildly more complex than the normal "attached" case.
 	//NOTE: The "default" for items centered this way is ANCHOR::CENTERED; otherwise, it behaves just like GetAttached()
 	//TODO: Combine code; modularity could be much better.
-	Attachment::ANCHOR anch = item.anchor==Attachment::ANCHOR::DEFAULT ? Attachment::ANCHOR::CENTERED : item.anchor;
+	Attachment::ANCHOR anch = item.anchor==Attachment::ANCHOR::DEFAULT ? Attachment::ANCHOR::CENTER : item.anchor;
 	int baseVal = 0;
 	if (anch==Attachment::ANCHOR::CENTER) {
 		//The center layout requires both points to be calculatable. Otherwise, it't not very different.

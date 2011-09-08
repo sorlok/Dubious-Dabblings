@@ -39,7 +39,7 @@ public:
 	//"offset" can mean many things. Here, if not zero, it specifies the component's "width" (or whatever) in pixels
 	Attachment(SPECIAL specialType, double percent, int width=0) : special(specialType), percent(percent), offset(width), type(TYPE::SPECIAL_PERCENT) {}
 
-	Attachment(SPECIAL specialType, phoenix::Sizable& attachTo, ANCHOR attachAt=ANCHOR::DEFAULT, int width=0) : special(specialType), refItem(attachTo) anchor(attachAt), offset(width), type(TYPE::SPECIAL_ATTACHED) {}
+	Attachment(SPECIAL specialType, phoenix::Sizable& attachTo, ANCHOR attachAt=ANCHOR::DEFAULT, int width=0) : refItem(&attachTo), anchor(attachAt), special(specialType), offset(width), type(TYPE::SPECIAL_ATTACHED) {}
 
 	//NOTE: If we are clever, we don't have to reset anything; we can just check "done" and "!done" alternatively.
 	//      This requires some attention when adding Sizables, but is otherwise easy. I just don't see a real performance boost

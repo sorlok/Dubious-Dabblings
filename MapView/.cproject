@@ -25,7 +25,8 @@
 <option id="gnu.cpp.compiler.exe.debug.option.optimization.level.1398033213" name="Optimization Level" superClass="gnu.cpp.compiler.exe.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.exe.debug.option.debugging.level.387534158" name="Debug Level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.option.include.paths.1346307745" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/src/phoenix&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../phoenix&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/..&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/src&quot;"/>
 </option>
 <option id="gnu.cpp.compiler.option.other.other.925707600" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -std=c++0x `pkg-config --cflags gtk+-2.0`" valueType="string"/>
@@ -42,11 +43,11 @@
 <tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.2052215890" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.483431443" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
 <option id="gnu.cpp.link.option.paths.1188571505" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
-<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/src/phoenix/build&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../phoenix/build&quot;"/>
 </option>
 <option id="gnu.cpp.link.option.libs.1256686605" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="X11"/>
-<listOptionValue builtIn="false" value="phoenix_ext"/>
+<listOptionValue builtIn="false" value="phoenix_ext_gtk"/>
 <listOptionValue builtIn="false" value="tinyxml"/>
 <listOptionValue builtIn="false" value="z"/>
 </option>
@@ -508,7 +509,8 @@
 <option id="gnu.cpp.compiler.exe.release.option.debugging.level.733454602" name="Debug Level" superClass="gnu.cpp.compiler.exe.release.option.debugging.level" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.option.other.other.1030570728" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -std=c++0x `pkg-config --cflags gtk+-2.0`" valueType="string"/>
 <option id="gnu.cpp.compiler.option.include.paths.1652727870" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/src/phoenix&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../phoenix&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/..&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/src&quot;"/>
 </option>
 <option id="gnu.cpp.compiler.option.preprocessor.def.884966101" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
@@ -526,12 +528,12 @@
 <option id="gnu.cpp.link.option.flags.1299864759" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="`pkg-config --libs gtk+-2.0`" valueType="string"/>
 <option id="gnu.cpp.link.option.libs.2133152669" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="X11"/>
-<listOptionValue builtIn="false" value="phoenix_ext"/>
+<listOptionValue builtIn="false" value="phoenix_ext_gtk"/>
 <listOptionValue builtIn="false" value="tinyxml"/>
 <listOptionValue builtIn="false" value="z"/>
 </option>
 <option id="gnu.cpp.link.option.paths.1886251114" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
-<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/src/phoenix/build&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../phoenix/build&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.457950981" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>

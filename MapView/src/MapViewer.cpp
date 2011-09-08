@@ -8,10 +8,10 @@
 //#include "TechTree.hpp"
 
 //Tests for the BSNES config menu via AttachLayout
-#include "BsnesMockup.hpp"
+//#include "BsnesMockup.hpp"
 
 //Main code (comment out if using one of the header-style tests, above.
-/*include <iostream>
+#include <iostream>
 
 #include <phoenix/phoenix.hpp>
 #include <nall/png.hpp>
@@ -40,7 +40,7 @@ struct Application : Window {
   void create() {
     //Do window tasks
     setTitle("Test Application");
-    //setGeometry({ 130, 130, 650, 490 });
+    setGeometry({ 130, 130, 650, 490 });
 
     helloLabel.setText("Map Viewer");
     okButton.setText("Load Map");
@@ -163,7 +163,7 @@ struct Application : Window {
     	}
     };
 
-    setGeometry({ 130, 130, 650, 490 });
+    //setGeometry({ 130, 130, 650, 490 });
     setVisible();
   }
 } application;
@@ -173,5 +173,5 @@ int main(int argc, char* argv[])
   application.create();
   OS::main();
   return 0;
-}*/
+}
 
