@@ -9,7 +9,7 @@
 class Attachment {
 private:
 	//Type of attachments
-	enum class TYPE { UNBOUND, PERCENT, ATTACHED, SPECIAL };
+	enum class TYPE { UNBOUND, PERCENT, ATTACHED, SPECIAL_PERCENT, SPECIAL_ATTACHED };
 
 public:
 	//Ways to anchor "Attached" attachments
@@ -37,7 +37,9 @@ public:
 
 	//Use a special attachment type.
 	//"offset" can mean many things. Here, if not zero, it specifies the component's "width" (or whatever) in pixels
-	Attachment(SPECIAL specialType, double percent, int offset=0) : special(specialType), percent(percent), offset(offset), type(TYPE::SPECIAL) {}
+	Attachment(SPECIAL specialType, double percent, int width=0) : special(specialType), percent(percent), offset(width), type(TYPE::SPECIAL_PERCENT) {}
+
+	Attachment(SPECIAL specialType, phoenix::Sizable& attachTo, ANCHOR attachAt=ANCHOR::DEFAULT, int width=0) : special(specialType), refItem(attachTo) anchor(attachAt), offset(width), type(TYPE::SPECIAL_ATTACHED) {}
 
 	//NOTE: If we are clever, we don't have to reset anything; we can just check "done" and "!done" alternatively.
 	//      This requires some attention when adding Sizables, but is otherwise easy. I just don't see a real performance boost
@@ -68,6 +70,31 @@ private:
 
 class AttachLayout : public phoenix::Layout {
 public:
+	//TODO: Perhaps we can use a function of the form:
+	//append(Sizable, Axis, Axis)
+	//...where "Axis" is either {Attachment, Attachment} for, e.g., "left-right", or {Attachment} for "centered horiz". 
+	//This would get a little bracey, as the default (top-left) case becomes:
+	//append(x, {{0.0}}, {{0.0}});
+	//..and a 100% width component is now:
+	//append(x, {{0.0},{1.0}}, {{0.0},{1.0}});
+	//This also removes our ability to handle Default arguments, since centered (at 50%) is now done like so:
+	//append(x, {{0.5}}, {{0.5}});
+	//Alternatively, we could continue to require the CENTERED flag, which might be a better idea for clarity:
+	//append(x, {Centered, {0.5}}, {Centered, {0.5}});
+	//...and then, of course, we can keep our Default arguments. 
+	//This last one isn't too bad, and I like having a keyword in there for clarity.
+
+	//TODO: We should also allow users to manually specify the axis/attachment objects, in case they don't like brace syntax:
+	//Axis horiz;
+	//horiz.left = Attachment(0.0, 5);
+	//horiz.right = Attachment(1.0, -5);
+	//(note that "Axis::top" and "Axis::bottom" can just be references to "left" and "right")
+	//Axis vert;
+	//vert.centered = Attachment(0.5);
+	//append(x, horiz, vert);
+	//...of course, if they try to set both "left", "right" and "centered", then the call to "append" will fail, but at least 
+	//this will pacity users who hate braces. 
+
 	//Required functionality: Layout
 	void append(phoenix::Sizable& sizable); //Note: calling append() without any attachments might lead to funky effects.
 	void append(phoenix::Sizable& sizable, const Attachment& leftA, const Attachment& topA, const Attachment& rightA=Attachment(), const Attachment& bottomA=Attachment());
@@ -140,7 +167,8 @@ private:
 	static int Get(Attachment& item, Attachment& diam, LayoutData args);
 	static int GetUnbound(Attachment& item, Attachment& diam, LayoutData args);
 	static int GetPercent(Attachment& item, LayoutData args);
-	static int GetCentered(Attachment& item, Attachment& diam, LayoutData args);
+	static int GetCenteredPercent(Attachment& item, Attachment& diam, LayoutData args);
+	static int GetCenteredAttached(Attachment& item, Attachment& diam, LayoutData args);
 	static int GetAttached(Attachment& item, Attachment& diam, LayoutData args);
 
 	struct State {

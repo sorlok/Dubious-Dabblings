@@ -156,8 +156,10 @@ int AttachLayout::Get(Attachment& item, Attachment& diam, LayoutData args)
 		item.res = GetPercent(item, args);
 	} else if (item.type==Attachment::TYPE::ATTACHED) {
 		item.res = GetAttached(item, diam, args);
-	} else if (item.type==Attachment::TYPE::SPECIAL && item.special==Attachment::SPECIAL::CENTERED) {
-		item.res = GetCentered(item, diam, args);
+	} else if (item.type==Attachment::TYPE::SPECIAL_PERCENT && item.special==Attachment::SPECIAL::CENTERED) {
+		item.res = GetCenteredPercent(item, diam, args);
+	} else if (item.type==Attachment::TYPE::SPECIAL_ATTACHED && item.special==Attachment::SPECIAL::CENTERED) {
+		item.res = GetCenteredAttached(item, diam, args);
 	} else {
 		//ERROR (in case we add more types later).
 		std::cout <<"ERROR: Unknown type\n";
@@ -183,10 +185,69 @@ int AttachLayout::GetPercent(Attachment& item, LayoutData args)
 }
 
 
-int AttachLayout::GetCentered(Attachment& item, Attachment& diam, LayoutData args)
+int AttachLayout::GetCenteredPercent(Attachment& item, Attachment& diam, LayoutData args)
 {
 	//First, get the centered position and width, then just expand outwards. Remember to set the diametric point to "done".
 	int point = item.percent*args.containerMax + args.offset;
+	int width = item.offset>0 ? item.offset : args.itemMin;
+
+	diam.res = point + width/2;
+	diam.done = true;
+	return point - width/2;
+}
+
+
+int AttachLayout::GetCenteredAttached(Attachment& item, Attachment& diam, LayoutData args)
+{
+	//First, retrieve the component
+	Children* other = nullptr;
+	foreach(child, args.children)  {
+		if(child.sizable == item.refItem) {
+			other = &child;
+			break;
+		}
+	}
+
+	//Did we retrieve anything? (this should also check for a null item.refItem)
+	if (!other) {
+		//TODO: We _could_ probably allow attaching to components in a fixed/horizontal/vertical layout
+		//      manager. But I think the complexity won't gain us much, and I'd rather get this working first.
+		std::cout <<"ERROR: attached item is not managed by this layout manager.\n";
+		return 0;
+	}
+
+	//This is only mildly more complex than the normal "attached" case.
+	//NOTE: The "default" for items centered this way is ANCHOR::CENTERED; otherwise, it behaves just like GetAttached()
+	//TODO: Combine code; modularity could be much better.
+	Attachment::ANCHOR anch = item.anchor==Attachment::ANCHOR::DEFAULT ? Attachment::ANCHOR::CENTERED : item.anchor;
+	int baseVal = 0;
+	if (anch==Attachment::ANCHOR::CENTER) {
+		//The center layout requires both points to be calculatable. Otherwise, it't not very different.
+		Attachment* near = args.isHoriz ? &other->left : &other->top;
+		Attachment* far = args.isHoriz ? &other->right : &other->bottom;
+		baseVal = AttachLayout::Get(*near, diam, args);
+		baseVal = (AttachLayout::Get(*far, diam, args)-baseVal)/2 + baseVal;
+	} else {
+		//For left/right layouts, there's only one point to check.
+		Attachment* base = nullptr;
+		if (anch==Attachment::ANCHOR::LEFT) {
+			base = args.isHoriz ? &other->left : &other->top;
+		} else if (anch==Attachment::ANCHOR::RIGHT) {
+			base = args.isHoriz ? &other->right : &other->bottom;
+		} else {
+			//Shouldn't fail, but just to be safe...
+			std::cout <<"ERROR: unexpected anchor value.\n";
+			return 0;
+		}
+
+		baseVal = AttachLayout::Get(*base, diam, args);
+	}
+
+	//Now center it as expected, setting diam's value too.
+	//NOTE: This code is nearly the same as GetCenteredPercent(), except for how "Point" is calculated. Surely we can combine them....
+	//NOTE: There might be an error with this code if we calculate the Right-anchor first. Need a test case.... or we can just be more 
+	//      responsible with how we declare Centered layouts. 
+	int point = baseVal + item.offset;
 	int width = item.offset>0 ? item.offset : args.itemMin;
 
 	diam.res = point + width/2;
@@ -215,8 +276,8 @@ int AttachLayout::GetAttached(Attachment& item, Attachment& diam, LayoutData arg
 		return 0;
 	}
 
-	//TODO: This is the only place that "isHoriz" is used... I'd like to try to remove it if possible since it feels like a hack.
-	//      Then again, most of this code feels like a hack in its present state. (Better TODO: clean up code!)
+	//Handle anchors; get the result
+	//TODO: Cleanup isHoriz if possible
 	Attachment::ANCHOR anch = item.anchor==Attachment::ANCHOR::DEFAULT ? args.defaultAnch : item.anchor;
 	int baseVal = 0;
 	if (anch==Attachment::ANCHOR::CENTER) {
