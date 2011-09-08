@@ -215,23 +215,34 @@ int AttachLayout::GetAttached(Attachment& item, Attachment& diam, LayoutData arg
 		return 0;
 	}
 
-	//Now, it's just a matter of retrieving the value we're looking for...
 	//TODO: This is the only place that "isHoriz" is used... I'd like to try to remove it if possible since it feels like a hack.
 	//      Then again, most of this code feels like a hack in its present state. (Better TODO: clean up code!)
-	Attachment* base = nullptr;
 	Attachment::ANCHOR anch = item.anchor==Attachment::ANCHOR::DEFAULT ? args.defaultAnch : item.anchor;
-	if (anch==Attachment::ANCHOR::LEFT) {
-		base = args.isHoriz ? &other->left : &other->top;
-	} else if (anch==Attachment::ANCHOR::RIGHT) {
-		base = args.isHoriz ? &other->right : &other->bottom;
+	int baseVal = 0;
+	if (anch==Attachment::ANCHOR::CENTER) {
+		//The center layout requires both points to be calculatable. Otherwise, it't not very different.
+		Attachment* near = args.isHoriz ? &other->left : &other->top;
+		Attachment* far = args.isHoriz ? &other->right : &other->bottom;
+		baseVal = AttachLayout::Get(*near, diam, args);
+		baseVal = (AttachLayout::Get(*far, diam, args)-baseVal)/2 + baseVal;
 	} else {
-		//Leaving this check in here for when we add ANCHOR::CENTER
-		std::cout <<"ERROR: unexpected anchor value.\n";
-		return 0;
+		//For left/right layouts, there's only one point to check.
+		Attachment* base = nullptr;
+		if (anch==Attachment::ANCHOR::LEFT) {
+			base = args.isHoriz ? &other->left : &other->top;
+		} else if (anch==Attachment::ANCHOR::RIGHT) {
+			base = args.isHoriz ? &other->right : &other->bottom;
+		} else {
+			//Shouldn't fail, but just to be safe...
+			std::cout <<"ERROR: unexpected anchor value.\n";
+			return 0;
+		}
+
+		baseVal = AttachLayout::Get(*base, diam, args);
 	}
 
-	//...and adding the offset
-	return AttachLayout::Get(*base, diam, args) + item.offset;
+	//Now add the offset
+	return baseVal + item.offset;
 }
 
 

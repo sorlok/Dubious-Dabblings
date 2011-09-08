@@ -17,7 +17,7 @@ public:
 		DEFAULT = 0,   //Default means "right" if it's a left attachment, and "left" if it's a right attachment.
 		LEFT=1,  TOP=1, //Semantically the same when it comes to layout.
 		RIGHT=2, BOTTOM=2, //Semantically the same when it comes to layout.
-		//TODO: I want to allow anchoring on the "center" --it should only require that "left" and "right" are both set.
+		CENTER=3,
 	};
 
 	//Special Attach cases; currently only "centered"
