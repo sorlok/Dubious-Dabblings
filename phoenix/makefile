@@ -1,10 +1,32 @@
-phoenix: phoenix.o
-	ar rcs build/libphoenix_ext.a phoenix.o
+#Default target is GTK. Windows and QT targets provided, but not (yet) tested.
 
-phoenix.o: phoenix.cpp core/core.hpp core/core.cpp
-	g++ -std=gnu++0x -I. -O3 -fomit-frame-pointer -c phoenix.cpp -DPHOENIX_GTK `pkg-config --cflags gtk+-2.0`
+gtk: phoenix_gtk.o
+	ar rcs build/libphoenix_ext_gtk.a phoenix_gtk.o
+
+win: phoenix_win.o
+	mingw32-g++ -mwindows -s phoenix_win.o phoenix-winres.o -lkernel32 -luser32 -lgdi32 -ladvapi32 -lcomctl32 -lcomdlg32 -lshell32 -lole32
+
+qt: phoenix_qt.o
+	ar rcs build/libphoenix_ext_qt.a phoenix_qt.o
+
+phoenix_gtk.o: phoenix.cpp core/core.hpp core/core.cpp
+	g++ -std=gnu++0x -I. -O3 -fomit-frame-pointer -o phoenix_gtk.o -c phoenix.cpp -DPHOENIX_GTK `pkg-config --cflags gtk+-2.0`
+
+phoenix_win.o: phoenix.cpp core/core.hpp core/core.cpp phoenix-winres.o
+	g++ -std=gnu++0x -I. -O3 -fomit-frame-pointer -o phoenix_win.o -c phoenix.cpp -DPHOENIX_WINDOWS 
+
+phoenix_qt.o: phoenix.cpp core/core.hpp core/core.cpp phoenix-qt-moc
+	g++ -std=gnu++0x -I. -O3 -fomit-frame-pointer -o phoenix_gtk.o -c phoenix.cpp -DPHOENIX_QT `pkg-config --cflags QtCore QtGui`
+
+phoenix-qt-moc: 
+	moc -i -o qt/qt.moc qt/qt.moc.hpp
+
+phoenix-resource.o: windows/phoenix.rc
+	windres windows/phoenix.rc phoenix-winres.o
 
 clean:
-	rm phoenix.o
+	rm -f phoenix_gtk.o phoenix_win.o phoenix_qt.o phoenix-winres.o build/libphoenix_ext_gtk.a build/libphoenix_ext_win.a build/libphoenix_ext_qt.a
+
+
 
 
