@@ -92,7 +92,7 @@ struct Application : Window {
   void create() {
     //Do window tasks
     setTitle("Test Application");
-    setGeometry({ 130, 130, 650, 490 });
+    setGeometry({ 130, 130, 700, 490 });
 
     helloLabel.setText("Map Viewer");
     okButton.setText("Load Map");
