@@ -3,8 +3,9 @@
 gtk: phoenix_gtk.o
 	ar rcs build/libphoenix_ext_gtk.a phoenix_gtk.o
 
+#Note: Will have to add the following to Eclipse: -lkernel32 -luser32 -lgdi32 -ladvapi32 -lcomctl32 -lcomdlg32 -lshell32 -lole32
 win: phoenix_win.o
-	i586-mingw32msvc-g++ -mwindows -s phoenix_win.o phoenix-winres.o -lkernel32 -luser32 -lgdi32 -ladvapi32 -lcomctl32 -lcomdlg32 -lshell32 -lole32
+	ar rcs build/libphoenix_ext_win.a phoenix_win.o phoenix-winres.o
 
 qt: phoenix_qt.o
 	ar rcs build/libphoenix_ext_qt.a phoenix_qt.o
