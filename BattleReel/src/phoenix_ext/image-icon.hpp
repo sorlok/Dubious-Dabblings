@@ -9,11 +9,13 @@
  */
 struct ImageIcon : public phoenix::Canvas {
 	ImageIcon();
-	void setImage(const nall::string& filename);
+	void setImage(const nall::png& image);
 	virtual void update();
+	virtual phoenix::Geometry minimumGeometry();
+	virtual void setGeometry(const phoenix::Geometry &geometry);
 
 private:
-	nall::png img;
+	const nall::png* img;
 };
 
 
