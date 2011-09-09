@@ -154,7 +154,7 @@ void PremultImage::resetSize(const Geometry& size, uint32_t* newBuffer)
 		return;
 	}
 
-	std::cout <<"Resize: " <<nall::hex((unsigned int)newBuffer) <<"\n";
+	//std::cout <<"Resize: " <<nall::hex((unsigned int)newBuffer) <<"\n";
 
 	//NOTE: We should probably have a way to check if newBuffer is the right size
 	buffer_ = newBuffer;
@@ -170,7 +170,7 @@ void PremultImage::resetSize(const Geometry& size, std::vector<uint8_t> fill)
 	//Get the background color:
 	uint32_t color = PremultImage::DecodeColor(fill);
 
-	std::cout <<"Resize: " <<size.width <<"," <<size.height <<"\n";
+	//std::cout <<"Resize: " <<size.width <<"," <<size.height <<"\n";
 
 	//Allocate the new one
 	size_t dim = size.width*size.height;
@@ -276,7 +276,7 @@ uint32_t PremultImage::DecodeColor(const vector<uint8_t>& color)
 
 void PremultImage::fillRect(const Geometry& rectangle, vector<uint8_t> color)
 {
-	std::cout <<"Filling rectangle [" <<rectangle.x <<"," <<rectangle.y <<"," <<rectangle.width <<"," <<rectangle.height <<"]\n";
+	//std::cout <<"Filling rectangle [" <<rectangle.x <<"," <<rectangle.y <<"," <<rectangle.width <<"," <<rectangle.height <<"]\n";
 
 	//Get the color
 	uint32_t color_ = PremultImage::DecodeColor(color);
@@ -389,10 +389,10 @@ uint32_t* PremultImage::LoadPNGFile(const string& path, unsigned int& imgWidth, 
 	imgHeight = image.info.height;
 
 	//Return the array of pixels
-	std::cout <<"Image is: " <<image.info.width <<" x " <<image.info.height <<", depth: " <<image.info.bitDepth <<"\n";
+	/*std::cout <<"Image is: " <<image.info.width <<" x " <<image.info.height <<", depth: " <<image.info.bitDepth <<"\n";
 	std::cout <<"Allocating " <<(image.rawSize/1024) <<" x4 KB\n";
 	std::cout <<"   Real: " <<(image.size/1024) <<" x4 KB\n";
-	std::cout <<"   Check: " <<(image.size) <<" to " <<(image.info.width*image.info.height*sizeof(image.data[0])) <<"\n";
+	std::cout <<"   Check: " <<(image.size) <<" to " <<(image.info.width*image.info.height*sizeof(image.data[0])) <<"\n";*/
 
 	//TEMP: For some reason, PNG flips out over a certain small file...
 	size_t size = image.info.width*image.info.height;

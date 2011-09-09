@@ -46,6 +46,10 @@ struct Application : Window {
     okButton.setText("Load Map");
     quitButton.setText("Quit");
 
+    //Skip
+    //layoutHoriz.skipUpdate = true;
+    //layoutVert.skipUpdate = true;
+
     //Horizontal layout
     layoutHoriz.append(okButton, 100, 30, 5);
     layoutHoriz.append(quitButton, 100, 30, 5);
@@ -55,6 +59,11 @@ struct Application : Window {
     layoutVert.append(helloLabel, 0, 0, 5);
     layoutVert.append(layoutHoriz, 0, 0, 10);
     layoutVert.append(myCanvas, ~0, ~0, 5);
+
+    //Unskip
+    //layoutHoriz.skipUpdate = false;
+    //layoutVert.skipUpdate = false;
+
     append(layoutVert);
 
     //Get a reference to the canvas's buffer:
@@ -76,7 +85,11 @@ struct Application : Window {
     bkgrd.fillRect({0, 0, w/2, h/2}, {0xFF, 0x00, 0x00});
     bkgrd.fillRect({w/4, h/4, w/2, h/2}, {0x80, 0x00, 0x00, 0xFF});
 
-    onClose = quitButton.onTick = &OS::quit;
+    onClose = quitButton.onTick = [&layoutHoriz, &layoutVert] {
+        //layoutHoriz.skipUpdate = true;
+        //layoutVert.skipUpdate = true;
+    	OS::quit();
+    };
 
     okButton.onTick = [this, &bkgrd, &scrollOffset]() {
     	if (!loadedMapOnce) {
@@ -164,6 +177,9 @@ struct Application : Window {
     };
 
     //setGeometry({ 130, 130, 650, 490 });
+
+    std::cout <<"========================================\n";
+
     setVisible();
   }
 } application;
