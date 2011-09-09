@@ -9,7 +9,11 @@ ImageIcon::ImageIcon() : Canvas(), img()
 
 void ImageIcon::setImage(const nall::string& filename)
 {
-
+	//Attempt to load the image.
+	if (img.decode(filename)) {
+		//Not sure if transform() is required once to get data to point to the right thing.
+		img.transform();
+	}
 }
 
 void ImageIcon::update()
