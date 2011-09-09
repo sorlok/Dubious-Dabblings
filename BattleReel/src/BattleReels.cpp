@@ -81,7 +81,13 @@ struct Application : Window {
   Button okButton;
   Button quitButton;
 
-  ImageIcon testIcon;
+  ImageIcon testIcon1;
+  ImageIcon testIcon2;
+  ImageIcon testIcon3;
+  ImageIcon testIcon4;
+  ImageIcon testIcon5;
+  ImageIcon testIcon6;
+  ImageIcon testIcon7;
 
   void create() {
     //Do window tasks
@@ -91,12 +97,24 @@ struct Application : Window {
     helloLabel.setText("Map Viewer");
     okButton.setText("Load Map");
     quitButton.setText("Quit");
-    testIcon.setImage(rouletteSlots.find(1)->second.img);
+    testIcon1.setImage(rouletteSlots.find(10)->second.img);
+    testIcon2.setImage(rouletteSlots.find(10)->second.img);
+    testIcon3.setImage(rouletteSlots.find(19)->second.img);
+    testIcon4.setImage(rouletteSlots.find(18)->second.img);
+    testIcon5.setImage(rouletteSlots.find(10)->second.img);
+    testIcon6.setImage(rouletteSlots.find(15)->second.img);
+    testIcon7.setImage(rouletteSlots.find(1)->second.img);
 
     //Horizontal layout
     layoutHoriz.append(okButton, 100, 30, 5);
     layoutHoriz.append(quitButton, 100, 30, 5);
-    layoutHoriz.append(testIcon, 0, 0, 5);
+    layoutHoriz.append(testIcon1, 0, 0, 5);
+    layoutHoriz.append(testIcon2, 0, 0, 5);
+    layoutHoriz.append(testIcon3, 0, 0, 5);
+    layoutHoriz.append(testIcon4, 0, 0, 5);
+    layoutHoriz.append(testIcon5, 0, 0, 5);
+    layoutHoriz.append(testIcon6, 0, 0, 5);
+    layoutHoriz.append(testIcon7, 0, 0, 5);
 
     //Vertical layout
     layoutVert.setMargin(5);
