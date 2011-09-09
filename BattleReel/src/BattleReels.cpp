@@ -5,70 +5,40 @@
 
 #include "phoenix_ext/anchor-layout.hpp"
 #include "phoenix_ext/image-icon.hpp"
+#include "components/SingleReel.hpp"
 
 using std::cout;
 using std::endl;
 using namespace nall;
 using namespace phoenix;
 
-//Attempt to load an image.
-bool LoadPng(const nall::string& filename, nall::png& res) {
-	if (res.decode(filename)) {
-		//Not sure if transform() is required once to get data to point to the right thing.
-		res.transform();
-		return true;
-	}
-	return false;
-}
 
-const nall::string prefix = "slots/";
-const nall::string suffix = ".png";
-struct Slot {
-	nall::string name;
-	nall::png img;
-	Slot(const nall::string& name) : name(name), img() {
-		init(name);
-	}
-	Slot(const Slot& copy) : name(copy.name), img() {
-		//It's expensive to reload the PNG each time, but phoenix::png doesn't declare a move constructor,
-		//   so pointers will be deleted twice otherwise.
-		init(name);
-	}
 
-private:
-	void init(const nall::string& name) {
-		if (!LoadPng({prefix, name, suffix}, img)) {
-			cout <<"Can't find image: " <<name <<endl;
-		}
-		cout <<"Loaded image: " <<name <<endl;
-	}
-};
-
-const std::map<unsigned int, Slot> rouletteSlots = {
-	{0, {"accessory"}},
-	{1, {"all"}},
-	{2, {"armor"}},
-	{3, {"command"}},
-	{4, {"cure"}},
-	{5, {"frog"}},
-	{6, {"halfhp"}},
-	{7, {"halfhpmp"}},
-	{8, {"halfmp"}},
-	{9, {"halfspeed"}},
-	{10, {"independent"}},
-	{11, {"item"}},
-	{12, {"level10"}},
-	{13, {"level5"}},
-	{14, {"lucky"}},
-	{15, {"magic"}},
-	{16, {"mini"}},
-	{17, {"poison"}},
-	{18, {"summon"}},
-	{19, {"support"}},
-	{20, {"time"}},
-	{21, {"weapon"}},
-	{22, {"zeromp"}},
-	{0xFF, {"unknown"}}
+const std::map<unsigned int, SlotImage> rouletteSlots = {
+	{0, {"accessory", 0}},
+	{1, {"all", 1}},
+	{2, {"armor", 2}},
+	{3, {"command", 3}},
+	{4, {"cure", 4}},
+	{5, {"frog", 5}},
+	{6, {"halfhp", 6}},
+	{7, {"halfhpmp", 7}},
+	{8, {"halfmp", 8}},
+	{9, {"halfspeed", 9}},
+	{10, {"independent", 10}},
+	{11, {"item", 11}},
+	{12, {"level10", 12}},
+	{13, {"level5", 13}},
+	{14, {"lucky", 14}},
+	{15, {"magic", 15}},
+	{16, {"mini", 16}},
+	{17, {"poison", 17}},
+	{18, {"summon", 18}},
+	{19, {"support", 19}},
+	{20, {"time", 20}},
+	{21, {"weapon", 21}},
+	{22, {"zeromp", 22}},
+	{0xFF, {"unknown", 0xFF}}
 };
 
 
@@ -89,10 +59,15 @@ struct Application : Window {
   ImageIcon testIcon6;
   ImageIcon testIcon7;
 
+  SingleReel testReel;
+
   void create() {
     //Do window tasks
     setTitle("Test Application");
     setGeometry({ 130, 130, 700, 490 });
+
+    //Ensure that the testReel can at least size itself (we can add images later).
+    //testReel.loadData(nullptr, rouletteSlots);
 
     helloLabel.setText("Map Viewer");
     okButton.setText("Load Map");
