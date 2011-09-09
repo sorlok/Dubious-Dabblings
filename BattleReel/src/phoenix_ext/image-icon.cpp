@@ -1,3 +1,6 @@
+//Copyright 2011 by Seth N. Hetu
+//Shared under the terms of the ISC license
+
 #include "image-icon.hpp"
 
 #include <iostream>
