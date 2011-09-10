@@ -49,6 +49,7 @@ public:
 	}
 	void loadData(const std::map<unsigned int, SlotImage>& imgLookup, unsigned char* dataStart=nullptr, unsigned int reelID=0);
 	AttachLayout& getLayout();
+	phoenix::Geometry getSuggestedMinimumSize();
 
 private:
 	static const size_t NUM_SLOTS = 7;

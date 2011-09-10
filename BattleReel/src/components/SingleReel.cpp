@@ -55,7 +55,18 @@ void SlotImage::init(const nall::string& name)
 }
 
 
-//phoenix::Font SingleReel::lblFont(nall::string("Arial 16 bold"));
+phoenix::Geometry SingleReel::getSuggestedMinimumSize()
+{
+	//TODO: These values at least should be somewhat more.... er... static.
+	int margin = 5;
+	int spacing = 5;
+	phoenix::Geometry text = phoenix::Font("Arial, 14, bold").geometry("000");
+	phoenix::Geometry square = std::get<0>(slots[0]).icon.minimumGeometry();
+
+	unsigned int w = margin*2 + text.width/2 + square.width*NUM_SLOTS + spacing*(NUM_SLOTS-1);
+	unsigned int h = margin*2 + text.height/2 + square.height;
+	return {0, 0, w, h};
+}
 
 
 AttachLayout& SingleReel::getLayout()
@@ -65,7 +76,6 @@ AttachLayout& SingleReel::getLayout()
 		layoutDone = true;
 
 		layout.setMargin(5);
-		layout.append(numLbl, {0.0}, {0.0});
 
 		//Attach right-to-left, so that we can easily overlap the numLbl if we want to.
 		phoenix::Sizable* last = nullptr;
@@ -79,6 +89,10 @@ AttachLayout& SingleReel::getLayout()
 			}
 			last = &icn;
 		}
+
+		//Make sure the number label overlaps other components.
+		// TODO: Test on other platforms
+		layout.append(numLbl, {0.0}, {0.0});
 	}
 
 	return layout;

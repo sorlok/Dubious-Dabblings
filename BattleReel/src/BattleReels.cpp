@@ -94,7 +94,7 @@ struct Application : Window {
     layoutVert.setMargin(5);
     layoutVert.append(helloLabel, 0, 0, 5);
     layoutVert.append(layoutHoriz, 0, 0, 10);
-    layoutVert.append(testReel.getLayout(), ~0, ~0, 5);
+    layoutVert.append(testReel.getLayout(), testReel.getSuggestedMinimumSize().width, testReel.getSuggestedMinimumSize().height, 5);
 
     //Master layout
     append(layoutVert);
