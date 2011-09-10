@@ -167,6 +167,8 @@ private:
 		LocalLayoutData local;
 	};
 
+	static Children* FindChild(nall::linear_vector<Children>& children, const Sizable& find);
+
 	static void ComputeComponent(Axis& axis, int& resOrigin, unsigned int& resMagnitude, LayoutData args);
 	static int Get(Axis& axis, LayoutData& args);
 	static nall::linear_vector<int> GetBoth(Axis& axis, LayoutData& args);

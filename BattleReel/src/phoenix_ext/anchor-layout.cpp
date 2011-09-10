@@ -28,11 +28,20 @@ AnchorLayout::~AnchorLayout()
 }
 
 
-void AnchorLayout::append(Sizable &sizable) {
+AnchorLayout::Children* AnchorLayout::FindChild(nall::linear_vector<Children>& children, const Sizable& find)
+{
 	foreach(child, children) {
-		if(child.sizable == &sizable) {
-			return;
+		if(child.sizable == &find) {
+			return &child;
 		}
+	}
+	return nullptr;
+}
+
+
+void AnchorLayout::append(Sizable &sizable) {
+	if (FindChild(children, sizable)) {
+		return;
 	}
 	Layout::append(sizable);
 	if(window()) {
@@ -46,12 +55,11 @@ void AnchorLayout::append(phoenix::Sizable &sizable, const Axis& horizontal, con
 	typedef AnchorPoint::Type Type;
 
 	//If this child already exists, update its attachment data
-	foreach(child, children)  {
-		if(child.sizable == &sizable) {
-			child.horiz = horizontal;
-			child.vert = vertical;
-			return;
-		}
+	Children* res = FindChild(children, sizable);
+	if (res) {
+		res->horiz = horizontal;
+		res->vert = vertical;
+		return;
 	}
 	//Else, add a new item
 	children.append({ &sizable, horizontal, vertical });
@@ -170,7 +178,6 @@ int AnchorLayout::Get(Axis& axis, LayoutData& args)
 {
 	typedef AnchorPoint::Type Type;
 	typedef AnchorPoint::State State;
-	//Axis::FullAxis Centered = Axis::FullAxis::Centered;  //For brevity
 
 	//Make sure we check the opposing point if we the axis is computed in one go.
 	AnchorPoint& item = args.local.ltr ? axis.least_ : axis.greatest_;
@@ -267,6 +274,70 @@ int AnchorLayout::GetUnbound(Axis& axis, LayoutData& args)
 }
 
 
+//Only slightly more complex. Centering requires a bit of careful math; the rest is a matter of remembering to flip "ltr"
+int AnchorLayout::GetAttached(Axis& axis, LayoutData& args)
+{
+	Axis::FullAxis Centered = Axis::FullAxis::Centered;  //For brevity
+
+	//First, retrieve the components
+	AnchorPoint& item = args.local.ltr ? axis.least_ : axis.greatest_;
+	Children* other = AnchorLayout::FindChild(args.global.children, *item.refItem);
+
+	//Did we retrieve anything? (this should also check for a null item.refItem)
+	if (!other) {
+		//TODO: We _could_ probably allow attaching to components in a fixed/horizontal/vertical layout
+		//      manager. But I think the complexity won't gain us much, and I'd rather get this working first.
+		std::cout <<"ERROR: attached item is not managed by this layout manager.\n";
+		return 0;
+	}
+
+	//Retrive the anchor (might be default)
+	Anchor anch = item.anchor;
+	if (anch==Anchor::Default) {
+		if (axis.isFullAxis) {  //TODO: This might be assuming too much!
+			anch = Anchor::Center;
+		} else {
+			anch = args.local.ltr ? Anchor::Right : Anchor::Left;
+		}
+	}
+
+	//Compute the result, based on either the first or second point, or both.
+	if (anch==Anchor::Center) {
+		//The center layout requires both points to be calculatable. Otherwise, it't not very different.
+		Attachment* near = args.isHoriz ? &other->left : &other->top;
+		Attachment* far = args.isHoriz ? &other->right : &other->bottom;
+		int baseVal = AttachLayout::Get(*near, *far, args);
+		int baseVal = (AttachLayout::Get(*far, *near, args)-baseVal)/2 + baseVal;
+		return baseVal + item.offset;
+	} else {
+		//For left/right layouts, there's only one point to check.
+		Attachment* base = nullptr;
+		Attachment* apart = nullptr;
+		LayoutData ld2 = args;
+		if (anch==Attachment::ANCHOR::LEFT) {
+			base = args.isHoriz ? &other->left : &other->top;
+			apart = args.isHoriz ? &other->right : &other->bottom;
+			ld2.setSign(-1).setAnchor(Attachment::ANCHOR::RIGHT);
+		} else if (anch==Attachment::ANCHOR::RIGHT) {
+			base = args.isHoriz ? &other->right : &other->bottom;
+			apart = args.isHoriz ? &other->left : &other->top;
+			ld2.setSign(1).setAnchor(Attachment::ANCHOR::LEFT);
+		} else {
+			//Shouldn't fail, but just to be safe...
+			std::cout <<"ERROR: unexpected anchor value.\n";
+			return 0;
+		}
+
+		return AttachLayout::Get(*base, *apart, ld2) + item.offset;
+	}
+}
+
+
+
+
+
+
+
 int AnchorLayout::GetCenteredPercent(Axis& axis, LayoutData& args)
 {
 	//First, get the centered position and width, then just expand outwards. Remember to set the diametric point to "done".
@@ -337,8 +408,8 @@ int AnchorLayout::GetCenteredAttached(Axis& axis, LayoutData& args)
 
 	//Now center it as expected, setting diam's value too.
 	//NOTE: This code is nearly the same as GetCenteredPercent(), except for how "Point" is calculated. Surely we can combine them....
-	//NOTE: There might be an error with this code if we calculate the Right-anchor first. Need a test case.... or we can just be more 
-	//      responsible with how we declare Centered layouts. 
+	//NOTE: There might be an error with this code if we calculate the Right-anchor first. Need a test case.... or we can just be more
+	//      responsible with how we declare Centered layouts.
 	int point = baseVal + item.offset;
 	int width = item.offset>0 ? item.offset : args.itemMin;
 
@@ -348,60 +419,4 @@ int AnchorLayout::GetCenteredAttached(Axis& axis, LayoutData& args)
 }
 
 
-//Only slightly more complex. Most of the math (figuring out the sign & default anchor) has already been done for us.
-int AnchorLayout::GetAttached(Axis& axis, LayoutData& args)
-{
-	Axis::FullAxis Centered = Axis::FullAxis::Centered;  //For brevity
 
-	//First, retrieve the component
-	Children* other = nullptr;
-	foreach(child, args.children)  {
-		if(child.sizable == item.refItem) {
-			other = &child;
-			break;
-		}
-	}
-
-	//Did we retrieve anything? (this should also check for a null item.refItem)
-	if (!other) {
-		//TODO: We _could_ probably allow attaching to components in a fixed/horizontal/vertical layout
-		//      manager. But I think the complexity won't gain us much, and I'd rather get this working first.
-		std::cout <<"ERROR: attached item is not managed by this layout manager.\n";
-		return 0;
-	}
-
-	//Handle anchors; get the result
-	//TODO: Cleanup isHoriz if possible
-	Attachment::ANCHOR anch = item.anchor==Attachment::ANCHOR::DEFAULT ? args.defaultAnch : item.anchor;
-	int baseVal = 0;
-	if (anch==Attachment::ANCHOR::CENTER) {
-		//The center layout requires both points to be calculatable. Otherwise, it't not very different.
-		Attachment* near = args.isHoriz ? &other->left : &other->top;
-		Attachment* far = args.isHoriz ? &other->right : &other->bottom;
-		baseVal = AttachLayout::Get(*near, *far, args);
-		baseVal = (AttachLayout::Get(*far, *near, args)-baseVal)/2 + baseVal;
-	} else {
-		//For left/right layouts, there's only one point to check.
-		Attachment* base = nullptr;
-		Attachment* apart = nullptr;
-		LayoutData ld2 = args;
-		if (anch==Attachment::ANCHOR::LEFT) {
-			base = args.isHoriz ? &other->left : &other->top;
-			apart = args.isHoriz ? &other->right : &other->bottom;
-			ld2.setSign(-1).setAnchor(Attachment::ANCHOR::RIGHT);
-		} else if (anch==Attachment::ANCHOR::RIGHT) {
-			base = args.isHoriz ? &other->right : &other->bottom;
-			apart = args.isHoriz ? &other->left : &other->top;
-			ld2.setSign(1).setAnchor(Attachment::ANCHOR::LEFT);
-		} else {
-			//Shouldn't fail, but just to be safe...
-			std::cout <<"ERROR: unexpected anchor value.\n";
-			return 0;
-		}
-
-		baseVal = AttachLayout::Get(*base, *apart, ld2);
-	}
-
-	//Now add the offset
-	return baseVal + item.offset;
-}
