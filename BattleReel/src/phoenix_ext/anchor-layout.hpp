@@ -32,7 +32,7 @@ public:
 	Attachment(double percent, int offset=0): percent(percent), offset(offset), type(TYPE::PERCENT) {}
 
 	//Attached attachment: Attach to another component directly, with an offset and possible alignment.
-	Attachment(phoenix::Sizable& attachTo, int offset, ANCHOR attachAt=ANCHOR::DEFAULT) : refItem(&attachTo), anchor(attachAt), offset(offset), type(TYPE::ATTACHED) {}
+	Attachment(phoenix::Sizable& attachTo, int offset=0, ANCHOR attachAt=ANCHOR::DEFAULT) : refItem(&attachTo), anchor(attachAt), offset(offset), type(TYPE::ATTACHED) {}
 
 	//Use a special attachment type.
 	//"offset" can mean many things. Here, if not zero, it specifies the component's "width" (or whatever) in pixels

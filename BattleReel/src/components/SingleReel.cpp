@@ -86,14 +86,14 @@ AttachLayout& SingleReel::getLayout()
 				//Test appending to the center; shouldn't do anything if components are the same height
 				layout.append(icn, {}, {Attachment::SPECIAL::CENTERED, *last}, {*last, -5});
 			} else {
-				layout.append(icn, {}, {numLbl, 0, Attachment::ANCHOR::CENTER}, {1.0, -5});
+				layout.append(icn, {}, {numLbl}, {1.0, -5});
 			}
 			last = &icn;
 		}
 
-		//Make sure the number label overlaps other components.
-		// TODO: Test on other platforms
+		//Test: out-of-order appending
 		layout.append(numLbl, {0.0}, {0.0});
+
 		layout.setSkipGeomUpdates(false);
 	}
 
