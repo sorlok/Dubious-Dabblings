@@ -141,7 +141,29 @@ private:
 	};
 	nall::linear_vector<Children> children;
 
+	//Global layout data doesn't change based on each component.
+	struct GlobalLayoutData {
+		int containerOffset;
+		unsigned int containerMax;
+		size_t containerMargin;
+		bool isHoriz;
+		nall::linear_vector<Children>& children;
+	};
+
+	//Local layout data varies by component or Attachment
+	struct LocalLayoutData {
+		unsigned int itemMin;
+		bool ltr;
+		int sign;
+	};
+
+	//Local and global are combined into LayoutData
 	struct LayoutData {
+		GlobalLayoutData global;
+		LocalLayoutData local;
+	};
+
+	/*struct LayoutData {
 		int offset;
 		unsigned int containerMax;
 		unsigned int itemMin;
@@ -173,7 +195,7 @@ private:
 			defaultAnch = (defaultAnch==Attachment::Anchor::Left?Attachment::Anchor::Right:Attachment::Anchor::Left);
 			return *this;
 		}
-	};
+	};*/
 
 
 	static void ComputeComponent(Attachment& least, Attachment& greatest, int& resOrigin, unsigned int& resMagnitude, LayoutData args);
