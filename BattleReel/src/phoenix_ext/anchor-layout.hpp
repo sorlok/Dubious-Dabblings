@@ -8,37 +8,26 @@
 class Attachment {
 private:
 	//Type of attachments
-	enum class TYPE { UNBOUND, PERCENT, ATTACHED, SPECIAL_PERCENT, SPECIAL_ATTACHED };
+	enum class Type { Unbound, Percent, Attached, SpecialPercent, SpecialAttached };
 
 public:
 	//Ways to anchor "Attached" attachments
-	enum class ANCHOR {
-		DEFAULT = 0,   //Default means "right" if it's a left attachment, and "left" if it's a right attachment.
-		LEFT=1,  TOP=1, //Semantically the same when it comes to layout.
-		RIGHT=2, BOTTOM=2, //Semantically the same when it comes to layout.
-		CENTER=3,
-	};
-
-	//Special Attach cases; currently only "centered"
-	enum class SPECIAL {
-		CENTERED,
+	enum class Anchor {
+		Default = 0,       //Default means "right" if it's a left attachment, and "left" if it's a right attachment, and "centered" if it's centered
+		Left=1,  Top=1,    //Semantically the same when it comes to layout.
+		Right=2, Bottom=2, //Semantically the same when it comes to layout.
+		Center=3,
 	};
 
 public:
 	//Defeault attachment: Figure it out based on the minimum width/height and the diametrically opposed Attachment.
-	Attachment(): type(TYPE::UNBOUND) {}
+	Attachment(): type(Type::Unbound) {}
 
 	//Percent attachment: Attach an item at a given % of the parent's total width/height
-	Attachment(double percent, int offset=0): percent(percent), offset(offset), type(TYPE::PERCENT) {}
+	Attachment(double percent, int offset=0): percent(percent), offset(offset), type(Type::Percent) {}
 
 	//Attached attachment: Attach to another component directly, with an offset and possible alignment.
-	Attachment(phoenix::Sizable& attachTo, int offset=0, ANCHOR attachAt=ANCHOR::DEFAULT) : refItem(&attachTo), anchor(attachAt), offset(offset), type(TYPE::ATTACHED) {}
-
-	//Use a special attachment type.
-	//"offset" can mean many things. Here, if not zero, it specifies the component's "width" (or whatever) in pixels
-	Attachment(SPECIAL specialType, double percent, int width=0) : special(specialType), percent(percent), offset(width), type(TYPE::SPECIAL_PERCENT) {}
-
-	Attachment(SPECIAL specialType, phoenix::Sizable& attachTo, ANCHOR attachAt=ANCHOR::DEFAULT, int width=0) : refItem(&attachTo), anchor(attachAt), special(specialType), offset(width), type(TYPE::SPECIAL_ATTACHED) {}
+	Attachment(phoenix::Sizable& attachTo, int offset=0, Anchor attachAt=Anchor::Default) : refItem(&attachTo), anchor(attachAt), offset(offset), type(Type::Attached) {}
 
 	//NOTE: If we are clever, we don't have to reset anything; we can just check "done" and "!done" alternatively.
 	//      This requires some attention when adding Sizables, but is otherwise easy. I just don't see a real performance boost
@@ -49,6 +38,13 @@ public:
 	}
 
 	friend class AttachLayout;
+	friend class Axis;
+
+private:
+	//Use a special attachment type. These can only be set by friend classes.
+	//"offset" can mean many things. Here, if not zero, it specifies the component's "width" (or whatever) in pixels
+	Attachment(bool isSpecial, double percent, int width=0) : isSpecial(true), percent(percent), offset(width), type(Type::SpecialPercent) {}
+	Attachment(bool isSpecial, phoenix::Sizable& attachTo, Anchor attachAt=Anchor::Default, int width=0) : refItem(&attachTo), anchor(attachAt), isSpecial(true), offset(width), type(Type::SpecialAttached) {}
 
 private:
 	//Variables used to track which attachments have been computed, and which are pending.
@@ -59,12 +55,51 @@ private:
 
 	//Combined state variables
 	phoenix::Sizable* refItem;
-	ANCHOR anchor;
-	SPECIAL special;
+	Anchor anchor;
+	bool isSpecial;
 	double percent;
 	int offset;
-	TYPE type;
+	Type type;
 };
+
+
+//An Axis contains attachment points for either the horizontal or the vertical axis.
+// It can generally be constructed as either a pair of points (left/right or top/bottom) or as
+// a single entity (horiz) spanning the entire axis.
+class Axis {
+private:
+	//Actual data
+	Attachment least_;
+	Attachment greatest_;
+	bool isFullAxis;
+
+public:
+	//Whole-axis attachment types
+	enum class FullAxis {
+		Centered,
+	};
+
+	//Construct an axis composed of a left/right or top/bottom pair of Attachments.
+	//Either one of these Attachments is optional, and may be set to {} to use the component's
+	// default width/height.
+	Axis(const Attachment& least, const Attachment& greatest=Attachment()) : least_(least), greatest_(greatest), isFullAxis(false),
+		left(least_), right(greatest_), top(least_), bottom(greatest_), horiz(least_), vert(least_)
+	{}
+
+	//Construct an axis composed of a full-axis attachment, such as "centered"
+	Axis(const FullAxis& type, const Attachment& full) : least_(full), greatest_({}), isFullAxis(true),
+		left(least_), right(greatest_), top(least_), bottom(greatest_), horiz(least_), vert(least_)
+	{}
+
+	//For convenience
+	Attachment& left;   //least
+	Attachment& right;  //greatest
+	Attachment& top;    //least
+	Attachment& bottom; //greatest
+	Attachment& horiz;  //least
+	Attachment& vert;   //least
+};
+
 
 
 class AttachLayout : public phoenix::Layout {

@@ -5,6 +5,9 @@
 #include <iostream> //Debugging only; comment out if you're not using cout()
 
 using namespace phoenix;
+typedef Attachment::Type Type;
+typedef Attachment::Anchor Anchor;
+typedef Axis::FullAxis::Centered Centered;
 
 
 AttachLayout::AttachLayout()
