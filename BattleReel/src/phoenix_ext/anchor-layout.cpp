@@ -160,9 +160,9 @@ void AnchorLayout::setGeometry(const Geometry& containerGeometry)
 void AnchorLayout::ComputeComponent(Axis& axis, int& resOrigin, unsigned int& resMagnitude, LayoutData args)
 {
 	args.local.ltr = true;
-	resOrigin = AnchorLayout::Get(axis.least_, axis.greatest_, args);
+	resOrigin = AnchorLayout::Get(axis, args);
 	args.local.ltr = false;
-	resMagnitude = (unsigned int)(AnchorLayout::Get(axis.greatest_, axis.least_, args) - resOrigin);
+	resMagnitude = (unsigned int)(AnchorLayout::Get(axis, args) - resOrigin);
 }
 
 
@@ -170,57 +170,98 @@ int AnchorLayout::Get(Axis& axis, LayoutData& args)
 {
 	typedef AnchorPoint::Type Type;
 	typedef AnchorPoint::State State;
-	Axis::FullAxis Centered = Axis::FullAxis::Centered;  //For brevity
+	//Axis::FullAxis Centered = Axis::FullAxis::Centered;  //For brevity
+
+	//Make sure we check the opposing point if we the axis is computed in one go.
+	AnchorPoint& item = args.local.ltr ? axis.least_ : axis.greatest_;
+	AnchorPoint* other = nullptr;
+	if (axis.isFullAxis) {
+		other = args.local.ltr ? &axis.greatest_ : &axis.least_;
+	}
 
 	//Simple cases
-	AnchorPoint item = args.local.ltr ? axis.least_ : axis.greatest_;
 	if (item.state==State::Done) {
 		return item.res;
 	}
-	if (item.state==State::Waiting) {
+	if (item.state==State::Waiting || (other && other->state==State::Waiting)) {
 		//ERROR: default to returning 0 (optional approach to problem-solving: throw something)
 		std::cout <<"ERROR: Still waiting on item.\n";
 		return 0;
 	}
-
-	//Have to figure it out
 	item.state = State::Waiting;
-	if (item.type==Type::Unbound) {
-		item.res = GetUnbound(item, diam, args);
-	} else if (item.type==Type::Percent) {
-		item.res = GetPercent(item, args);
-	} else if (item.type==Type::Attached) {
-		item.res = GetAttached(item, diam, args);
-	} else if (item.type==Type::SpecialPercent && item.special==Attachment::SPECIAL::CENTERED) {
-		item.res = GetCenteredPercent(item, diam, args);
-	} else if (item.type==Type::SpecialAttached && item.special==Attachment::SPECIAL::CENTERED) {
-		item.res = GetCenteredAttached(item, diam, args);
-	} else {
-		//ERROR (in case we add more types later).
-		std::cout <<"ERROR: Unknown type\n";
-		return 0;
+	if (other) {
+		other->state = State::Waiting;
 	}
+
+	if (axis.isFullAxis) {
+		//Some items require figuring out both points at the same time.
+		nall::linear_vector<int> res = GetBoth(axis, args);
+		item.res = res[0];
+		other->res = res[1];
+	} else {
+		//Others can be computed independently.
+		if (item.type==Type::Unbound) {
+			item.res = GetUnbound(axis, args);
+		} else if (item.type==Type::Percent) {
+			item.res = GetPercent(axis, args);
+		} else if (item.type==Type::Attached) {
+			item.res = GetAttached(axis, args);
+		} else {
+			std::cout <<"ERROR: Unknown independent type\n";
+			return 0;
+		}
+	}
+
+	//Mark done, return result
 	item.state = State::Done;
+	if (other) {
+		other->state = State::Done;
+	}
 	return item.res;
 }
 
 
+nall::linear_vector<int> AnchorLayout::GetBoth(Axis& axis, LayoutData& args)
+{
+	typedef AnchorPoint::Type Type;
 
-int AnchorLayout::GetUnbound(AnchorPoint& item, AnchorPoint& diam, LayoutData& args)
+	//We need to save the current ltr value of args.local. That is because "linked" axis components are always processed LTR
+	// TODO: There should be a better way around this...
+	bool oldLtr = args.local.ltr;
+	args.local.ltr = true;
+
+	//Dispatch
+	nall::linear_vector<int> res = {0, 0};
+	if (axis.least_.type==Type::Percent) {
+		GetCenteredPercent(axis, args, res);
+	} else if (axis.greatest_.type==Type::Attached) {
+		GetCenteredAttached(axis, args, res);
+	} else {
+		std::cout <<"ERROR: Unknown dependent type\n";
+	}
+
+	//Now, restore ltr and return
+	args.local.ltr = oldLtr;
+	return res;
+}
+
+
+
+int AnchorLayout::GetUnbound(Axis& axis, LayoutData& args)
 {
 	//This simply depends on the item diametrically opposed to this one, plus a bit of sign manipulation
 	return AttachLayout::Get(diam, item, args.flipAnchor()) + args.local.sign*args.local.itemMin;
 }
 
 
-int AnchorLayout::GetPercent(AnchorPoint& item, LayoutData& args)
+int AnchorLayout::GetPercent(Axis& axis, LayoutData& args)
 {
 	//Simple; just remember to include the item's offset, and the global margin
 	return item.percent*args.containerMax + args.offset + item.offset + ((int)args.margin*-args.sign);
 }
 
 
-int AnchorLayout::GetCenteredPercent(AnchorPoint& item, AnchorPoint& diam, LayoutData& args)
+int AnchorLayout::GetCenteredPercent(Axis& axis, LayoutData& args)
 {
 	//First, get the centered position and width, then just expand outwards. Remember to set the diametric point to "done".
 	//NOTE: The margin has no effect here, because it's (practically speaking) added to the left and removed from the right,
@@ -234,7 +275,7 @@ int AnchorLayout::GetCenteredPercent(AnchorPoint& item, AnchorPoint& diam, Layou
 }
 
 
-int AnchorLayout::GetCenteredAttached(AnchorPoint& item, AnchorPoint& diam, LayoutData& args)
+int AnchorLayout::GetCenteredAttached(Axis& axis, LayoutData& args)
 {
 	Axis::FullAxis Centered = Axis::FullAxis::Centered;  //For brevity
 
@@ -302,7 +343,7 @@ int AnchorLayout::GetCenteredAttached(AnchorPoint& item, AnchorPoint& diam, Layo
 
 
 //Only slightly more complex. Most of the math (figuring out the sign & default anchor) has already been done for us.
-int AnchorLayout::GetAttached(AnchorPoint& item, AnchorPoint& diam, LayoutData& args)
+int AnchorLayout::GetAttached(Axis& axis, LayoutData& args)
 {
 	Axis::FullAxis Centered = Axis::FullAxis::Centered;  //For brevity
 

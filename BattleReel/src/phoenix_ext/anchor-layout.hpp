@@ -169,11 +169,12 @@ private:
 
 	static void ComputeComponent(Axis& axis, int& resOrigin, unsigned int& resMagnitude, LayoutData args);
 	static int Get(Axis& axis, LayoutData& args);
-	static int GetUnbound(AnchorPoint& item, AnchorPoint& diam, LayoutData& args);
-	static int GetPercent(AnchorPoint& item, LayoutData& args);
-	static int GetCenteredPercent(AnchorPoint& item, AnchorPoint& diam, LayoutData& args);
-	static int GetCenteredAttached(AnchorPoint& item, AnchorPoint& diam, LayoutData& args);
-	static int GetAttached(AnchorPoint& item, AnchorPoint& diam, LayoutData& args);
+	static nall::linear_vector<int> GetBoth(Axis& axis, LayoutData& args);
+	static int GetUnbound(Axis& axis, LayoutData& args);
+	static int GetPercent(Axis& axis, LayoutData& args);
+	static int GetCenteredPercent(Axis& axis, LayoutData& args, nall::linear_vector<int>& res);
+	static int GetCenteredAttached(Axis& axis, LayoutData& args, nall::linear_vector<int>& res);
+	static int GetAttached(Axis& axis, LayoutData& args);
 
 	struct State {
 		bool enabled;
