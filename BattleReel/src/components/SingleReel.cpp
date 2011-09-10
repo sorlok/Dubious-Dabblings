@@ -76,6 +76,7 @@ AttachLayout& SingleReel::getLayout()
 		layoutDone = true;
 
 		layout.setMargin(5);
+		layout.setSkipGeomUpdates(true);
 
 		//Attach right-to-left, so that we can easily overlap the numLbl if we want to.
 		phoenix::Sizable* last = nullptr;
@@ -93,6 +94,7 @@ AttachLayout& SingleReel::getLayout()
 		//Make sure the number label overlaps other components.
 		// TODO: Test on other platforms
 		layout.append(numLbl, {0.0}, {0.0});
+		layout.setSkipGeomUpdates(false);
 	}
 
 	return layout;

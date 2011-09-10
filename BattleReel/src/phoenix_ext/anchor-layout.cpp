@@ -227,8 +227,8 @@ int AttachLayout::GetCenteredAttached(Attachment& item, Attachment& diam, Layout
 		//The center layout requires both points to be calculatable. Otherwise, it't not very different.
 		Attachment* near = args.isHoriz ? &other->left : &other->top;
 		Attachment* far = args.isHoriz ? &other->right : &other->bottom;
-		baseVal = AttachLayout::Get(*near, diam, args);
-		baseVal = (AttachLayout::Get(*far, diam, args)-baseVal)/2 + baseVal;
+		baseVal = AttachLayout::Get(*near, *far, args);
+		baseVal = (AttachLayout::Get(*far, *near, args)-baseVal)/2 + baseVal;
 	} else {
 		//For left/right layouts, there's only one point to check.
 		Attachment* base = nullptr;
@@ -286,8 +286,8 @@ int AttachLayout::GetAttached(Attachment& item, Attachment& diam, LayoutData arg
 		//The center layout requires both points to be calculatable. Otherwise, it't not very different.
 		Attachment* near = args.isHoriz ? &other->left : &other->top;
 		Attachment* far = args.isHoriz ? &other->right : &other->bottom;
-		baseVal = AttachLayout::Get(*near, diam, args);
-		baseVal = (AttachLayout::Get(*far, diam, args)-baseVal)/2 + baseVal;
+		baseVal = AttachLayout::Get(*near, *far, args);
+		baseVal = (AttachLayout::Get(*far, *near, args)-baseVal)/2 + baseVal;
 	} else {
 		//For left/right layouts, there's only one point to check.
 		Attachment* base = nullptr;
