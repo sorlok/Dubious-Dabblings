@@ -234,7 +234,7 @@ nall::linear_vector<int> AnchorLayout::GetBoth(Axis& axis, LayoutData& args, boo
 	nall::linear_vector<int> res = {0, 0};
 	if (axis.least_.type==Type::Percent) {
 		GetCenteredPercent(res, axis, args, true, comp);
-	} else if (axis.greatest_.type==Type::Attached) {
+	} else if (axis.least_.type==Type::Attached) {
 		GetCenteredAttached(res, axis, args, true, comp);
 	} else {
 		std::cout <<"ERROR: Unknown dependent type\n";
