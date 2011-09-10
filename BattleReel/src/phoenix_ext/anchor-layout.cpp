@@ -181,7 +181,7 @@ int AttachLayout::GetUnbound(Attachment& item, Attachment& diam, LayoutData args
 int AttachLayout::GetPercent(Attachment& item, LayoutData args)
 {
 	//Simple; just remember to include the item's offset, and the global margin
-	return item.percent*args.containerMax + args.offset + item.offset + args.margin*args.sign;
+	return item.percent*args.containerMax + args.offset + item.offset + ((int)args.margin*args.sign);
 }
 
 
@@ -317,8 +317,6 @@ void AttachLayout::setGeometry(const Geometry& containerGeometry)
 	if (skipGeomUpdate) {
 		return;
 	}
-
-	std::cout <<"Set geom: " <<containerGeometry.width <<"," <<containerGeometry.height <<"\n";
 
 	//Save containerGeometry
 	lastKnownSize = containerGeometry;

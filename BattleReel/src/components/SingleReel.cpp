@@ -55,6 +55,9 @@ void SlotImage::init(const nall::string& name)
 }
 
 
+//phoenix::Font SingleReel::lblFont(nall::string("Arial 16 bold"));
+
+
 AttachLayout& SingleReel::getLayout()
 {
 	//Perform layout of visible components.

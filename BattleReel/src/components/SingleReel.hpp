@@ -44,12 +44,16 @@ public:
 	unsigned int id;
 	std::tuple<SingleSlot, SingleSlot, SingleSlot> slots[7];
 
-	SingleReel() : layoutDone(false) {}
+	SingleReel() : layoutDone(false) {
+		numLbl.setFont({"Arial, 14, bold"});
+	}
 	void loadData(const std::map<unsigned int, SlotImage>& imgLookup, unsigned char* dataStart=nullptr, unsigned int reelID=0);
 	AttachLayout& getLayout();
 
 private:
 	static const size_t NUM_SLOTS = 7;
+
+	//static phoenix::Font lblFont;
 
 	void nullAll(const nall::png& defaultImg);
 
