@@ -68,11 +68,11 @@ AttachLayout& SingleReel::getLayout()
 		phoenix::Sizable* last = nullptr;
 		for (int i=NUM_SLOTS-1; i>=0; i--) {
 			ImageIcon& icn = std::get<1>(slots[i]).icon;
-			Attachment top = {numLbl, 0, Attachment::ANCHOR::CENTER};
 			if (last) {
-				layout.append(icn, {}, top, {*last, -5});
+				//Test appending to the center; shouldn't do anything if components are the same height
+				layout.append(icn, {}, {Attachment::SPECIAL::CENTERED, *last}, {*last, -5});
 			} else {
-				layout.append(icn, {}, top, {1.0, -5});
+				layout.append(icn, {}, {numLbl, 0, Attachment::ANCHOR::CENTER}, {1.0, -5});
 			}
 			last = &icn;
 		}
