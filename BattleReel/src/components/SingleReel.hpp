@@ -48,7 +48,7 @@ public:
 		numLbl.setFont({"Arial, 14, bold"});
 	}
 	void loadData(const std::map<unsigned int, SlotImage>& imgLookup, unsigned char* dataStart=nullptr, unsigned int reelID=0);
-	AttachLayout& getLayout();
+	AnchorLayout& getLayout();
 	phoenix::Geometry getSuggestedMinimumSize();
 
 private:
@@ -60,7 +60,7 @@ private:
 
 	//For drawing
 	bool layoutDone;
-	AttachLayout layout;
+	AnchorLayout layout;
 	phoenix::Label numLbl;
 
 	//Location within the binary file, with a bounds check.

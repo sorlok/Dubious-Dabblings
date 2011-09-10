@@ -69,8 +69,10 @@ phoenix::Geometry SingleReel::getSuggestedMinimumSize()
 }
 
 
-AttachLayout& SingleReel::getLayout()
+AnchorLayout& SingleReel::getLayout()
 {
+	Axis::FullAxis Centered = Axis::FullAxis::Centered; //For brevity
+
 	//Perform layout of visible components.
 	if (!layoutDone) {
 		layoutDone = true;
@@ -86,15 +88,15 @@ AttachLayout& SingleReel::getLayout()
 			ImageIcon& icn = std::get<1>(slots[i]).icon;
 			if (last) {
 				//Test appending to the center; shouldn't do anything if components are the same height
-				layout.append(icn, {}, {Attachment::SPECIAL::CENTERED, *last}, {*last, -5});
+				layout.append(icn, {{}, {*last, -5}}, {Centered, *last});
 			} else {
-				layout.append(icn, {}, {numLbl}, {1.0, -5});
+				layout.append(icn, {{}, {1.0, -5}}, {{numLbl}});
 			}
 			last = &icn;
 		}
 
 		//Test: out-of-order appending
-		layout.append(numLbl, {0.0}, {0.0});
+		layout.append(numLbl, {{0.0}}, {{0.0}});
 
 		layout.setSkipGeomUpdates(false);
 	}
