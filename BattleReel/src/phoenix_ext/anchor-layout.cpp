@@ -5,12 +5,10 @@
 #include <iostream> //Debugging only; comment out if you're not using cout()
 
 using namespace phoenix;
-typedef Attachment::Type Type;
 typedef Attachment::Anchor Anchor;
-typedef Axis::FullAxis::Centered Centered;
 
 
-AttachLayout::AttachLayout()
+AnchorLayout::AnchorLayout()
 {
 	//Defaults
 	state.enabled = true;
@@ -20,7 +18,7 @@ AttachLayout::AttachLayout()
 }
 
 
-AttachLayout::~AttachLayout()
+AnchorLayout::~AnchorLayout()
 {
 	//Remove all children on exit
 	setSkipGeomUpdates(true);
@@ -30,7 +28,7 @@ AttachLayout::~AttachLayout()
 }
 
 
-void AttachLayout::append(Sizable &sizable) {
+void AnchorLayout::append(Sizable &sizable) {
 	foreach(child, children) {
 		if(child.sizable == &sizable) {
 			return;
@@ -43,10 +41,12 @@ void AttachLayout::append(Sizable &sizable) {
 }
 
 
-void AttachLayout::append(phoenix::Sizable &sizable, const Attachment& leftL, const Attachment& topL, const Attachment& rightL, const Attachment& bottomL)
+void AnchorLayout::append(phoenix::Sizable &sizable, const Axis& horizontal, const Axis& vertical)
 {
+	typedef Attachment::Type Type;
+
 	//First, a quick check: If ONE of any 2 diametrically opposed points is "special", the other should copy it.
-	Attachment left = (rightL.type==Attachment::TYPE::SPECIAL_PERCENT||rightL.type==Attachment::TYPE::SPECIAL_ATTACHED) ? rightL : leftL;
+	Attachment left = (rightL.type==Type::SpecialPercent||rightL.type==Attachment::TYPE::SPECIAL_ATTACHED) ? rightL : leftL;
 	Attachment right = (leftL.type==Attachment::TYPE::SPECIAL_PERCENT||leftL.type==Attachment::TYPE::SPECIAL_ATTACHED) ? leftL : rightL;
 	Attachment top = (bottomL.type==Attachment::TYPE::SPECIAL_PERCENT||bottomL.type==Attachment::TYPE::SPECIAL_ATTACHED) ? bottomL : topL;
 	Attachment bottom = (topL.type==Attachment::TYPE::SPECIAL_PERCENT||topL.type==Attachment::TYPE::SPECIAL_ATTACHED) ? topL : bottomL;
@@ -67,7 +67,7 @@ void AttachLayout::append(phoenix::Sizable &sizable, const Attachment& leftL, co
 }
 
 
-void AttachLayout::remove(Sizable& sizable)
+void AnchorLayout::remove(Sizable& sizable)
 {
 	//Rmove this item if it exists.
 	for(unsigned n=0; n<children.size(); n++) {
@@ -80,7 +80,7 @@ void AttachLayout::remove(Sizable& sizable)
 }
 
 
-void AttachLayout::synchronize()
+void AnchorLayout::synchronize()
 {
 	//Ensure all sizables have been appended to the layout.
 	foreach(child, children) {
@@ -89,7 +89,7 @@ void AttachLayout::synchronize()
 }
 
 
-void AttachLayout::setEnabled(bool enabled)
+void AnchorLayout::setEnabled(bool enabled)
 {
 	state.enabled = enabled;
 	foreach(child, children) {
@@ -97,7 +97,7 @@ void AttachLayout::setEnabled(bool enabled)
 	}
 }
 
-void AttachLayout::setVisible(bool visible)
+void AnchorLayout::setVisible(bool visible)
 {
 	state.visible = visible;
 	foreach(child, children) {
@@ -105,7 +105,7 @@ void AttachLayout::setVisible(bool visible)
 	}
 }
 
-bool AttachLayout::enabled()
+bool AnchorLayout::enabled()
 {
 	if(layout()) {
 		return state.enabled && layout()->enabled();
@@ -113,7 +113,7 @@ bool AttachLayout::enabled()
 	return state.enabled;
 }
 
-bool AttachLayout::visible()
+bool AnchorLayout::visible()
 {
 	if(layout()) {
 		return state.visible && layout()->visible();
@@ -122,7 +122,7 @@ bool AttachLayout::visible()
 }
 
 
-Geometry AttachLayout::minimumGeometry()
+Geometry AnchorLayout::minimumGeometry()
 {
 	//By its nature, AttachLayouts take up the entire width/height of the parent.
 	// At least, I can't think of a reasonable use case for taking less than the maximum.
@@ -132,15 +132,18 @@ Geometry AttachLayout::minimumGeometry()
 
 //Compute a single component. "Least" and "Greatest" are essentially "left" and "right".
 // Save into "resOrigin", "resMagnitude", which are basically "x" and "width".
-void AttachLayout::ComputeComponent(Attachment& least, Attachment& greatest, int& resOrigin, unsigned int& resMagnitude, LayoutData args)
+void AnchorLayout::ComputeComponent(Attachment& least, Attachment& greatest, int& resOrigin, unsigned int& resMagnitude, LayoutData args)
 {
 	resOrigin = AttachLayout::Get(least, greatest, args.setSign(-1).setAnchor(Attachment::ANCHOR::RIGHT));
 	resMagnitude = (unsigned int)(AttachLayout::Get(greatest, least, args.flipSign().flipAnchor())-resOrigin);
 }
 
 
-int AttachLayout::Get(Attachment& item, Attachment& diam, LayoutData args)
+int AnchorLayout::Get(Attachment& item, Attachment& diam, LayoutData args)
 {
+	typedef Attachment::Type Type;
+	Axis::FullAxis Centered = Axis::FullAxis::Centered;  //For brevity
+
 	//Simple cases
 	if (item.done) {
 		return item.res;
@@ -153,15 +156,15 @@ int AttachLayout::Get(Attachment& item, Attachment& diam, LayoutData args)
 
 	//Have to figure it out
 	item.waiting = true;
-	if (item.type==Attachment::TYPE::UNBOUND) {
+	if (item.type==Type::Unbound) {
 		item.res = GetUnbound(item, diam, args);
-	} else if (item.type==Attachment::TYPE::PERCENT) {
+	} else if (item.type==Type::Percent) {
 		item.res = GetPercent(item, args);
-	} else if (item.type==Attachment::TYPE::ATTACHED) {
+	} else if (item.type==Type::Attached) {
 		item.res = GetAttached(item, diam, args);
-	} else if (item.type==Attachment::TYPE::SPECIAL_PERCENT && item.special==Attachment::SPECIAL::CENTERED) {
+	} else if (item.type==Type::SpecialPercent && item.special==Attachment::SPECIAL::CENTERED) {
 		item.res = GetCenteredPercent(item, diam, args);
-	} else if (item.type==Attachment::TYPE::SPECIAL_ATTACHED && item.special==Attachment::SPECIAL::CENTERED) {
+	} else if (item.type==Type::SpecialAttached && item.special==Attachment::SPECIAL::CENTERED) {
 		item.res = GetCenteredAttached(item, diam, args);
 	} else {
 		//ERROR (in case we add more types later).
@@ -174,21 +177,21 @@ int AttachLayout::Get(Attachment& item, Attachment& diam, LayoutData args)
 
 
 
-int AttachLayout::GetUnbound(Attachment& item, Attachment& diam, LayoutData args)
+int AnchorLayout::GetUnbound(Attachment& item, Attachment& diam, LayoutData args)
 {
 	//This simply depends on the item diametrically opposed to this one, plus a bit of sign manipulation
 	return AttachLayout::Get(diam, item, args.flipAnchor()) + args.sign*args.itemMin;
 }
 
 
-int AttachLayout::GetPercent(Attachment& item, LayoutData args)
+int AnchorLayout::GetPercent(Attachment& item, LayoutData args)
 {
 	//Simple; just remember to include the item's offset, and the global margin
 	return item.percent*args.containerMax + args.offset + item.offset + ((int)args.margin*-args.sign);
 }
 
 
-int AttachLayout::GetCenteredPercent(Attachment& item, Attachment& diam, LayoutData args)
+int AnchorLayout::GetCenteredPercent(Attachment& item, Attachment& diam, LayoutData args)
 {
 	//First, get the centered position and width, then just expand outwards. Remember to set the diametric point to "done".
 	//NOTE: The margin has no effect here, because it's (practically speaking) added to the left and removed from the right,
@@ -202,8 +205,10 @@ int AttachLayout::GetCenteredPercent(Attachment& item, Attachment& diam, LayoutD
 }
 
 
-int AttachLayout::GetCenteredAttached(Attachment& item, Attachment& diam, LayoutData args)
+int AnchorLayout::GetCenteredAttached(Attachment& item, Attachment& diam, LayoutData args)
 {
+	Axis::FullAxis Centered = Axis::FullAxis::Centered;  //For brevity
+
 	//First, retrieve the component
 	Children* other = nullptr;
 	foreach(child, args.children)  {
@@ -224,7 +229,7 @@ int AttachLayout::GetCenteredAttached(Attachment& item, Attachment& diam, Layout
 	//This is only mildly more complex than the normal "attached" case.
 	//NOTE: The "default" for items centered this way is ANCHOR::CENTERED; otherwise, it behaves just like GetAttached()
 	//TODO: Combine code; modularity could be much better.
-	Attachment::ANCHOR anch = item.anchor==Attachment::ANCHOR::DEFAULT ? Attachment::ANCHOR::CENTER : item.anchor;
+	Anchor anch = item.anchor==Anchor::Default ? Anchor::Center : item.anchor;
 	int baseVal = 0;
 	if (anch==Attachment::ANCHOR::CENTER) {
 		//The center layout requires both points to be calculatable. Otherwise, it't not very different.
@@ -268,8 +273,10 @@ int AttachLayout::GetCenteredAttached(Attachment& item, Attachment& diam, Layout
 
 
 //Only slightly more complex. Most of the math (figuring out the sign & default anchor) has already been done for us.
-int AttachLayout::GetAttached(Attachment& item, Attachment& diam, LayoutData args)
+int AnchorLayout::GetAttached(Attachment& item, Attachment& diam, LayoutData args)
 {
+	Axis::FullAxis Centered = Axis::FullAxis::Centered;  //For brevity
+
 	//First, retrieve the component
 	Children* other = nullptr;
 	foreach(child, args.children)  {
@@ -325,7 +332,7 @@ int AttachLayout::GetAttached(Attachment& item, Attachment& diam, LayoutData arg
 
 
 
-void AttachLayout::setGeometry(const Geometry& containerGeometry)
+void AnchorLayout::setGeometry(const Geometry& containerGeometry)
 {
 	//When closing the app (or if the user tells us to) we don't need to redo any internal geometry
 	// calculations. Be careful not to leave this flag on before going back to the message loop.
