@@ -49,7 +49,7 @@ public:
 	AttachLayout& getLayout();
 
 private:
-	static const size_t NUM_SLOTS = 8;
+	static const size_t NUM_SLOTS = 7;
 
 	void nullAll(const nall::png& defaultImg);
 

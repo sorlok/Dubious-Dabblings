@@ -130,11 +130,11 @@ void SingleReel::loadData(const map<unsigned int, SlotImage>& imgLookup, unsigne
 		std::stringstream num;
 		num <<reelID;
 		numLbl.setText(PadString(num.str(), 3).c_str());
-	}
 
-	//Check
-	if (src != dataStart+this->dataSize) {
-		std::cout <<"Alignment error.\n";
+		//Check
+		if (src != dataStart+this->dataSize) {
+			std::cout <<"Alignment error.\n";
+		}
 	}
 }
 

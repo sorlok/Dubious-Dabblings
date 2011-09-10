@@ -318,6 +318,8 @@ void AttachLayout::setGeometry(const Geometry& containerGeometry)
 		return;
 	}
 
+	std::cout <<"Set geom: " <<containerGeometry.width <<"," <<containerGeometry.height <<"\n";
+
 	//Save containerGeometry
 	lastKnownSize = containerGeometry;
 

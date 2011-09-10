@@ -67,7 +67,7 @@ struct Application : Window {
     setGeometry({ 130, 130, 700, 490 });
 
     //Ensure that the testReel can at least size itself (we can add images later).
-    //testReel.loadData(nullptr, rouletteSlots);
+    testReel.loadData(rouletteSlots);
 
     helloLabel.setText("Map Viewer");
     okButton.setText("Load Map");
@@ -83,25 +83,25 @@ struct Application : Window {
     //Horizontal layout
     layoutHoriz.append(okButton, 100, 30, 5);
     layoutHoriz.append(quitButton, 100, 30, 5);
-    layoutHoriz.append(testIcon1, 0, 0, 5);
-    layoutHoriz.append(testIcon2, 0, 0, 5);
+    /*layoutHoriz.append(testIcon2, 0, 0, 5);
     layoutHoriz.append(testIcon3, 0, 0, 5);
     layoutHoriz.append(testIcon4, 0, 0, 5);
     layoutHoriz.append(testIcon5, 0, 0, 5);
     layoutHoriz.append(testIcon6, 0, 0, 5);
-    layoutHoriz.append(testIcon7, 0, 0, 5);
+    layoutHoriz.append(testIcon7, 0, 0, 5);*/
 
     //Vertical layout
     layoutVert.setMargin(5);
     layoutVert.append(helloLabel, 0, 0, 5);
     layoutVert.append(layoutHoriz, 0, 0, 10);
+    layoutVert.append(testReel.getLayout(), ~0, ~0, 5);
 
     //Master layout
     append(layoutVert);
 
 
-    onClose = quitButton.onTick = [&layoutHoriz, &layoutVert] {
-        //layout.skipUpdate = true;
+    onClose = quitButton.onTick = [&testReel] {
+    	testReel.getLayout().setSkipGeomUpdates(true);
     	OS::quit();
     };
 
