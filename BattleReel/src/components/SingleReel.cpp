@@ -78,6 +78,8 @@ AttachLayout& SingleReel::getLayout()
 		layout.setMargin(5);
 		layout.setSkipGeomUpdates(true);
 
+		//layout.append(numLbl, {0.0}, {0.0});
+
 		//Attach right-to-left, so that we can easily overlap the numLbl if we want to.
 		phoenix::Sizable* last = nullptr;
 		for (int i=NUM_SLOTS-1; i>=0; i--) {

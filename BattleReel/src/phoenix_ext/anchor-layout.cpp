@@ -230,19 +230,25 @@ int AttachLayout::GetCenteredAttached(Attachment& item, Attachment& diam, Layout
 		baseVal = AttachLayout::Get(*near, *far, args);
 		baseVal = (AttachLayout::Get(*far, *near, args)-baseVal)/2 + baseVal;
 	} else {
-		//For left/right layouts, there's only one point to check.
+		//For left/right layouts, there's only one point to check. //Not true!
 		Attachment* base = nullptr;
+		Attachment* apart = nullptr;
+		LayoutData ld2 = args;
 		if (anch==Attachment::ANCHOR::LEFT) {
 			base = args.isHoriz ? &other->left : &other->top;
+			apart = args.isHoriz ? &other->right : &other->bottom;
+			ld2.setSign(-1).setAnchor(Attachment::ANCHOR::RIGHT);
 		} else if (anch==Attachment::ANCHOR::RIGHT) {
 			base = args.isHoriz ? &other->right : &other->bottom;
+			apart = args.isHoriz ? &other->left : &other->top;
+			ld2.setSign(1).setAnchor(Attachment::ANCHOR::LEFT);
 		} else {
 			//Shouldn't fail, but just to be safe...
 			std::cout <<"ERROR: unexpected anchor value.\n";
 			return 0;
 		}
 
-		baseVal = AttachLayout::Get(*base, diam, args);
+		baseVal = AttachLayout::Get(*base, *apart, ld2);
 	}
 
 	//Now center it as expected, setting diam's value too.
@@ -291,17 +297,23 @@ int AttachLayout::GetAttached(Attachment& item, Attachment& diam, LayoutData arg
 	} else {
 		//For left/right layouts, there's only one point to check.
 		Attachment* base = nullptr;
+		Attachment* apart = nullptr;
+		LayoutData ld2 = args;
 		if (anch==Attachment::ANCHOR::LEFT) {
 			base = args.isHoriz ? &other->left : &other->top;
+			apart = args.isHoriz ? &other->right : &other->bottom;
+			ld2.setSign(-1).setAnchor(Attachment::ANCHOR::RIGHT);
 		} else if (anch==Attachment::ANCHOR::RIGHT) {
 			base = args.isHoriz ? &other->right : &other->bottom;
+			apart = args.isHoriz ? &other->left : &other->top;
+			ld2.setSign(1).setAnchor(Attachment::ANCHOR::LEFT);
 		} else {
 			//Shouldn't fail, but just to be safe...
 			std::cout <<"ERROR: unexpected anchor value.\n";
 			return 0;
 		}
 
-		baseVal = AttachLayout::Get(*base, diam, args);
+		baseVal = AttachLayout::Get(*base, *apart, ld2);
 	}
 
 	//Now add the offset
