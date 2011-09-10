@@ -181,7 +181,7 @@ int AttachLayout::GetUnbound(Attachment& item, Attachment& diam, LayoutData args
 int AttachLayout::GetPercent(Attachment& item, LayoutData args)
 {
 	//Simple; just remember to include the item's offset, and the global margin
-	return item.percent*args.containerMax + args.offset + item.offset + ((int)args.margin*args.sign);
+	return item.percent*args.containerMax + args.offset + item.offset + ((int)args.margin*-args.sign);
 }
 
 
