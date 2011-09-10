@@ -5,7 +5,7 @@
 #include <iostream> //Debugging only; comment out if you're not using cout()
 
 using namespace phoenix;
-typedef Attachment::Anchor Anchor;
+typedef AnchorPoint::Anchor Anchor;
 
 
 AnchorLayout::AnchorLayout()
@@ -14,7 +14,7 @@ AnchorLayout::AnchorLayout()
 	state.enabled = true;
 	state.visible = true;
 	state.margin = 0;
-	skipGeomUpdate = false;
+	state.skipGeomUpdate = false;
 }
 
 
@@ -43,26 +43,18 @@ void AnchorLayout::append(Sizable &sizable) {
 
 void AnchorLayout::append(phoenix::Sizable &sizable, const Axis& horizontal, const Axis& vertical)
 {
-	typedef Attachment::Type Type;
-
-	//First, a quick check: If ONE of any 2 diametrically opposed points is "special", the other should copy it.
-	Attachment left = (rightL.type==Type::SpecialPercent||rightL.type==Attachment::TYPE::SPECIAL_ATTACHED) ? rightL : leftL;
-	Attachment right = (leftL.type==Attachment::TYPE::SPECIAL_PERCENT||leftL.type==Attachment::TYPE::SPECIAL_ATTACHED) ? leftL : rightL;
-	Attachment top = (bottomL.type==Attachment::TYPE::SPECIAL_PERCENT||bottomL.type==Attachment::TYPE::SPECIAL_ATTACHED) ? bottomL : topL;
-	Attachment bottom = (topL.type==Attachment::TYPE::SPECIAL_PERCENT||topL.type==Attachment::TYPE::SPECIAL_ATTACHED) ? topL : bottomL;
+	typedef AnchorPoint::Type Type;
 
 	//If this child already exists, update its attachment data
 	foreach(child, children)  {
 		if(child.sizable == &sizable) {
-			child.left = left;
-			child.top = top;
-			child.right = right;
-			child.bottom = bottom;
+			child.horiz = horizontal;
+			child.vert = vertical;
 			return;
 		}
 	}
 	//Else, add a new item
-	children.append({ &sizable, left, top, right, bottom });
+	children.append({ &sizable, horizontal, vertical });
 	synchronize();
 }
 
@@ -126,36 +118,73 @@ Geometry AnchorLayout::minimumGeometry()
 {
 	//By its nature, AttachLayouts take up the entire width/height of the parent.
 	// At least, I can't think of a reasonable use case for taking less than the maximum.
-	return lastKnownSize;
+	return state.lastKnownSize;
 }
+
+
+
+void AnchorLayout::setGeometry(const Geometry& containerGeometry)
+{
+	//When closing the app (or if the user tells us to) we don't need to redo any internal geometry
+	// calculations. Be careful not to leave this flag on before going back to the message loop.
+	if (state.skipGeomUpdate) {
+		return;
+	}
+
+	//Save containerGeometry
+	state.lastKnownSize = containerGeometry;
+
+	//First, reset all children.
+	foreach(child, children) {
+		child.horiz.reset();
+		child.vert.reset();
+	}
+
+	//Apply alyout rules for each child  individually.
+	foreach(child, children) {
+		//We compute each component in pairs..
+		Geometry res;
+
+		AnchorLayout::ComputeComponent(child.horiz, res.x, res.width, {{containerGeometry.x, containerGeometry.width, state.margin, true, children}, {child.sizable->minimumGeometry().width, true}});
+		AnchorLayout::ComputeComponent(child.vert, res.y, res.height, {{containerGeometry.y, containerGeometry.height, state.margin, true, children}, {child.sizable->minimumGeometry().height, false}});
+		child.sizable->setGeometry(res);
+	}
+
+}
+
+
 
 
 //Compute a single component. "Least" and "Greatest" are essentially "left" and "right".
 // Save into "resOrigin", "resMagnitude", which are basically "x" and "width".
-void AnchorLayout::ComputeComponent(Attachment& least, Attachment& greatest, int& resOrigin, unsigned int& resMagnitude, LayoutData args)
+void AnchorLayout::ComputeComponent(Axis& axis, int& resOrigin, unsigned int& resMagnitude, LayoutData args)
 {
-	resOrigin = AttachLayout::Get(least, greatest, args.setSign(-1).setAnchor(Attachment::ANCHOR::RIGHT));
-	resMagnitude = (unsigned int)(AttachLayout::Get(greatest, least, args.flipSign().flipAnchor())-resOrigin);
+	args.local.ltr = true;
+	resOrigin = AnchorLayout::Get(axis.least_, axis.greatest_, args);
+	args.local.ltr = false;
+	resMagnitude = (unsigned int)(AnchorLayout::Get(axis.greatest_, axis.least_, args) - resOrigin);
 }
 
 
-int AnchorLayout::Get(Attachment& item, Attachment& diam, LayoutData args)
+int AnchorLayout::Get(Axis& axis, LayoutData& args)
 {
-	typedef Attachment::Type Type;
+	typedef AnchorPoint::Type Type;
+	typedef AnchorPoint::State State;
 	Axis::FullAxis Centered = Axis::FullAxis::Centered;  //For brevity
 
 	//Simple cases
-	if (item.done) {
+	AnchorPoint item = args.local.ltr ? axis.least_ : axis.greatest_;
+	if (item.state==State::Done) {
 		return item.res;
 	}
-	if (item.waiting) {
+	if (item.state==State::Waiting) {
 		//ERROR: default to returning 0 (optional approach to problem-solving: throw something)
 		std::cout <<"ERROR: Still waiting on item.\n";
 		return 0;
 	}
 
 	//Have to figure it out
-	item.waiting = true;
+	item.state = State::Waiting;
 	if (item.type==Type::Unbound) {
 		item.res = GetUnbound(item, diam, args);
 	} else if (item.type==Type::Percent) {
@@ -171,27 +200,27 @@ int AnchorLayout::Get(Attachment& item, Attachment& diam, LayoutData args)
 		std::cout <<"ERROR: Unknown type\n";
 		return 0;
 	}
-	item.done = true;
+	item.state = State::Done;
 	return item.res;
 }
 
 
 
-int AnchorLayout::GetUnbound(Attachment& item, Attachment& diam, LayoutData args)
+int AnchorLayout::GetUnbound(AnchorPoint& item, AnchorPoint& diam, LayoutData& args)
 {
 	//This simply depends on the item diametrically opposed to this one, plus a bit of sign manipulation
-	return AttachLayout::Get(diam, item, args.flipAnchor()) + args.sign*args.itemMin;
+	return AttachLayout::Get(diam, item, args.flipAnchor()) + args.local.sign*args.local.itemMin;
 }
 
 
-int AnchorLayout::GetPercent(Attachment& item, LayoutData args)
+int AnchorLayout::GetPercent(AnchorPoint& item, LayoutData& args)
 {
 	//Simple; just remember to include the item's offset, and the global margin
 	return item.percent*args.containerMax + args.offset + item.offset + ((int)args.margin*-args.sign);
 }
 
 
-int AnchorLayout::GetCenteredPercent(Attachment& item, Attachment& diam, LayoutData args)
+int AnchorLayout::GetCenteredPercent(AnchorPoint& item, AnchorPoint& diam, LayoutData& args)
 {
 	//First, get the centered position and width, then just expand outwards. Remember to set the diametric point to "done".
 	//NOTE: The margin has no effect here, because it's (practically speaking) added to the left and removed from the right,
@@ -205,7 +234,7 @@ int AnchorLayout::GetCenteredPercent(Attachment& item, Attachment& diam, LayoutD
 }
 
 
-int AnchorLayout::GetCenteredAttached(Attachment& item, Attachment& diam, LayoutData args)
+int AnchorLayout::GetCenteredAttached(AnchorPoint& item, AnchorPoint& diam, LayoutData& args)
 {
 	Axis::FullAxis Centered = Axis::FullAxis::Centered;  //For brevity
 
@@ -273,7 +302,7 @@ int AnchorLayout::GetCenteredAttached(Attachment& item, Attachment& diam, Layout
 
 
 //Only slightly more complex. Most of the math (figuring out the sign & default anchor) has already been done for us.
-int AnchorLayout::GetAttached(Attachment& item, Attachment& diam, LayoutData args)
+int AnchorLayout::GetAttached(AnchorPoint& item, AnchorPoint& diam, LayoutData& args)
 {
 	Axis::FullAxis Centered = Axis::FullAxis::Centered;  //For brevity
 
@@ -329,47 +358,3 @@ int AnchorLayout::GetAttached(Attachment& item, Attachment& diam, LayoutData arg
 	//Now add the offset
 	return baseVal + item.offset;
 }
-
-
-
-void AnchorLayout::setGeometry(const Geometry& containerGeometry)
-{
-	//When closing the app (or if the user tells us to) we don't need to redo any internal geometry
-	// calculations. Be careful not to leave this flag on before going back to the message loop.
-	if (skipGeomUpdate) {
-		return;
-	}
-
-	//Save containerGeometry
-	lastKnownSize = containerGeometry;
-
-	//First, reset all children.
-	foreach(child, children) {
-		child.left.reset();
-		child.right.reset();
-		child.top.reset();
-		child.bottom.reset();
-	}
-
-	//Apply alyout rules for each child  individually.
-	foreach(child, children) {
-		//We compute each component in pairs..
-		Geometry res;
-		AttachLayout::ComputeComponent(child.left, child.right, res.x, res.width, {containerGeometry.x, containerGeometry.width, child.sizable->minimumGeometry().width, true, state.margin, children});
-		AttachLayout::ComputeComponent(child.top, child.bottom, res.y, res.height, {containerGeometry.y, containerGeometry.height, child.sizable->minimumGeometry().height, false, state.margin, children});
-		child.sizable->setGeometry(res);
-	}
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
