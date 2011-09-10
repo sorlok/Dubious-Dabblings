@@ -153,8 +153,8 @@ void AnchorLayout::setGeometry(const Geometry& containerGeometry)
 		//We compute each component in pairs..
 		Geometry res;
 
-		AnchorLayout::ComputeComponent(child.horiz, res.x, res.width, {{containerGeometry.x, containerGeometry.width, state.margin, true, children}, {child.sizable->minimumGeometry().width, true}});
-		AnchorLayout::ComputeComponent(child.vert, res.y, res.height, {{containerGeometry.y, containerGeometry.height, state.margin, true, children}, {child.sizable->minimumGeometry().height, false}});
+		AnchorLayout::ComputeComponent(child.horiz, res.x, res.width, {containerGeometry.x, containerGeometry.width, state.margin, true, children}, *child.sizable);
+		AnchorLayout::ComputeComponent(child.vert, res.y, res.height, {containerGeometry.y, containerGeometry.height, state.margin, true, children}, *child.sizable);
 		child.sizable->setGeometry(res);
 	}
 
@@ -165,25 +165,23 @@ void AnchorLayout::setGeometry(const Geometry& containerGeometry)
 
 //Compute a single component. "Least" and "Greatest" are essentially "left" and "right".
 // Save into "resOrigin", "resMagnitude", which are basically "x" and "width".
-void AnchorLayout::ComputeComponent(Axis& axis, int& resOrigin, unsigned int& resMagnitude, LayoutData args)
+void AnchorLayout::ComputeComponent(Axis& axis, int& resOrigin, unsigned int& resMagnitude, LayoutData args, phoenix::Sizable& comp)
 {
-	args.local.ltr = true;
-	resOrigin = AnchorLayout::Get(axis, args);
-	args.local.ltr = false;
-	resMagnitude = (unsigned int)(AnchorLayout::Get(axis, args) - resOrigin);
+	resOrigin = AnchorLayout::Get(axis, args, true, comp);
+	resMagnitude = (unsigned int)(AnchorLayout::Get(axis, args, false, comp) - resOrigin);
 }
 
 
-int AnchorLayout::Get(Axis& axis, LayoutData& args)
+int AnchorLayout::Get(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp)
 {
 	typedef AnchorPoint::Type Type;
 	typedef AnchorPoint::State State;
 
 	//Make sure we check the opposing point if we the axis is computed in one go.
-	AnchorPoint& item = args.local.ltr ? axis.least_ : axis.greatest_;
+	AnchorPoint& item = ltr ? axis.least_ : axis.greatest_;
 	AnchorPoint* other = nullptr;
 	if (axis.isFullAxis) {
-		other = args.local.ltr ? &axis.greatest_ : &axis.least_;
+		other = ltr ? &axis.greatest_ : &axis.least_;
 	}
 
 	//Simple cases
@@ -202,17 +200,17 @@ int AnchorLayout::Get(Axis& axis, LayoutData& args)
 
 	if (axis.isFullAxis) {
 		//Some items require figuring out both points at the same time.
-		nall::linear_vector<int> res = GetBoth(axis, args);
+		nall::linear_vector<int> res = GetBoth(axis, args, ltr, comp);
 		item.res = res[0];
 		other->res = res[1];
 	} else {
 		//Others can be computed independently.
 		if (item.type==Type::Unbound) {
-			item.res = GetUnbound(axis, args);
+			item.res = GetUnbound(axis, args, ltr, comp);
 		} else if (item.type==Type::Percent) {
-			item.res = GetPercent(axis, args);
+			item.res = GetPercent(axis, args, ltr, comp);
 		} else if (item.type==Type::Attached) {
-			item.res = GetAttached(axis, args);
+			item.res = GetAttached(axis, args, ltr, comp);
 		} else {
 			std::cout <<"ERROR: Unknown independent type\n";
 			return 0;
@@ -228,60 +226,52 @@ int AnchorLayout::Get(Axis& axis, LayoutData& args)
 }
 
 
-nall::linear_vector<int> AnchorLayout::GetBoth(Axis& axis, LayoutData& args)
+nall::linear_vector<int> AnchorLayout::GetBoth(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp)
 {
 	typedef AnchorPoint::Type Type;
-
-	//We need to save the current ltr value of args.local. That is because "linked" axis components are always processed LTR
-	// TODO: There should be a better way around this...
-	bool oldLtr = args.local.ltr;
-	args.local.ltr = true;
 
 	//Dispatch
 	nall::linear_vector<int> res = {0, 0};
 	if (axis.least_.type==Type::Percent) {
-		GetCenteredPercent(axis, args, res);
+		GetCenteredPercent(res, axis, args, true, comp);
 	} else if (axis.greatest_.type==Type::Attached) {
-		GetCenteredAttached(axis, args, res);
+		GetCenteredAttached(res, axis, args, true, comp);
 	} else {
 		std::cout <<"ERROR: Unknown dependent type\n";
 	}
 
-	//Now, restore ltr and return
-	args.local.ltr = oldLtr;
 	return res;
 }
 
 
-int AnchorLayout::GetPercent(Axis& axis, LayoutData& args)
+int AnchorLayout::GetPercent(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp)
 {
 	//Simple; just remember to include the item's offset, and the global margin (+/- sign)
-	AnchorPoint& item = args.local.ltr ? axis.least_ : axis.greatest_;
-	int sign = args.local.ltr ? 1 : -1;
-	return item.percent*args.global.containerMax + args.global.containerOffset + item.offset + ((int)args.global.containerMargin*sign);
+	AnchorPoint& item = ltr ? axis.least_ : axis.greatest_;
+	int sign = ltr ? 1 : -1;
+	return item.percent*args.containerMax + args.containerOffset + item.offset + ((int)args.containerMargin*sign);
 }
 
 
-int AnchorLayout::GetUnbound(Axis& axis, LayoutData& args)
+int AnchorLayout::GetUnbound(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp)
 {
 	//This simply depends on the item diametrically opposed to this one, plus a bit of sign manipulation
-	args.local.ltr = !args.local.ltr;
-	int other = AnchorLayout::Get(axis, args);
-	bool sign = args.local.ltr ? 1 : -1;
-	args.local.ltr = !args.local.ltr;
-	return other + sign*args.local.itemMin;
+	int itemMin = args.isHoriz ? comp.minimumGeometry().width : comp.minimumGeometry().height;
+	int other = AnchorLayout::Get(axis, args, !ltr, comp);
+	bool sign = ltr ? -1 : 1;
+	return other + sign*itemMin;
 
 }
 
 
 //Only slightly more complex. Centering requires a bit of careful math; the rest is a matter of remembering to flip "ltr"
-int AnchorLayout::GetAttached(Axis& axis, LayoutData& args)
+int AnchorLayout::GetAttached(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp)
 {
 	Axis::FullAxis Centered = Axis::FullAxis::Centered;  //For brevity
 
 	//First, retrieve the components
-	AnchorPoint& item = args.local.ltr ? axis.least_ : axis.greatest_;
-	Children* other = AnchorLayout::FindChild(args.global.children, *item.refItem);
+	AnchorPoint& item = ltr ? axis.least_ : axis.greatest_;
+	Children* other = AnchorLayout::FindChild(args.children, *item.refItem);
 
 	//Did we retrieve anything? (this should also check for a null item.refItem)
 	if (!other) {
@@ -291,60 +281,50 @@ int AnchorLayout::GetAttached(Axis& axis, LayoutData& args)
 		return 0;
 	}
 
-	//Retrive the anchor (might be default)
+	//Retrive the anchor; translate "default" value
 	Anchor anch = item.anchor;
 	if (anch==Anchor::Default) {
 		if (axis.isFullAxis) {  //TODO: This might be assuming too much!
 			anch = Anchor::Center;
 		} else {
-			anch = args.local.ltr ? Anchor::Right : Anchor::Left;
+			anch = ltr ? Anchor::Right : Anchor::Left;
 		}
 	}
 
 	//Compute the result, based on either the first or second point, or both.
+	Axis & otherAxis = args.isHoriz ? other->horiz : other->vert;
 	if (anch==Anchor::Center) {
 		//The center layout requires both points to be calculatable. Otherwise, it't not very different.
-		Attachment* near = args.isHoriz ? &other->left : &other->top;
-		Attachment* far = args.isHoriz ? &other->right : &other->bottom;
-		int baseVal = AttachLayout::Get(*near, *far, args);
-		int baseVal = (AttachLayout::Get(*far, *near, args)-baseVal)/2 + baseVal;
+		int baseVal = AnchorLayout::Get(otherAxis, args, true, *other->sizable);
+		baseVal = (AnchorLayout::Get(otherAxis, args, true, *other->sizable)-baseVal)/2 + baseVal;
 		return baseVal + item.offset;
 	} else {
 		//For left/right layouts, there's only one point to check.
-		Attachment* base = nullptr;
-		Attachment* apart = nullptr;
-		LayoutData ld2 = args;
-		if (anch==Attachment::ANCHOR::LEFT) {
-			base = args.isHoriz ? &other->left : &other->top;
-			apart = args.isHoriz ? &other->right : &other->bottom;
-			ld2.setSign(-1).setAnchor(Attachment::ANCHOR::RIGHT);
-		} else if (anch==Attachment::ANCHOR::RIGHT) {
-			base = args.isHoriz ? &other->right : &other->bottom;
-			apart = args.isHoriz ? &other->left : &other->top;
-			ld2.setSign(1).setAnchor(Attachment::ANCHOR::LEFT);
+		int baseVal = 0;
+		if (anch==Anchor::Left) {
+			baseVal = AnchorLayout::Get(otherAxis, args, true, *other->sizable);
+		} else if (anch==Anchor::Right) {
+			baseVal = AnchorLayout::Get(otherAxis, args, false, *other->sizable);
 		} else {
 			//Shouldn't fail, but just to be safe...
 			std::cout <<"ERROR: unexpected anchor value.\n";
 			return 0;
 		}
 
-		return AttachLayout::Get(*base, *apart, ld2) + item.offset;
+		return baseVal + item.offset;
 	}
 }
 
 
 
-
-
-
-
-int AnchorLayout::GetCenteredPercent(Axis& axis, LayoutData& args)
+int AnchorLayout::GetCenteredPercent(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp)
 {
 	//First, get the centered position and width, then just expand outwards. Remember to set the diametric point to "done".
 	//NOTE: The margin has no effect here, because it's (practically speaking) added to the left and removed from the right,
 	//      thus having no overall effect on the centered component.
+	int itemMin = args.isHoriz ? child.sizable->minimumGeometry().width : child.sizable->minimumGeometry().height;
 	int point = item.percent*args.containerMax + args.offset;
-	int width = item.offset>0 ? item.offset : args.itemMin;
+	int width = item.offset>0 ? item.offset : itemMin;
 
 	diam.res = point + width/2;
 	diam.done = true;
@@ -352,7 +332,7 @@ int AnchorLayout::GetCenteredPercent(Axis& axis, LayoutData& args)
 }
 
 
-int AnchorLayout::GetCenteredAttached(Axis& axis, LayoutData& args)
+int AnchorLayout::GetCenteredAttached(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp)
 {
 	Axis::FullAxis Centered = Axis::FullAxis::Centered;  //For brevity
 

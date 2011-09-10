@@ -146,7 +146,7 @@ private:
 	nall::linear_vector<Children> children;
 
 	//Global layout data doesn't change based on each component.
-	struct GlobalLayoutData {
+	struct LayoutData {
 		int containerOffset;
 		unsigned int containerMax;
 		size_t containerMargin;
@@ -154,29 +154,16 @@ private:
 		nall::linear_vector<Children>& children;
 	};
 
-	//Local layout data varies by component or Attachment
-	struct LocalLayoutData {
-		unsigned int itemMin;
-		bool ltr;
-		//int sign;  //Should be able to get from "sign"
-	};
-
-	//Local and global are combined into LayoutData
-	struct LayoutData {
-		GlobalLayoutData global;
-		LocalLayoutData local;
-	};
-
 	static Children* FindChild(nall::linear_vector<Children>& children, const Sizable& find);
 
-	static void ComputeComponent(Axis& axis, int& resOrigin, unsigned int& resMagnitude, LayoutData args);
-	static int Get(Axis& axis, LayoutData& args);
-	static nall::linear_vector<int> GetBoth(Axis& axis, LayoutData& args);
-	static int GetUnbound(Axis& axis, LayoutData& args);
-	static int GetPercent(Axis& axis, LayoutData& args);
-	static int GetCenteredPercent(Axis& axis, LayoutData& args, nall::linear_vector<int>& res);
-	static int GetCenteredAttached(Axis& axis, LayoutData& args, nall::linear_vector<int>& res);
-	static int GetAttached(Axis& axis, LayoutData& args);
+	static void ComputeComponent(Axis& axis, int& resOrigin, unsigned int& resMagnitude, LayoutData args, phoenix::Sizable& comp);
+	static int Get(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp);
+	static nall::linear_vector<int> GetBoth(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp);
+	static int GetUnbound(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp);
+	static int GetPercent(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp);
+	static int GetCenteredPercent(nall::linear_vector<int>& res, Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp);
+	static int GetCenteredAttached(nall::linear_vector<int>& res, Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp);
+	static int GetAttached(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp);
 
 	struct State {
 		bool enabled;
