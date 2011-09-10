@@ -316,86 +316,41 @@ int AnchorLayout::GetAttached(Axis& axis, LayoutData& args, bool ltr, phoenix::S
 }
 
 
-
-int AnchorLayout::GetCenteredPercent(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp)
+void AnchorLayout::CenterItem(nall::linear_vector<int>& res, int center, Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp)
 {
-	//First, get the centered position and width, then just expand outwards. Remember to set the diametric point to "done".
-	//NOTE: The margin has no effect here, because it's (practically speaking) added to the left and removed from the right,
-	//      thus having no overall effect on the centered component.
-	int itemMin = args.isHoriz ? child.sizable->minimumGeometry().width : child.sizable->minimumGeometry().height;
-	int point = item.percent*args.containerMax + args.offset;
+	//Retrieve the item's width, divide by 2, and save the result
+	AnchorPoint& item = ltr ? axis.least_ : axis.greatest_;
+	int itemMin = args.isHoriz ? comp.minimumGeometry().width : comp.minimumGeometry().height;
 	int width = item.offset>0 ? item.offset : itemMin;
-
-	diam.res = point + width/2;
-	diam.done = true;
-	return point - width/2;
+	res[0] = center - width/2;
+	res[1] = center + width/2;
 }
 
 
-int AnchorLayout::GetCenteredAttached(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp)
+void AnchorLayout::GetCenteredPercent(nall::linear_vector<int>& res, Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp)
 {
-	Axis::FullAxis Centered = Axis::FullAxis::Centered;  //For brevity
+	//Retrieve the item, stash "offset" (since we use it for the width here.)
+	AnchorPoint& item = ltr ? axis.least_ : axis.greatest_;
+	int offset = item.offset;
+	item.offset = 0;
 
-	//First, retrieve the component
-	Children* other = nullptr;
-	foreach(child, args.children)  {
-		if(child.sizable == item.refItem) {
-			other = &child;
-			break;
-		}
-	}
+	//Call the relevant sibling function, restore the offset
+	int center = AnchorLayout::GetPercent(axis, args, ltr, comp);
+	item.offset = offset;
 
-	//Did we retrieve anything? (this should also check for a null item.refItem)
-	if (!other) {
-		//TODO: We _could_ probably allow attaching to components in a fixed/horizontal/vertical layout
-		//      manager. But I think the complexity won't gain us much, and I'd rather get this working first.
-		std::cout <<"ERROR: attached item is not managed by this layout manager.\n";
-		return 0;
-	}
+	//Now factor in the item's width
+	AnchorLayout::CenterItem(res, center, axis, args, ltr, comp);
+}
 
-	//This is only mildly more complex than the normal "attached" case.
-	//NOTE: The "default" for items centered this way is ANCHOR::CENTERED; otherwise, it behaves just like GetAttached()
-	//TODO: Combine code; modularity could be much better.
-	Anchor anch = item.anchor==Anchor::Default ? Anchor::Center : item.anchor;
-	int baseVal = 0;
-	if (anch==Attachment::ANCHOR::CENTER) {
-		//The center layout requires both points to be calculatable. Otherwise, it't not very different.
-		Attachment* near = args.isHoriz ? &other->left : &other->top;
-		Attachment* far = args.isHoriz ? &other->right : &other->bottom;
-		baseVal = AttachLayout::Get(*near, *far, args);
-		baseVal = (AttachLayout::Get(*far, *near, args)-baseVal)/2 + baseVal;
-	} else {
-		//For left/right layouts, there's only one point to check. //Not true!
-		Attachment* base = nullptr;
-		Attachment* apart = nullptr;
-		LayoutData ld2 = args;
-		if (anch==Attachment::ANCHOR::LEFT) {
-			base = args.isHoriz ? &other->left : &other->top;
-			apart = args.isHoriz ? &other->right : &other->bottom;
-			ld2.setSign(-1).setAnchor(Attachment::ANCHOR::RIGHT);
-		} else if (anch==Attachment::ANCHOR::RIGHT) {
-			base = args.isHoriz ? &other->right : &other->bottom;
-			apart = args.isHoriz ? &other->left : &other->top;
-			ld2.setSign(1).setAnchor(Attachment::ANCHOR::LEFT);
-		} else {
-			//Shouldn't fail, but just to be safe...
-			std::cout <<"ERROR: unexpected anchor value.\n";
-			return 0;
-		}
 
-		baseVal = AttachLayout::Get(*base, *apart, ld2);
-	}
+void AnchorLayout::GetCenteredAttached(nall::linear_vector<int>& res, Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp)
+{
+	//Retrieve the item, call the sibling function
+	AnchorPoint& item = ltr ? axis.least_ : axis.greatest_;
+	int center = AnchorLayout::GetAttached(axis, args, ltr, comp);
 
-	//Now center it as expected, setting diam's value too.
-	//NOTE: This code is nearly the same as GetCenteredPercent(), except for how "Point" is calculated. Surely we can combine them....
-	//NOTE: There might be an error with this code if we calculate the Right-anchor first. Need a test case.... or we can just be more
-	//      responsible with how we declare Centered layouts.
-	int point = baseVal + item.offset;
-	int width = item.offset>0 ? item.offset : args.itemMin;
-
-	diam.res = point + width/2;
-	diam.done = true;
-	return point - width/2;
+	//Now factor in the item's width
+	AnchorLayout::CenterItem(res, center, axis, args, ltr, comp);
 }
 
 

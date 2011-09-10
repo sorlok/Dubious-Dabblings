@@ -161,9 +161,10 @@ private:
 	static nall::linear_vector<int> GetBoth(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp);
 	static int GetUnbound(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp);
 	static int GetPercent(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp);
-	static int GetCenteredPercent(nall::linear_vector<int>& res, Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp);
-	static int GetCenteredAttached(nall::linear_vector<int>& res, Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp);
 	static int GetAttached(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp);
+	static void GetCenteredPercent(nall::linear_vector<int>& res, Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp);
+	static void GetCenteredAttached(nall::linear_vector<int>& res, Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp);
+	static void CenterItem(nall::linear_vector<int>& res, int center, Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp);
 
 	struct State {
 		bool enabled;
