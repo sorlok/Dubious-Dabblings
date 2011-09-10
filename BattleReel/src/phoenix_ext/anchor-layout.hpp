@@ -110,6 +110,7 @@ public:
 
 	//Mildly useful
 	void setSkipGeomUpdates(bool val) { skipGeomUpdate = val; }
+	void setMargin(size_t margin) { state.margin = margin; }
 
 	//Constructor/destructor
 	AttachLayout();
@@ -135,11 +136,12 @@ private:
 		int sign;
 		bool isHoriz;
 		Attachment::ANCHOR defaultAnch;
+		size_t margin;
 		nall::linear_vector<Children>& children;
 
 		//sign and defaultAnch aren't set until later, so let's make a slightly more useful constructor
-		LayoutData(int offset, unsigned int containerMax, unsigned int itemMin, bool isHoriz, nall::linear_vector<Children>& children) :
-			offset(offset), containerMax(containerMax), itemMin(itemMin), isHoriz(isHoriz), children(children)
+		LayoutData(int offset, unsigned int containerMax, unsigned int itemMin, bool isHoriz, size_t margin, nall::linear_vector<Children>& children) :
+			offset(offset), containerMax(containerMax), itemMin(itemMin), isHoriz(isHoriz), margin(margin), children(children)
 		{}
 
 		//Helper methods; makes it easier to pass this structure around without manually resetting everything.
@@ -173,5 +175,6 @@ private:
 	struct State {
 		bool enabled;
 		bool visible;
+		size_t margin;
 	} state;
 };

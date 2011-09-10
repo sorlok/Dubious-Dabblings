@@ -2,6 +2,9 @@
 
 #include <iostream>
 
+using std::map;
+using std::string;
+
 namespace {
 //Attempt to load an image.
 bool LoadPng(const nall::string& filename, nall::png& res) {
@@ -19,6 +22,14 @@ const nall::png& GetIcon(const std::map<unsigned int, SlotImage>& imgLookup, con
 		return imgLookup.find(iconCode)->second.img;
 	}
 	return defaultImg;
+}
+
+string PadString(const string& src, size_t len)
+{
+	if (src.length()>len) {
+		return string(len, '#');
+	}
+	return string(len-src.length(),'0') + src;
 }
 } //End anon namespace
 
@@ -44,6 +55,33 @@ void SlotImage::init(const nall::string& name)
 }
 
 
+AttachLayout& SingleReel::getLayout()
+{
+	//Perform layout of visible components.
+	if (!layoutDone) {
+		layoutDone = true;
+
+		layout.setMargin(5);
+		layout.append(numLbl, {0.0}, {0.0});
+
+		//Attach right-to-left, so that we can easily overlap the numLbl if we want to.
+		phoenix::Sizable* last = nullptr;
+		for (int i=NUM_SLOTS-1; i>=0; i--) {
+			ImageIcon& icn = std::get<1>(slots[i]).icon;
+			Attachment top = {numLbl, 0, Attachment::ANCHOR::CENTER};
+			if (last) {
+				layout.append(icn, {}, top, {*last, -5});
+			} else {
+				layout.append(icn, {}, top, {1.0, -5});
+			}
+			last = &icn;
+		}
+	}
+
+	return layout;
+}
+
+
 void SingleReel::nullAll(const nall::png& defaultImg)
 {
 	//We need to set all Icons here so that our layout manager works properly
@@ -52,11 +90,12 @@ void SingleReel::nullAll(const nall::png& defaultImg)
 		std::get<1>(slots[i]).icon.setImage(defaultImg);
 		std::get<2>(slots[i]).icon.setImage(defaultImg);
 	}
+	numLbl.setText("N/A");
 }
 
 
 //Load data for this SingleReel using a pointer to the data's start location
-void SingleReel::loadData(unsigned char* dataStart, const std::map<unsigned int, SlotImage>& imgLookup)
+void SingleReel::loadData(const map<unsigned int, SlotImage>& imgLookup, unsigned char* dataStart, unsigned int reelID)
 {
 	//Save
 	unsigned char* src = dataStart;
@@ -72,21 +111,25 @@ void SingleReel::loadData(unsigned char* dataStart, const std::map<unsigned int,
 	//Are we actually doing anything?
 	if (!dataStart) {
 		nullAll(defaultImg);
-		return;
-	}
-
-	//Now load
-	for (size_t row=0; row<3; row++) {
-		for (size_t slot=0; slot<NUM_SLOTS; slot++) {
-			//Something like this:
-			unsigned char statusID = src[3];
-			unsigned int bpReward = (src[2]<<16) | (src[1]<<8) | src[0];
-			SingleSlot& curr = (row==0)?std::get<0>(slots[slot]):(row==1)?std::get<1>(slots[slot]):std::get<2>(slots[slot]);
-			curr.statusID = statusID;
-			curr.numBP = bpReward;
-			curr.icon.setImage(GetIcon(imgLookup, defaultImg, statusID));
-			src += 4;
+	} else {
+		//Now load
+		for (size_t row=0; row<3; row++) {
+			for (size_t slot=0; slot<NUM_SLOTS; slot++) {
+				//Something like this:
+				unsigned char statusID = src[3];
+				unsigned int bpReward = (src[2]<<16) | (src[1]<<8) | src[0];
+				SingleSlot& curr = (row==0)?std::get<0>(slots[slot]):(row==1)?std::get<1>(slots[slot]):std::get<2>(slots[slot]);
+				curr.statusID = statusID;
+				curr.numBP = bpReward;
+				curr.icon.setImage(GetIcon(imgLookup, defaultImg, statusID));
+				src += 4;
+			}
 		}
+
+		//The number
+		std::stringstream num;
+		num <<reelID;
+		numLbl.setText(PadString(num.str(), 3).c_str());
 	}
 
 	//Check

@@ -2,9 +2,12 @@
 
 #include <map>
 #include <tuple>
+#include <string>
+#include <sstream>
 #include <phoenix.hpp>
 #include <nall/png.hpp>
 #include "phoenix_ext/image-icon.hpp"
+#include "phoenix_ext/anchor-layout.hpp"
 
 
 //A SlotImage is used to help lookup slots in a global map.
@@ -41,12 +44,19 @@ public:
 	unsigned int id;
 	std::tuple<SingleSlot, SingleSlot, SingleSlot> slots[7];
 
-	void loadData(unsigned char* dataStart, const std::map<unsigned int, SlotImage>& imgLookup);
+	SingleReel() : layoutDone(false) {}
+	void loadData(const std::map<unsigned int, SlotImage>& imgLookup, unsigned char* dataStart=nullptr, unsigned int reelID=0);
+	AttachLayout& getLayout();
 
 private:
 	static const size_t NUM_SLOTS = 8;
 
 	void nullAll(const nall::png& defaultImg);
+
+	//For drawing
+	bool layoutDone;
+	AttachLayout layout;
+	phoenix::Label numLbl;
 
 	//Location within the binary file, with a bounds check.
 	unsigned char* dataStart;

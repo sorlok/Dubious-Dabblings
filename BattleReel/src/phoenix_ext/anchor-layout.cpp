@@ -12,6 +12,7 @@ AttachLayout::AttachLayout()
 	//Defaults
 	state.enabled = true;
 	state.visible = true;
+	state.margin = 0;
 	skipGeomUpdate = false;
 }
 
@@ -179,14 +180,16 @@ int AttachLayout::GetUnbound(Attachment& item, Attachment& diam, LayoutData args
 
 int AttachLayout::GetPercent(Attachment& item, LayoutData args)
 {
-	//Simple; just remember to include the item's offset.
-	return item.percent*args.containerMax + args.offset + item.offset;
+	//Simple; just remember to include the item's offset, and the global margin
+	return item.percent*args.containerMax + args.offset + item.offset + args.margin*args.sign;
 }
 
 
 int AttachLayout::GetCenteredPercent(Attachment& item, Attachment& diam, LayoutData args)
 {
 	//First, get the centered position and width, then just expand outwards. Remember to set the diametric point to "done".
+	//NOTE: The margin has no effect here, because it's (practically speaking) added to the left and removed from the right,
+	//      thus having no overall effect on the centered component.
 	int point = item.percent*args.containerMax + args.offset;
 	int width = item.offset>0 ? item.offset : args.itemMin;
 
@@ -330,8 +333,8 @@ void AttachLayout::setGeometry(const Geometry& containerGeometry)
 	foreach(child, children) {
 		//We compute each component in pairs..
 		Geometry res;
-		AttachLayout::ComputeComponent(child.left, child.right, res.x, res.width, {containerGeometry.x, containerGeometry.width, child.sizable->minimumGeometry().width, true, children});
-		AttachLayout::ComputeComponent(child.top, child.bottom, res.y, res.height, {containerGeometry.y, containerGeometry.height, child.sizable->minimumGeometry().height, false, children});
+		AttachLayout::ComputeComponent(child.left, child.right, res.x, res.width, {containerGeometry.x, containerGeometry.width, child.sizable->minimumGeometry().width, true, state.margin, children});
+		AttachLayout::ComputeComponent(child.top, child.bottom, res.y, res.height, {containerGeometry.y, containerGeometry.height, child.sizable->minimumGeometry().height, false, state.margin, children});
 		child.sizable->setGeometry(res);
 	}
 
