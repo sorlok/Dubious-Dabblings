@@ -246,18 +246,24 @@ nall::linear_vector<int> AnchorLayout::GetBoth(Axis& axis, LayoutData& args)
 }
 
 
+int AnchorLayout::GetPercent(Axis& axis, LayoutData& args)
+{
+	//Simple; just remember to include the item's offset, and the global margin (+/- sign)
+	AnchorPoint& item = args.local.ltr ? axis.least_ : axis.greatest_;
+	int sign = args.local.ltr ? 1 : -1;
+	return item.percent*args.global.containerMax + args.global.containerOffset + item.offset + ((int)args.global.containerMargin*sign);
+}
+
 
 int AnchorLayout::GetUnbound(Axis& axis, LayoutData& args)
 {
 	//This simply depends on the item diametrically opposed to this one, plus a bit of sign manipulation
-	return AttachLayout::Get(diam, item, args.flipAnchor()) + args.local.sign*args.local.itemMin;
-}
+	args.local.ltr = !args.local.ltr;
+	int other = AnchorLayout::Get(axis, args);
+	bool sign = args.local.ltr ? 1 : -1;
+	args.local.ltr = !args.local.ltr;
+	return other + sign*args.local.itemMin;
 
-
-int AnchorLayout::GetPercent(Axis& axis, LayoutData& args)
-{
-	//Simple; just remember to include the item's offset, and the global margin
-	return item.percent*args.containerMax + args.offset + item.offset + ((int)args.margin*-args.sign);
 }
 
 
