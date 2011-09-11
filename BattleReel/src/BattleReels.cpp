@@ -102,13 +102,19 @@ struct Application : Window {
     //Master layout
     append(layout);
 
-    loadFile.onTick = [&fileName, &loadFile, &saveFile, &chReader] {
+    loadFile.onTick = [&fileName, &loadFile, &saveFile, &chReader, &testReels, &numTestReels] {
     	fileName.setEnabled(false);
     	loadFile.setEnabled(false);
 
     	if (chReader.loadFile(fileName.text()()) && chReader.getNumFiles()==2) {
     		//Update reels
-    		std::cout <<"Correct!\n";
+    	    for (size_t i=0; i<numTestReels; i++) {
+    	    	testReels[i].loadData(rouletteSlots, chReader.getFile(1), i);
+    	    }
+    	} else {
+    	    for (size_t i=0; i<numTestReels; i++) {
+    	    	testReels[i].loadData(rouletteSlots);
+    	    }
     	}
 
     	fileName.setEnabled(true);
