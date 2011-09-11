@@ -99,7 +99,7 @@ struct Application : Window {
     //Master layout
     append(layout);
 
-    loadFile.onTick = [] {
+    loadFile.onTick = [&fileName] {
 
     };
 
