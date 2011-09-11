@@ -56,9 +56,22 @@ struct Application : Window {
 
   Button pgUp;
   Button pgDown;
+  int page;
 
   size_t numTestReels;
   SingleReel testReels[4];
+
+  void updateReels() {
+  	int startID = page * numTestReels;
+  	for (size_t i=0; i<numTestReels; i++) {
+  		int id = i + startID;
+  		if (id<128) { //TODO: 128 is just what the game expects; should make this more flexible.
+  			testReels[i].loadData(rouletteSlots, chReader.getFile(1), id);
+  		} else {
+  			testReels[i].loadData(rouletteSlots);
+  		}
+  	}
+  }
 
   void create() {
     //Do window tasks
@@ -66,6 +79,7 @@ struct Application : Window {
     setGeometry({ 130, 130, 650, 490 });
 
     //Ensure that the testReel can at least size itself (we can add images later).
+    page = 0;
     numTestReels = 4;
     for (size_t i=0; i<numTestReels; i++) {
     	testReels[i].loadData(rouletteSlots);
@@ -77,6 +91,8 @@ struct Application : Window {
     quitButton.setText("Quit");
     pgUp.setText("PgUp");
     pgDown.setText("PgDn");
+    pgUp.setEnabled(false);
+    pgDown.setEnabled(false);
 
     //Layout
     layout.setMargin(10);
@@ -102,15 +118,30 @@ struct Application : Window {
     //Master layout
     append(layout);
 
-    loadFile.onTick = [&fileName, &loadFile, &saveFile, &chReader, &testReels, &numTestReels] {
+
+    pgDown.onTick = [&page, &numTestReels, this] {
+    	//TODO: Again, maxPage is rigid here for now reason
+    	int maxPage = 128/numTestReels + (128%numTestReels ? 1 : 0);
+    	if (page<maxPage-1) {
+    		page++;
+    		updateReels();
+    	}
+    };
+
+    pgUp.onTick = [&page, this] {
+    	if (page>0) {
+    		page--;
+    		updateReels();
+    	}
+    };
+
+
+    loadFile.onTick = [&fileName, &loadFile, &saveFile, &pgUp, &pgDown, &chReader, &testReels, &numTestReels, &page, this] {
     	fileName.setEnabled(false);
     	loadFile.setEnabled(false);
 
     	if (chReader.loadFile(fileName.text()()) && chReader.getNumFiles()==2) {
-    		//Update reels
-    	    for (size_t i=0; i<numTestReels; i++) {
-    	    	testReels[i].loadData(rouletteSlots, chReader.getFile(1), i);
-    	    }
+    		updateReels();
     	} else {
     	    for (size_t i=0; i<numTestReels; i++) {
     	    	testReels[i].loadData(rouletteSlots);
@@ -120,6 +151,8 @@ struct Application : Window {
     	fileName.setEnabled(true);
     	loadFile.setEnabled(true);
     	saveFile.setEnabled(true);
+    	pgUp.setEnabled(true);
+    	pgDown.setEnabled(true);
     };
 
     onClose = quitButton.onTick = [&testReels, &layout, &numTestReels] {

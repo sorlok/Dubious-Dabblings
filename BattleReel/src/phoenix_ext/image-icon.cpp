@@ -14,8 +14,13 @@ ImageIcon::ImageIcon() : Canvas(), img(nullptr)
 
 void ImageIcon::setImage(const nall::png& image)
 {
+	//Requires a little bit of thought to avoid messing with layouts
 	img = &image;
-	Canvas::setGeometry(minimumGeometry());
+	Geometry old = geometry();
+	Geometry min = minimumGeometry();
+
+	//Save and update
+	Canvas::setGeometry({old.x, old.y, min.width, min.height});
 	update();
 }
 

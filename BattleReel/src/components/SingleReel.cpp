@@ -158,15 +158,18 @@ void SingleReel::loadData(const map<unsigned int, SlotImage>& imgLookup, unsigne
 		std::stringstream num;
 		num <<reelID;
 		std::string digits = PadString(num.str(), 3);
-		digit1.setText(std::string(digits[0], 1).c_str());
-		digit2.setText(std::string(digits[1], 1).c_str());
-		digit3.setText(std::string(digits[2], 1).c_str());
+		digit1.setText(std::string(1, digits[0]).c_str());
+		digit2.setText(std::string(1, digits[1]).c_str());
+		digit3.setText(std::string(1, digits[2]).c_str());
 
 		//Check
 		if (src != dataStart+this->dataSize) {
 			std::cout <<"Alignment error.\n";
 		}
 	}
+
+	//Finally, update the layout, lest we end up stacking all items in the corner again.
+	//layout.setGeometry(getSuggestedMinimumSize());
 }
 
 
