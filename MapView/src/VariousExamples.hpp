@@ -28,7 +28,7 @@ struct Application : Window {
 
     layout.setMargin(5);
     layout.append(btn1, {{0.0}}, {{0.0}});
-    layout.append(btn2, {Centered, {0.5}}, {{0.0}});
+    layout.append(btn2, {{btn1, 5}, {btn3, -5}}, {{0.0}});
     layout.append(btn3, {{}, {1.0}}, {{0.0}});
     append(layout);
 
