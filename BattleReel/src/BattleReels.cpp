@@ -119,8 +119,8 @@ struct Application : Window {
 
     //Initialize callbacks
     for (size_t i=0; i<numTestReels; i++) {
-    	testReels[i].setClickCallback([] {
-    		std::cout <<"Callback\n";
+    	testReels[i].setClickCallback(i, [](size_t rowID, size_t slotID) {
+    		std::cout <<"Callback: " <<rowID <<"," <<slotID <<"\n";
     	}
     	);
     }

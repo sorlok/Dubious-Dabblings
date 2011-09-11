@@ -50,28 +50,30 @@ public:
 		digit1.setFont({"Courier New, 14, bold"});
 		digit2.setFont({"Courier New, 14, bold"});
 		digit3.setFont({"Courier New, 14, bold"});
+	}
+	void loadData(const std::map<unsigned int, SlotImage>& imgLookup, unsigned char* dataStart=nullptr, unsigned int reelID=0);
+	void setClickCallback(size_t rowID, std::function<void (size_t, size_t)> callback) {
+		this->callback = callback;
 
 		//Add click events
 		for (int i=NUM_SLOTS-1; i>=0; i--) {
 			ImageIcon& icn = std::get<1>(slots[i]).icon;
-			icn.onMotion = [this](unsigned int x, unsigned int y, phoenix::MOVE_FLAG moveFlag) {
+			icn.onMotion = [this, i, rowID](unsigned int x, unsigned int y, phoenix::MOVE_FLAG moveFlag) {
 				if (moveFlag==phoenix::MOVE_FLAG::LEFT_UP) {
-					if (callback) {
-						callback();
+					if (this->callback) {
+						this->callback(rowID, i);
 					}
 				}
 			};
 		}
 	}
-	void loadData(const std::map<unsigned int, SlotImage>& imgLookup, unsigned char* dataStart=nullptr, unsigned int reelID=0);
-	void setClickCallback(std::function<void ()> callback) { this->callback = callback; }
 	AnchorLayout& getLayout();
 	phoenix::Geometry getSuggestedMinimumSize();
 
 private:
 	static const size_t NUM_SLOTS = 7;
 
-	std::function<void ()> callback;
+	std::function<void (size_t, size_t)> callback;
 
 	void nullAll(const nall::png& defaultImg);
 
