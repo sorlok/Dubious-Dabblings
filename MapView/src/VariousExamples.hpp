@@ -28,8 +28,8 @@ struct Application : Window {
 
     layout.setMargin(5);
     layout.append(btn1, {{0.0}}, {{0.0}});
-    layout.append(btn2, {{btn1, 5}, {btn3, -5}}, {{0.0}});
-    layout.append(btn3, {{}, {1.0}}, {{0.0}});
+    layout.append(btn2, {{btn1, 0, Anchor::Center}}, {{btn1, 5}});
+    layout.append(btn3, {{btn2, 0, Anchor::Center}}, {{btn2, 5}});
     append(layout);
 
     onClose = [&layout] {
