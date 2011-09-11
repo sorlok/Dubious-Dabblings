@@ -2,8 +2,6 @@
 //Shared under the terms of the ISC license
 #include "anchor-layout.hpp"
 
-#include <iostream> //Debugging only; comment out if you're not using cout()
-
 using namespace phoenix;
 typedef AnchorPoint::Anchor Anchor;
 
@@ -18,6 +16,13 @@ bool FloatEquals(float f1, float f2)  {
 	return fabs(f1-f2) <= FLT_EPSILON * fmax(fmax(1.0F, fabs(f1)), fabs(f2));
 }
 }
+
+//Here's the alternative, for those who prefer it.
+/*namespace {
+bool FloatEquals(float f1, float f2)  {
+	return f1 == f2;
+}
+}*/
 
 
 AnchorLayout::AnchorLayout()
@@ -151,10 +156,6 @@ void AnchorLayout::setGeometry(const Geometry& containerGeometry)
 		return;
 	}
 
-	std::cout <<"------------------------------------------\n";
-	std::cout <<"FULL GEOM UPDATE\n";
-	std::cout <<"------------------------------------------\n";
-
 	//Save containerGeometry
 	state.lastKnownSize = containerGeometry;
 
@@ -168,8 +169,6 @@ void AnchorLayout::setGeometry(const Geometry& containerGeometry)
 	foreach(child, children) {
 		//We compute each component in pairs..
 		Geometry res;
-
-		std::cout <<"Measuring component: " <<child.sizable <<"\n";
 		AnchorLayout::ComputeComponent(child.horiz, res.x, res.width, {containerGeometry.x, containerGeometry.width, state.margin, true, children}, *child.sizable);
 		AnchorLayout::ComputeComponent(child.vert, res.y, res.height, {containerGeometry.y, containerGeometry.height, state.margin, false, children}, *child.sizable);
 		child.sizable->setGeometry(res);
@@ -206,8 +205,7 @@ int AnchorLayout::Get(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& 
 		return item.res;
 	}
 	if (item.state==State::Waiting || (other && other->state==State::Waiting)) {
-		//ERROR: default to returning 0 (optional approach to problem-solving: throw something)
-		std::cout <<"ERROR: Still waiting on item.\n";
+		//ERROR: All errors position the component at 0 X/Y.
 		return 0;
 	}
 	item.state = State::Waiting;
@@ -229,7 +227,6 @@ int AnchorLayout::Get(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& 
 		} else if (item.type==Type::Attached) {
 			item.res = GetAttached(axis, args, ltr, comp);
 		} else {
-			std::cout <<"ERROR: Unknown independent type\n";
 			return 0;
 		}
 	}
@@ -254,7 +251,8 @@ nall::linear_vector<int> AnchorLayout::GetBoth(Axis& axis, LayoutData& args, boo
 	} else if (axis.least_.type==Type::Attached) {
 		GetCenteredAttached(res, axis, args, true, comp);
 	} else {
-		std::cout <<"ERROR: Unknown dependent type: " <<(axis.least_.type==Type::Unbound) <<"\n";
+		//Error.
+		return {0, 0};
 	}
 
 	return res;
@@ -271,11 +269,7 @@ int AnchorLayout::GetPercent(Axis& axis, LayoutData& args, bool ltr, phoenix::Si
 	}
 
 	//Simple; just remember to include the item's offset, and the global margin (+/- sign)
-	int res = item.percent*args.containerMax + args.containerOffset + item.offset + ((int)args.containerMargin*sign);
-
-	std::cout <<"   (" <<&comp   <<") Percent: " <<item.percent <<" of " <<args.containerMax <<" with offset " <<item.offset <<" = "  <<res <<"\n";
-
-	return res;
+	return item.percent*args.containerMax + args.containerOffset + item.offset + ((int)args.containerMargin*sign);
 }
 
 
@@ -285,8 +279,6 @@ int AnchorLayout::GetUnbound(Axis& axis, LayoutData& args, bool ltr, phoenix::Si
 	int itemMin = args.isHoriz ? comp.minimumGeometry().width : comp.minimumGeometry().height;
 	int other = AnchorLayout::Get(axis, args, !ltr, comp);
 	int sign = ltr ? -1 : 1;
-
-	std::cout <<"   (" <<&comp   <<") Unbound: " <<other <<" + " <<(sign*itemMin) <<"\n";
 
 	return other + sign*itemMin;
 
@@ -306,7 +298,6 @@ int AnchorLayout::GetAttached(Axis& axis, LayoutData& args, bool ltr, phoenix::S
 	if (!other) {
 		//TODO: We _could_ probably allow attaching to components in a fixed/horizontal/vertical layout
 		//      manager. But I think the complexity won't gain us much, and I'd rather get this working first.
-		std::cout <<"ERROR: attached item is not managed by this layout manager.\n";
 		return 0;
 	}
 
@@ -326,9 +317,6 @@ int AnchorLayout::GetAttached(Axis& axis, LayoutData& args, bool ltr, phoenix::S
 		//The center layout requires both points to be calculatable. Otherwise, it't not very different.
 		int baseVal = AnchorLayout::Get(otherAxis, args, true, *other->sizable);
 		baseVal = (AnchorLayout::Get(otherAxis, args, false, *other->sizable)-baseVal)/2 + baseVal;
-
-		std::cout <<"  returning centered: " <<baseVal <<" + " <<item.offset <<"\n";
-
 		return baseVal + item.offset;
 	} else {
 		//For left/right layouts, there's only one point to check.
@@ -339,7 +327,6 @@ int AnchorLayout::GetAttached(Axis& axis, LayoutData& args, bool ltr, phoenix::S
 			baseVal = AnchorLayout::Get(otherAxis, args, false, *other->sizable);
 		} else {
 			//Shouldn't fail, but just to be safe...
-			std::cout <<"ERROR: unexpected anchor value.\n";
 			return 0;
 		}
 
@@ -370,8 +357,6 @@ void AnchorLayout::GetCenteredPercent(nall::linear_vector<int>& res, Axis& axis,
 	int center = AnchorLayout::GetPercent(axis, args, ltr, comp);
 	item.offset = offset;
 
-	std::cout <<"   (" <<&comp   <<") Centered at: " <<center <<" width " <<item.offset <<"\n";
-
 	//Now factor in the item's width
 	AnchorLayout::CenterItem(res, center, axis, args, ltr, comp);
 }
@@ -386,11 +371,7 @@ void AnchorLayout::GetCenteredAttached(nall::linear_vector<int>& res, Axis& axis
 	int center = AnchorLayout::GetAttached(axis, args, ltr, comp);
 	item.offset = offset;
 
-	std::cout <<"   (" <<&comp   <<") Centered2 at: " <<center <<" width " <<item.offset <<"\n";
-
 	//Now factor in the item's width
 	AnchorLayout::CenterItem(res, center, axis, args, ltr, comp);
 }
-
-
 

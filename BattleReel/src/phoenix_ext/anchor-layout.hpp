@@ -4,7 +4,6 @@
 #pragma once
 
 #include <phoenix.hpp>
-#include <iostream>
 
 class AnchorPoint {
 private:
