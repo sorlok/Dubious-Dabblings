@@ -5,10 +5,12 @@
 
 #include <phoenix.hpp>
 
+#include <iostream>
+
 class AnchorPoint {
 private:
 	//Type of AnchorPoint
-	enum class Type { Unbound, Percent, Attached, SpecialPercent, SpecialAttached };
+	enum class Type { Unbound, Percent, Attached };
 
 public:
 	//Ways to anchor "Attached" AnchorPoints
@@ -21,13 +23,13 @@ public:
 
 public:
 	//Defeault attachment: Figure it out based on the minimum width/height and the diametrically opposed Attachment.
-	AnchorPoint(): type(Type::Unbound) {}
+	AnchorPoint(): type(Type::Unbound), superSpecial(false) {}
 
 	//Percent attachment: Attach an item at a given % of the parent's total width/height
-	AnchorPoint(double percent, int offset=0): percent(percent), offset(offset), type(Type::Percent) {}
+	AnchorPoint(double percent, int offset=0): percent(percent), offset(offset), type(Type::Percent), superSpecial(false) {}
 
 	//Attached attachment: Attach to another component directly, with an offset and possible alignment.
-	AnchorPoint(phoenix::Sizable& attachTo, int offset=0, Anchor attachAt=Anchor::Default) : refItem(&attachTo), anchor(attachAt), offset(offset), type(Type::Attached) {}
+	AnchorPoint(phoenix::Sizable& attachTo, int offset=0, Anchor attachAt=Anchor::Default) : refItem(&attachTo), anchor(attachAt), offset(offset), type(Type::Attached), superSpecial(false) {}
 
 	//NOTE: If we are clever, we don't have to reset anything; we can just check "done" and "!done" alternatively.
 	//      This requires some attention when adding Sizables, but is otherwise easy. I just don't see a real performance boost
@@ -40,12 +42,9 @@ public:
 	friend class Axis;
 
 private:
-	//Use a special attachment type. These can only be set by friend classes.
-	//"offset" can mean many things. Here, if not zero, it specifies the component's "width" (or whatever) in pixels
-	AnchorPoint(bool isSpecial, double percent, int width=0) : isSpecial(true), percent(percent), offset(width), type(Type::SpecialPercent) {}
-	AnchorPoint(bool isSpecial, phoenix::Sizable& attachTo, Anchor attachAt=Anchor::Default, int width=0) : refItem(&attachTo), anchor(attachAt), isSpecial(true), offset(width), type(Type::SpecialAttached) {}
+	//Hackish constructor: "Special" type. Only usable internally to prevent abuse.
+	//explicit AnchorPoint(bool isSpecial, bool dummy, bool dummy2, bool dummy3) : superSpecial(true) {}
 
-private:
 	enum class State {
 		Ready, Waiting, Done
 	};
@@ -58,10 +57,10 @@ private:
 	//Combined state variables
 	phoenix::Sizable* refItem;
 	Anchor anchor;
-	bool isSpecial;
 	double percent;
 	int offset;
 	Type type;
+	bool superSpecial;
 };
 
 
@@ -79,18 +78,27 @@ private:
 	Axis() : least_({}), greatest_({}), isFullAxis(false) {}
 
 public:
-	//Whole-axis attachment types
-	enum class FullAxis {
-		Centered,
-	};
+	//Whole-axis attachment types. (Note: This is mildly hackish, but only in the backend)
+	static AnchorPoint Centered() { AnchorPoint res; res.superSpecial=true; return res; }
+
 
 	//Construct an axis composed of a left/right or top/bottom pair of Attachments.
 	//Either one of these Attachments is optional, and may be set to {} to use the component's
 	// default width/height.
-	Axis(const AnchorPoint& least, const AnchorPoint& greatest=AnchorPoint()) : least_(least), greatest_(greatest), isFullAxis(false) {}
+	Axis(const AnchorPoint& least, const AnchorPoint& greatest=AnchorPoint()) {
+		isFullAxis = least.superSpecial;
+		if (isFullAxis) {
+			least_ = greatest;
+			greatest_ = {};
+		} else {
+			least_ = least;
+			greatest_ = greatest;
+		}
+	}
 
 	//Construct an axis composed of a full-axis attachment, such as "centered"
-	Axis(const FullAxis& type, const AnchorPoint& full) : least_(full), greatest_({}), isFullAxis(true) {}
+	//Explicit helps prevent usage errors
+	//explicit Axis(const FixedAxis& type, const AnchorPoint& full) : least_(full), greatest_({}), isFullAxis(true) {}
 
 	//For convenience
 	AnchorPoint& left()    { return least_; }

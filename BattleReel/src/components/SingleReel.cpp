@@ -71,7 +71,7 @@ phoenix::Geometry SingleReel::getSuggestedMinimumSize()
 
 AnchorLayout& SingleReel::getLayout()
 {
-	Axis::FullAxis Centered = Axis::FullAxis::Centered; //For brevity
+	AnchorPoint Centered = Axis::Centered(); //Makes things look cleaner.
 
 	//Perform layout of visible components.
 	if (!layoutDone) {
@@ -88,7 +88,7 @@ AnchorLayout& SingleReel::getLayout()
 			ImageIcon& icn = std::get<1>(slots[i]).icon;
 			if (last) {
 				//Test appending to the center; shouldn't do anything if components are the same height
-				layout.append(icn, {{}, {*last, -5}}, {Centered, *last});
+				layout.append(icn, {{}, {*last, -5}}, {Centered, {*last}});
 			} else {
 				layout.append(icn, {{}, {1.0, -5}}, {{numLbl}});
 			}

@@ -8,18 +8,23 @@ using namespace phoenix;
 
 //For brevity
 typedef AnchorPoint::Anchor Anchor;
-Axis::FullAxis Centered = Axis::FullAxis::Centered;
+AnchorPoint Centered = Axis::Centered();
 
 
 struct Application : Window {
   AnchorLayout layout;
 
   Label helloLabel;
+  LineEdit statusBar;
   Button okButton;
   Button quitButton;
   Button rightButton;
   Button rightButtonBack;
   Button bigButton;
+  Button north;
+  Button south;
+  Button east;
+  Button west;
 
   void create() {
     setTitle("Test Application");
@@ -31,6 +36,12 @@ struct Application : Window {
     rightButton.setText("Rightish");
     rightButtonBack.setText("Left of Rightish");
     bigButton.setText("Fully centered, 300x");
+    statusBar.setText("(Status bar)");
+    statusBar.setEditable(false);
+    north.setText("North");
+    south.setText("South");
+    east.setText("East");
+    west.setText("West");
 
     /*std::cout <<"Hello lbl: " <<&helloLabel <<"\n";
     std::cout <<"Ok button: " <<&okButton <<"\n";
@@ -42,7 +53,7 @@ struct Application : Window {
     layout.append(helloLabel, {{0.0}}, {{0.0}});
 
     //OkButton is 10 pixelsunder HelloLabel
-    layout.append(okButton, {0.0}, {helloLabel, 10});
+    layout.append(okButton, {{0.0}}, {{helloLabel, 10}});
 
     //QuitButton is right of OkButton. We force it to be 150 pixels long
     layout.append(quitButton, {{okButton, 10},{quitButton, 150, Anchor::Left}}, {{okButton, 0, Anchor::Top}});
@@ -53,8 +64,19 @@ struct Application : Window {
     //The next button just attaches to the left of this (we're testing right-attachments here)
     layout.append(rightButtonBack, {{}, {rightButton, -10}}, {{okButton, 0, Anchor::Top}});
 
+    //Put a status bar at the bottom of the screen.
+    layout.append(statusBar, {{0.0, 5},{1.0, -5}}, {{}, {1.0, -5}});
+
     //The final component simply takes up all remaining vertical space, and is centered horizontally
     layout.append(bigButton, {Centered, {0.5, 300}}, {Centered, {0.5, 300}});
+
+    //These are fun!
+    layout.append(north, {Centered, {bigButton, 0, Anchor::Center}}, {{}, {bigButton, -5}});
+    layout.append(south, {Centered, {bigButton, 0, Anchor::Center}}, {{bigButton, 5}});
+    layout.append(west, {{}, {bigButton, -5}}, {Centered, {bigButton, 0, Anchor::Center}});
+    layout.append(east, {{bigButton, 5}}, {Centered, {bigButton, 0, Anchor::Center}});
+
+    //Hook it all up
     append(layout);
 
     onClose = quitButton.onTick = [&layout] {

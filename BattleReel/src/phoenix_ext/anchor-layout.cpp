@@ -139,6 +139,10 @@ void AnchorLayout::setGeometry(const Geometry& containerGeometry)
 		return;
 	}
 
+	std::cout <<"------------------------------------------\n";
+	std::cout <<"FULL GEOM UPDATE\n";
+	std::cout <<"------------------------------------------\n";
+
 	//Save containerGeometry
 	state.lastKnownSize = containerGeometry;
 
@@ -153,8 +157,9 @@ void AnchorLayout::setGeometry(const Geometry& containerGeometry)
 		//We compute each component in pairs..
 		Geometry res;
 
+		std::cout <<"Measuring component: " <<child.sizable <<"\n";
 		AnchorLayout::ComputeComponent(child.horiz, res.x, res.width, {containerGeometry.x, containerGeometry.width, state.margin, true, children}, *child.sizable);
-		AnchorLayout::ComputeComponent(child.vert, res.y, res.height, {containerGeometry.y, containerGeometry.height, state.margin, true, children}, *child.sizable);
+		AnchorLayout::ComputeComponent(child.vert, res.y, res.height, {containerGeometry.y, containerGeometry.height, state.margin, false, children}, *child.sizable);
 		child.sizable->setGeometry(res);
 	}
 
@@ -237,7 +242,7 @@ nall::linear_vector<int> AnchorLayout::GetBoth(Axis& axis, LayoutData& args, boo
 	} else if (axis.least_.type==Type::Attached) {
 		GetCenteredAttached(res, axis, args, true, comp);
 	} else {
-		std::cout <<"ERROR: Unknown dependent type\n";
+		std::cout <<"ERROR: Unknown dependent type: " <<(axis.least_.type==Type::Unbound) <<"\n";
 	}
 
 	return res;
@@ -249,7 +254,11 @@ int AnchorLayout::GetPercent(Axis& axis, LayoutData& args, bool ltr, phoenix::Si
 	//Simple; just remember to include the item's offset, and the global margin (+/- sign)
 	AnchorPoint& item = ltr ? axis.least_ : axis.greatest_;
 	int sign = ltr ? 1 : -1;
-	return item.percent*args.containerMax + args.containerOffset + item.offset + ((int)args.containerMargin*sign);
+	int res = item.percent*args.containerMax + args.containerOffset + item.offset + ((int)args.containerMargin*sign);
+
+	std::cout <<"   (" <<&comp   <<") Percent: " <<item.percent <<" of " <<args.containerMax <<" with offset " <<item.offset <<" = "  <<res <<"\n";
+
+	return res;
 }
 
 
@@ -258,7 +267,10 @@ int AnchorLayout::GetUnbound(Axis& axis, LayoutData& args, bool ltr, phoenix::Si
 	//This simply depends on the item diametrically opposed to this one, plus a bit of sign manipulation
 	int itemMin = args.isHoriz ? comp.minimumGeometry().width : comp.minimumGeometry().height;
 	int other = AnchorLayout::Get(axis, args, !ltr, comp);
-	bool sign = ltr ? -1 : 1;
+	int sign = ltr ? -1 : 1;
+
+	std::cout <<"   (" <<&comp   <<") Unbound: " <<other <<" + " <<(sign*itemMin) <<"\n";
+
 	return other + sign*itemMin;
 
 }
@@ -267,7 +279,7 @@ int AnchorLayout::GetUnbound(Axis& axis, LayoutData& args, bool ltr, phoenix::Si
 //Only slightly more complex. Centering requires a bit of careful math; the rest is a matter of remembering to flip "ltr"
 int AnchorLayout::GetAttached(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp)
 {
-	Axis::FullAxis Centered = Axis::FullAxis::Centered;  //For brevity
+	//Axis::FixedAxis Centered = Axis::Centered();  //For brevity
 
 	//First, retrieve the components
 	AnchorPoint& item = ltr ? axis.least_ : axis.greatest_;
@@ -338,6 +350,8 @@ void AnchorLayout::GetCenteredPercent(nall::linear_vector<int>& res, Axis& axis,
 	int center = AnchorLayout::GetPercent(axis, args, ltr, comp);
 	item.offset = offset;
 
+	std::cout <<"   (" <<&comp   <<") Centered at: " <<center <<" width " <<item.offset <<"\n";
+
 	//Now factor in the item's width
 	AnchorLayout::CenterItem(res, center, axis, args, ltr, comp);
 }
@@ -348,6 +362,8 @@ void AnchorLayout::GetCenteredAttached(nall::linear_vector<int>& res, Axis& axis
 	//Retrieve the item, call the sibling function
 	AnchorPoint& item = ltr ? axis.least_ : axis.greatest_;
 	int center = AnchorLayout::GetAttached(axis, args, ltr, comp);
+
+	std::cout <<"   (" <<&comp   <<") Centered2 at: " <<center <<" width " <<item.offset <<"\n";
 
 	//Now factor in the item's width
 	AnchorLayout::CenterItem(res, center, axis, args, ltr, comp);
