@@ -126,9 +126,9 @@ void SingleReel::nullAll(const nall::png& defaultImg)
 void SingleReel::loadData(const map<unsigned int, SlotImage>& imgLookup, unsigned char* dataStart, unsigned int reelID)
 {
 	//Save
-	unsigned char* src = dataStart;
-	this->dataStart = dataStart;
 	this->dataSize = NUM_SLOTS * 4 * 3;
+	this->dataStart = dataStart + dataSize*reelID;
+	unsigned char* src = this->dataStart;
 
 	//Retrieve a good default
 	if (imgLookup.count(0xFF)==0) {
@@ -163,7 +163,7 @@ void SingleReel::loadData(const map<unsigned int, SlotImage>& imgLookup, unsigne
 		digit3.setText(std::string(1, digits[2]).c_str());
 
 		//Check
-		if (src != dataStart+this->dataSize) {
+		if (src != this->dataStart+this->dataSize) {
 			std::cout <<"Alignment error.\n";
 		}
 	}
