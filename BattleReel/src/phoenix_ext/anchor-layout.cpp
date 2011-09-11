@@ -308,7 +308,10 @@ int AnchorLayout::GetAttached(Axis& axis, LayoutData& args, bool ltr, phoenix::S
 	if (anch==Anchor::Center) {
 		//The center layout requires both points to be calculatable. Otherwise, it't not very different.
 		int baseVal = AnchorLayout::Get(otherAxis, args, true, *other->sizable);
-		baseVal = (AnchorLayout::Get(otherAxis, args, true, *other->sizable)-baseVal)/2 + baseVal;
+		baseVal = (AnchorLayout::Get(otherAxis, args, false, *other->sizable)-baseVal)/2 + baseVal;
+
+		std::cout <<"  returning centered: " <<baseVal <<" + " <<item.offset <<"\n";
+
 		return baseVal + item.offset;
 	} else {
 		//For left/right layouts, there's only one point to check.
@@ -361,7 +364,10 @@ void AnchorLayout::GetCenteredAttached(nall::linear_vector<int>& res, Axis& axis
 {
 	//Retrieve the item, call the sibling function
 	AnchorPoint& item = ltr ? axis.least_ : axis.greatest_;
+	int offset = item.offset;
+	item.offset = 0;
 	int center = AnchorLayout::GetAttached(axis, args, ltr, comp);
+	item.offset = offset;
 
 	std::cout <<"   (" <<&comp   <<") Centered2 at: " <<center <<" width " <<item.offset <<"\n";
 
