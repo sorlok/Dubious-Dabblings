@@ -4,13 +4,13 @@
 //For brevity
 using namespace nall;
 using namespace phoenix;
-typedef Attachment::ANCHOR ANCHOR;
-typedef Attachment::SPECIAL SPECIAL;
+typedef AnchorPoint::Anchor Anchor;
+AnchorPoint Centered = Axis::Centered();
 
 
 struct Application : Window {
-  AttachLayout layout;
-  AttachLayout sublayout;
+  AnchorLayout layout;
+  AnchorLayout sublayout;
 
   ListView configPanels;
   Label settingsCaption;
@@ -84,25 +84,27 @@ struct Application : Window {
     compositFullscreen.setChecked();
 
     //Perform layout
-    layout.append(configPanels, {0.0, 5}, {0.0, 5}, {configPanels, 120}, {statusBar, -5});
-    layout.append(statusBar, {0.0, 5}, {statusBar, -20, ANCHOR::BOTTOM}, {1.0, -5}, {1.0, -5});
-    layout.append(sublayout, {configPanels, 10}, {0.0}, {1.0}, {1.0});
-    sublayout.append(settingsCaption, {0.0, 5}, {0.0, 5});
-    sublayout.append(driverSel, {settingsCaption, 0, ANCHOR::LEFT}, {settingsCaption, 10});
-    sublayout.append(videoLbl, {0.0, 5}, {videoCmb, 5, ANCHOR::TOP});
-    sublayout.append(videoCmb, {videoLbl, 5}, {driverSel, 5}, {0.333, -5});
-    sublayout.append(audioLbl, {0.333, 5}, {audioCmb, 5, ANCHOR::TOP});
-    sublayout.append(audioCmb, {audioLbl, 5}, {driverSel, 5}, {0.667, -5});
-    sublayout.append(inputLbl, {0.667, 5}, {inputCmb, 5, ANCHOR::TOP});
-    sublayout.append(inputCmb, {inputLbl, 5}, {driverSel, 5}, {1.0, -5});
-    sublayout.append(focusSel, {settingsCaption, 0, ANCHOR::LEFT}, {videoCmb, 15});
-    sublayout.append(focusPause, {0.0, 5}, {focusSel, 5});
-    sublayout.append(focusIgnore, {0.333, 5}, {focusSel, 5});
-    sublayout.append(focusAllow, {0.667, 5}, {focusSel, 5});
-    sublayout.append(compositorSel, {settingsCaption, 0, ANCHOR::LEFT}, {focusPause, 15});
-    sublayout.append(compositNever, {0.0, 5}, {compositorSel, 5});
-    sublayout.append(compositFullscreen, {0.333, 5}, {compositorSel, 5});
-    sublayout.append(compositAlways, {0.667, 5}, {compositorSel, 5});
+    layout.setMargin(5);
+    layout.append(configPanels, {{0.0},{configPanels, 120}}, {{0.0},{statusBar, -5}});
+    layout.append(statusBar, {{0.0},{1.0}}, {{}, {1.0}});
+    layout.append(sublayout, {{configPanels, 10},{1.0}}, {{0.0},{1.0}});
+    sublayout.setMargin(5);
+    sublayout.append(settingsCaption, {{0.0}}, {{0.0}});
+    sublayout.append(driverSel, {{settingsCaption, 0, Anchor::Left}}, {{settingsCaption, 10}});
+    sublayout.append(videoLbl, {{0.0}}, {{videoCmb, 5, Anchor::Top}});
+    sublayout.append(videoCmb, {{videoLbl, 5},{0.333, -5}}, {{driverSel, 5}});
+    sublayout.append(audioLbl, {{0.333, 5}}, {{audioCmb, 5, Anchor::Top}});
+    sublayout.append(audioCmb, {{audioLbl, 5},{0.667, -5}}, {{driverSel, 5}});
+    sublayout.append(inputLbl, {{0.667, 5}}, {{inputCmb, 5, Anchor::Top}});
+    sublayout.append(inputCmb, {{inputLbl, 5},{1.0}}, {{driverSel, 5}});
+    sublayout.append(focusSel, {{settingsCaption, 0, Anchor::Left}}, {{videoCmb, 15}});
+    sublayout.append(focusPause, {{0.0}}, {{focusSel, 5}});
+    sublayout.append(focusIgnore, {{0.333, 5}}, {{focusSel, 5}});
+    sublayout.append(focusAllow, {{0.667, 5}}, {{focusSel, 5}});
+    sublayout.append(compositorSel, {{settingsCaption, 0, Anchor::Left}}, {{focusPause, 15}});
+    sublayout.append(compositNever, {{0.0}}, {{compositorSel, 5}});
+    sublayout.append(compositFullscreen, {{0.333, 5}}, {{compositorSel, 5}});
+    sublayout.append(compositAlways, {{0.667, 5}}, {{compositorSel, 5}});
 
     append(layout);
 

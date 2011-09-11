@@ -10,8 +10,8 @@ using namespace phoenix;
 using std::vector;
 
 //For brevity
-typedef Attachment::ANCHOR ANCHOR;
-typedef Attachment::SPECIAL SPECIAL;
+typedef AnchorPoint::Anchor Anchor;
+AnchorPoint Centered = Axis::Centered();
 
 const vector<vector<nall::string>> layers = {
 	{"Restore", "Damage"},
@@ -25,7 +25,7 @@ struct Application : Window {
   Button okBtn;
   Button cancelBtn;
 
-  AttachLayout layout;
+  AnchorLayout layout;
   Label techStartLabel;
   Button layerButtons[20]; //Hackish... Button doesn't want to be put into a vector
 
@@ -53,8 +53,8 @@ struct Application : Window {
     lowerButtonLayout.append(cancelBtn, 150, 50, 0.5);
 
     //Append our title and lower button layouts since they're the easiest
-    layout.append(techStartLabel, {SPECIAL::CENTERED, 0.5}, {0.0, 20});
-    layout.append(lowerButtonLayout, {}, {}, {SPECIAL::CENTERED, 0.5}, {1.0, -20});
+    layout.append(techStartLabel, {Centered, {0.5}}, {{0.0, 20}});
+    layout.append(lowerButtonLayout, {Centered, {0.5}}, {{},{1.0, -20}});
 
     //And now the buttons! (We skip blank buttons)
     id=0;
@@ -67,7 +67,7 @@ struct Application : Window {
     		//Skip it?
     		Button& b = layerButtons[id++];
     		if (layers[row][col].length()>0) {
-    			layout.append(b, {SPECIAL::CENTERED, startOffset}, {*lastRow, 10});
+    			layout.append(b, {Centered, {startOffset}}, {{*lastRow, 10}});
     		}
 
     		//Increment

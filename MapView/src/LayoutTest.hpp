@@ -67,14 +67,14 @@ struct Application : Window {
     //Put a status bar at the bottom of the screen.
     layout.append(statusBar, {{0.0, 5},{1.0, -5}}, {{}, {1.0, -5}});
 
-    //The final component simply takes up all remaining vertical space, and is centered horizontally
-    layout.append(bigButton, {Centered, {0.5, 300}}, {Centered, {0.5, 300}});
-
     //These are fun!
     layout.append(north, {Centered, {bigButton, 0, Anchor::Center}}, {{}, {bigButton, -5}});
     layout.append(south, {Centered, {bigButton, 0, Anchor::Center}}, {{bigButton, 5}});
     layout.append(west, {{}, {bigButton, -5}}, {Centered, {bigButton, 0, Anchor::Center}});
     layout.append(east, {{bigButton, 5}}, {Centered, {bigButton, 0, Anchor::Center}});
+
+    //The final component simply takes up all remaining vertical space, and is centered horizontally
+    layout.append(bigButton, {Centered, {0.5, 300}}, {Centered, {0.5, 300}});
 
     //Hook it all up
     append(layout);

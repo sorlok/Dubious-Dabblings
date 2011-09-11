@@ -251,9 +251,14 @@ nall::linear_vector<int> AnchorLayout::GetBoth(Axis& axis, LayoutData& args, boo
 
 int AnchorLayout::GetPercent(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp)
 {
-	//Simple; just remember to include the item's offset, and the global margin (+/- sign)
+	//Note: Margin only applies if percent is 0.0 or 1.0
 	AnchorPoint& item = ltr ? axis.least_ : axis.greatest_;
-	int sign = ltr ? 1 : -1;
+	int sign = 0;
+	if (item.percent==0.0 || item.percent==1.0) {
+		sign = ltr ? 1 : -1;
+	}
+
+	//Simple; just remember to include the item's offset, and the global margin (+/- sign)
 	int res = item.percent*args.containerMax + args.containerOffset + item.offset + ((int)args.containerMargin*sign);
 
 	std::cout <<"   (" <<&comp   <<") Percent: " <<item.percent <<" of " <<args.containerMax <<" with offset " <<item.offset <<" = "  <<res <<"\n";
