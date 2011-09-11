@@ -53,7 +53,32 @@ const std::vector<nall::string> comboLabels = {
 };
 
 
+
 struct Application : Window {
+  struct MsgBox : Window {
+	AnchorLayout layout;
+	Label lbl;
+	Button ok;
+
+	void create() {
+		setTitle("Nice Try");
+		setGeometry({200, 200, 180, 75});
+
+		lbl.setText("Sorry, not a chance.");
+		ok.setText("Ok");
+
+		layout.setMargin(5);
+		layout.append(lbl, {Centered, {0.5}}, {Centered, {0.5, -10}});
+		layout.append(ok, {Centered, {0.5}}, {{lbl, 5}});
+
+		ok.onTick = [this] {
+			setVisible(false);
+		};
+
+		append(layout);
+	}
+  } MsgBox;
+
   AnchorLayout layout;
 
   ChunkReader chReader;
@@ -92,6 +117,9 @@ struct Application : Window {
     //Do window tasks
     setTitle("FF7 Battle Reel Editor");
     setGeometry({ 130, 130, 650, 500 });
+
+    //Whee...
+    MsgBox.create();
 
     //Ensure that the testReel can at least size itself (we can add images later).
     page = 0;
@@ -137,8 +165,6 @@ struct Application : Window {
     			currEditReel[r].setImage(curr.icon.getImage());
     			currEditBpVal[r].setText(curr.numBP);
     			currEditType[r].setSelection(rouletteSlots.find(id)->second.comboID);
-
-    			//std::cout <<"Set selction: " <<rowID <<"," <<slotID <<"\n";
     		}
     	}
     	);
@@ -215,6 +241,10 @@ struct Application : Window {
     	saveFile.setEnabled(true);
     	pgUp.setEnabled(true);
     	pgDown.setEnabled(true);
+    };
+
+    saveFile.onTick = [&MsgBox] {
+    	MsgBox.setVisible(true);
     };
 
     onClose = quitButton.onTick = [&testReels, &layout, &numTestReels] {

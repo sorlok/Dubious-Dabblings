@@ -40,7 +40,7 @@ SlotImage::SlotImage(const nall::string& name, unsigned char hexCode, unsigned i
 	init(name);
 }
 
-SlotImage::SlotImage(const SlotImage& copy) : name(copy.name), hexCode(copy.hexCode), img()
+SlotImage::SlotImage(const SlotImage& copy) : name(copy.name), hexCode(copy.hexCode), comboID(copy.comboID), img()
 {
 	//It's expensive to reload the PNG each time, but phoenix::png doesn't declare a move constructor,
 	//   so pointers will be deleted twice otherwise.
