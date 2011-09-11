@@ -32,7 +32,7 @@ struct Application : Window {
 
     layout.setMargin(5);
     layout.append(btn5, {{btn3, 5}}, {Centered, {0.5}});
-    layout.append(btn2, {Centered, {0.5}}, {{}, {btn4, -5}});
+    layout.append(btn2, {Centered, {0.5}}, {{}, {btn5, -5}});
     layout.append(btn4, {{}, {btn2, -5}}, {Centered, {0.5}});
     layout.append(btn3, {Centered, {0.5}}, {{btn4, 5}});
     append(layout);

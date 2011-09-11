@@ -1,11 +1,14 @@
+//Turn on debugging info
+#define ANCHOR_LAYOUT_ERRORS_ON
+
 //Minimal test for Phoenix layout error
 //#include "Sample.hpp"
 
 //Tests for new AttachLayout
-//#include "LayoutTest.hpp"
+#include "LayoutTest.hpp"
 
 //Various examples
-#include "VariousExamples.hpp"
+//#include "VariousExamples.hpp"
 
 //Test "Tech Tree" mockup
 //#include "TechTree.hpp"

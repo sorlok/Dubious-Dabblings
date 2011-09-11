@@ -2,7 +2,9 @@
 //Shared under the terms of the ISC license
 #include "anchor-layout.hpp"
 
+#ifdef ANCHOR_LAYOUT_ERRORS_ON
 #include <iostream>
+#endif
 
 using namespace phoenix;
 typedef AnchorPoint::Anchor Anchor;
@@ -208,7 +210,9 @@ int AnchorLayout::Get(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& 
 	}
 	if (item.state==State::Waiting || (other && other->state==State::Waiting)) {
 		//ERROR: All errors position the component at 0 X/Y.
+#ifdef ANCHOR_LAYOUT_ERRORS_ON
 		std::cout <<"Error: Already waiting on component.\n";
+#endif
 		return 0;
 	}
 	item.state = State::Waiting;
@@ -219,8 +223,13 @@ int AnchorLayout::Get(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& 
 	if (axis.isFullAxis) {
 		//Some items require figuring out both points at the same time.
 		nall::linear_vector<int> res = GetBoth(axis, args, ltr, comp);
-		item.res = res[0];
-		other->res = res[1];
+		if (ltr) {
+			item.res = res[0];
+			other->res = res[1];
+		} else {
+			item.res = res[1];
+			other->res = res[0];
+		}
 	} else {
 		//Others can be computed independently.
 		if (item.type==Type::Unbound) {
@@ -230,7 +239,9 @@ int AnchorLayout::Get(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& 
 		} else if (item.type==Type::Attached) {
 			item.res = GetAttached(axis, args, ltr, comp);
 		} else {
+#ifdef ANCHOR_LAYOUT_ERRORS_ON
 			std::cout <<"Error: Unknown independent type.\n";
+#endif
 			return 0;
 		}
 	}
@@ -256,7 +267,9 @@ nall::linear_vector<int> AnchorLayout::GetBoth(Axis& axis, LayoutData& args, boo
 		GetCenteredAttached(res, axis, args, true, comp);
 	} else {
 		//Error.
+#ifdef ANCHOR_LAYOUT_ERRORS_ON
 		std::cout <<"Error: Unknown dependent type.\n";
+#endif
 		return {0, 0};
 	}
 
@@ -303,7 +316,9 @@ int AnchorLayout::GetAttached(Axis& axis, LayoutData& args, bool ltr, phoenix::S
 	if (!other) {
 		//TODO: We _could_ probably allow attaching to components in a fixed/horizontal/vertical layout
 		//      manager. But I think the complexity won't gain us much, and I'd rather get this working first.
+#ifdef ANCHOR_LAYOUT_ERRORS_ON
 		std::cout <<"Error: Attaching to unmanaged component.\n";
+#endif
 		return 0;
 	}
 
@@ -333,7 +348,9 @@ int AnchorLayout::GetAttached(Axis& axis, LayoutData& args, bool ltr, phoenix::S
 			baseVal = AnchorLayout::Get(otherAxis, args, false, *other->sizable);
 		} else {
 			//Shouldn't fail, but just to be safe...
+#ifdef ANCHOR_LAYOUT_ERRORS_ON
 			std::cout <<"Error: Unexpected Anchor.\n";
+#endif
 			return 0;
 		}
 

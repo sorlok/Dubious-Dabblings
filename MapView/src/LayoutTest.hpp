@@ -43,12 +43,6 @@ struct Application : Window {
     east.setText("East");
     west.setText("West");
 
-    /*std::cout <<"Hello lbl: " <<&helloLabel <<"\n";
-    std::cout <<"Ok button: " <<&okButton <<"\n";
-    std::cout <<"Quit button: " <<&quitButton <<"\n";
-    std::cout <<"Right button: " <<&rightButton <<"\n";
-    std::cout <<"Big button: " <<&bigButton <<"\n";*/
-
     //HelloLabel is in the top-left corner.
     layout.append(helloLabel, {{0.0}}, {{0.0}});
 
