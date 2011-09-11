@@ -151,6 +151,10 @@ void SingleReel::loadData(const map<unsigned int, SlotImage>& imgLookup, unsigne
 				curr.numBP = bpReward;
 				curr.icon.setImage(GetIcon(imgLookup, defaultImg, statusID));
 				src += 4;
+
+				if (imgLookup.count(curr.statusID)==0) {
+					std::cout <<"slotID: " <<slot <<" icon: " <<(int)curr.statusID <<" BP: " <<curr.numBP <<"\n";
+				}
 			}
 		}
 
