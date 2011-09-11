@@ -4,6 +4,7 @@
 #include <tuple>
 #include <string>
 #include <sstream>
+#include <functional>
 #include <phoenix.hpp>
 #include <nall/png.hpp>
 #include "phoenix_ext/image-icon.hpp"
@@ -49,15 +50,28 @@ public:
 		digit1.setFont({"Courier New, 14, bold"});
 		digit2.setFont({"Courier New, 14, bold"});
 		digit3.setFont({"Courier New, 14, bold"});
+
+		//Add click events
+		for (int i=NUM_SLOTS-1; i>=0; i--) {
+			ImageIcon& icn = std::get<1>(slots[i]).icon;
+			icn.onMotion = [this](unsigned int x, unsigned int y, phoenix::MOVE_FLAG moveFlag) {
+				if (moveFlag==phoenix::MOVE_FLAG::LEFT_UP) {
+					if (callback) {
+						callback();
+					}
+				}
+			};
+		}
 	}
 	void loadData(const std::map<unsigned int, SlotImage>& imgLookup, unsigned char* dataStart=nullptr, unsigned int reelID=0);
+	void setClickCallback(std::function<void ()> callback) { this->callback = callback; }
 	AnchorLayout& getLayout();
 	phoenix::Geometry getSuggestedMinimumSize();
 
 private:
 	static const size_t NUM_SLOTS = 7;
 
-	//static phoenix::Font lblFont;
+	std::function<void ()> callback;
 
 	void nullAll(const nall::png& defaultImg);
 

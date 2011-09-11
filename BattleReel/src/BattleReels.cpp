@@ -117,6 +117,14 @@ struct Application : Window {
     	}
     }
 
+    //Initialize callbacks
+    for (size_t i=0; i<numTestReels; i++) {
+    	testReels[i].setClickCallback([] {
+    		std::cout <<"Callback\n";
+    	}
+    	);
+    }
+
     //Layout
     layout.setMargin(10);
     layout.append(loadFile, {{fileName, 10}}, {{0.0}});

@@ -15,6 +15,28 @@ static void Canvas_motion(Canvas *self, GdkEventMotion* event) {
   if(self->onMotion) self->onMotion(x, y, MOVE_FLAG::MOVE);
 }
 
+static void Canvas_press(Canvas *self, GdkEventButton* event) {
+  //Signal we are ready for the next mouse event.
+  gint x, y;
+  gdk_window_get_pointer(event->window, &x, &y, NULL);
+
+  //Signal our user-defined function
+  if (event->button==1) {
+    if(self->onMotion) self->onMotion(x, y, MOVE_FLAG::LEFT_DOWN);
+  }
+}
+
+static void Canvas_release(Canvas *self, GdkEventButton* event) {
+  //Signal we are ready for the next mouse event.
+  gint x, y;
+  gdk_window_get_pointer(event->window, &x, &y, NULL);
+
+  //Signal our user-defined function
+  if (event->button==1) {
+    if(self->onMotion) self->onMotion(x, y, MOVE_FLAG::LEFT_UP);
+  }
+}
+
 //Added
 static void Canvas_enter(Canvas *self) {
   if(self->onMotion) self->onMotion(0, 0, MOVE_FLAG::ENTER);
@@ -59,8 +81,11 @@ void pCanvas::constructor() {
   //ADDED: Mouse motion events
   //TODO:  Since these might be expensive, the user should explicitly call something like "add events"
   //       (which means we will also need a "remove events", and also need to check how QT and Windows do it)
-  gtk_widget_add_events(gtkWidget, GDK_POINTER_MOTION_MASK|GDK_POINTER_MOTION_HINT_MASK);  //The hint mask slows down X's mouse events to one per update.
+  //The hint mask slows down X's mouse events to one per update.
+  gtk_widget_add_events(gtkWidget, GDK_POINTER_MOTION_MASK|GDK_POINTER_MOTION_HINT_MASK|GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK); 
   g_signal_connect_swapped(G_OBJECT(gtkWidget), "motion_notify_event", G_CALLBACK(Canvas_motion), (gpointer)&canvas);
+  g_signal_connect_swapped(G_OBJECT(gtkWidget), "button_press_event", G_CALLBACK(Canvas_press), (gpointer)&canvas);
+  g_signal_connect_swapped(G_OBJECT(gtkWidget), "button_release_event", G_CALLBACK(Canvas_release), (gpointer)&canvas);
 
   //ADDED: Mouse enter/leaving events
   gtk_widget_add_events(gtkWidget, GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK);
