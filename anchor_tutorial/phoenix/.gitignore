@@ -1,0 +1,17 @@
+#Ignore all of phoenix's src
+phoenix.cpp
+phoenix.hpp
+sync.sh
+
+#...including folders
+core
+gtk
+nall
+qt
+reference
+test
+windows
+
+#Ignore gedit backup files
+*~
+
