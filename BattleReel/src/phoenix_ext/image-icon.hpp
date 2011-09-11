@@ -13,6 +13,7 @@
 struct ImageIcon : public phoenix::Canvas {
 	ImageIcon();
 	void setImage(const nall::png& image);
+	const nall::png& getImage() { return *img; }
 	virtual void update();
 	virtual phoenix::Geometry minimumGeometry();
 	virtual void setGeometry(const phoenix::Geometry &geometry);

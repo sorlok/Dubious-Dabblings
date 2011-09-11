@@ -64,6 +64,7 @@ struct Application : Window {
 
   Button pgUp;
   Button pgDown;
+  bool notYetLoaded;
   int page;
 
   ImageIcon currEditReel[3];
@@ -96,6 +97,7 @@ struct Application : Window {
     page = 0;
     numTestReels = 4;
     numEditReels = 3;
+    notYetLoaded = true;
     for (size_t i=0; i<numTestReels; i++) {
     	testReels[i].loadData(rouletteSlots);
     }
@@ -119,8 +121,25 @@ struct Application : Window {
 
     //Initialize callbacks
     for (size_t i=0; i<numTestReels; i++) {
-    	testReels[i].setClickCallback(i, [](size_t rowID, size_t slotID) {
-    		std::cout <<"Callback: " <<rowID <<"," <<slotID <<"\n";
+    	testReels[i].setClickCallback(i, [this](size_t rowID, size_t slotID) {
+    		if (rowID>=128 || notYetLoaded) {
+    			return; //Again, must be a better way of doing this...
+    		}
+
+    		//Retrieve the tuple for this row:
+    		std::tuple<SingleSlot, SingleSlot, SingleSlot>& reels = testReels[rowID].slots[slotID];
+    		for (size_t r=0; r<3; r++) {
+    			//Again, I mildly regret using tuples for array-like data.
+    			SingleSlot& curr = (r==0)?std::get<0>(reels):(r==1)?std::get<1>(reels):std::get<2>(reels);
+
+    			//Update the image, text, and combo box.
+    			unsigned int id = (rouletteSlots.count(curr.statusID)>0) ? curr.statusID : 0xFF;
+    			currEditReel[r].setImage(curr.icon.getImage());
+    			currEditBpVal[r].setText(curr.numBP);
+    			currEditType[r].setSelection(rouletteSlots.find(id)->second.comboID);
+
+    			//std::cout <<"Set selction: " <<rowID <<"," <<slotID <<"\n";
+    		}
     	}
     	);
     }
@@ -184,6 +203,7 @@ struct Application : Window {
 
     	if (chReader.loadFile(fileName.text()()) && chReader.getNumFiles()==2) {
     		updateReels();
+    		notYetLoaded = false;
     	} else {
     	    for (size_t i=0; i<numTestReels; i++) {
     	    	testReels[i].loadData(rouletteSlots);
