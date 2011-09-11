@@ -8,6 +8,18 @@ using namespace phoenix;
 typedef AnchorPoint::Anchor Anchor;
 
 
+//I'm not sure how C++ handles floating-point math.
+//If you are confident in f1==f2 being accurate for 0.0==0.0 and 1.0==1.0 (which it should be!) then
+// you can comment out the following and create a new version of FloatEquals which just checks basic equality
+#include <cmath>
+#include <cfloat>
+namespace {
+bool FloatEquals(float f1, float f2)  {
+	return fabs(f1-f2) <= FLT_EPSILON * fmax(fmax(1.0F, fabs(f1)), fabs(f2));
+}
+}
+
+
 AnchorLayout::AnchorLayout()
 {
 	//Defaults
@@ -254,7 +266,7 @@ int AnchorLayout::GetPercent(Axis& axis, LayoutData& args, bool ltr, phoenix::Si
 	//Note: Margin only applies if percent is 0.0 or 1.0
 	AnchorPoint& item = ltr ? axis.least_ : axis.greatest_;
 	int sign = 0;
-	if (item.percent==0.0 || item.percent==1.0) {
+	if (FloatEquals(item.percent,0.0) || FloatEquals(item.percent,1.0)) {
 		sign = ltr ? 1 : -1;
 	}
 
