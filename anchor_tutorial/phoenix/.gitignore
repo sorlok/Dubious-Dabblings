@@ -4,6 +4,7 @@ phoenix.hpp
 sync.sh
 
 #...including folders
+build
 core
 gtk
 nall
