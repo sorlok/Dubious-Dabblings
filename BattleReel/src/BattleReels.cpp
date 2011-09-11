@@ -11,7 +11,7 @@ using std::cout;
 using std::endl;
 using namespace nall;
 using namespace phoenix;
-
+typedef AnchorPoint::Anchor Anchor;
 
 
 const std::map<unsigned int, SlotImage> rouletteSlots = {
@@ -44,67 +44,44 @@ const std::map<unsigned int, SlotImage> rouletteSlots = {
 
 
 struct Application : Window {
-  VerticalLayout layoutVert;
-  HorizontalLayout layoutHoriz;
+  AnchorLayout layout;
 
-  Label helloLabel;
-  Button okButton;
+  Button loadFile;
+  Button saveFile;
   Button quitButton;
-
-  ImageIcon testIcon1;
-  ImageIcon testIcon2;
-  ImageIcon testIcon3;
-  ImageIcon testIcon4;
-  ImageIcon testIcon5;
-  ImageIcon testIcon6;
-  ImageIcon testIcon7;
 
   SingleReel testReel;
 
   void create() {
     //Do window tasks
-    setTitle("Test Application");
+    setTitle("FF7 Battle Reel Editor");
     setGeometry({ 130, 130, 700, 490 });
 
     //Ensure that the testReel can at least size itself (we can add images later).
     testReel.loadData(rouletteSlots);
-
-    helloLabel.setText("Map Viewer");
-    okButton.setText("Load Map");
+    loadFile.setText("Load File");
+    saveFile.setText("Save Changes");
     quitButton.setText("Quit");
-    testIcon1.setImage(rouletteSlots.find(10)->second.img);
-    testIcon2.setImage(rouletteSlots.find(10)->second.img);
-    testIcon3.setImage(rouletteSlots.find(19)->second.img);
-    testIcon4.setImage(rouletteSlots.find(18)->second.img);
-    testIcon5.setImage(rouletteSlots.find(10)->second.img);
-    testIcon6.setImage(rouletteSlots.find(15)->second.img);
-    testIcon7.setImage(rouletteSlots.find(1)->second.img);
 
-    //Horizontal layout
-    layoutHoriz.append(okButton, 100, 30, 5);
-    layoutHoriz.append(quitButton, 100, 30, 5);
-    /*layoutHoriz.append(testIcon2, 0, 0, 5);
-    layoutHoriz.append(testIcon3, 0, 0, 5);
-    layoutHoriz.append(testIcon4, 0, 0, 5);
-    layoutHoriz.append(testIcon5, 0, 0, 5);
-    layoutHoriz.append(testIcon6, 0, 0, 5);
-    layoutHoriz.append(testIcon7, 0, 0, 5);*/
+    //SingleReels are a bit strange.
+    Geometry reelSize = testReel.getSuggestedMinimumSize();
 
-    //Vertical layout
-    layoutVert.setMargin(5);
-    layoutVert.append(helloLabel, 0, 0, 5);
-    layoutVert.append(layoutHoriz, 0, 0, 10);
-    layoutVert.append(testReel.getLayout(), testReel.getSuggestedMinimumSize().width, testReel.getSuggestedMinimumSize().height, 5);
+    //Layout
+    layout.setMargin(10);
+    layout.append(loadFile, {{0.0}}, {{0.0}});
+    layout.append(saveFile, {{loadFile, 10}}, {{loadFile, 0, Anchor::Top}});
+    layout.append(quitButton, {{1.0}}, {{loadFile, 0, Anchor::Top}});
+    layout.append(testReel.getLayout(), {{0.0}, {testReel.getLayout(), reelSize.width, Anchor::Left}}, {{0.5}, {testReel.getLayout(), reelSize.height, Anchor::Top}});
 
     //Master layout
-    append(layoutVert);
+    append(layout);
 
 
-    onClose = quitButton.onTick = [&testReel] {
+    onClose = quitButton.onTick = [&testReel, &layout] {
+    	layout.setSkipGeomUpdates(true);
     	testReel.getLayout().setSkipGeomUpdates(true);
     	OS::quit();
     };
-
 
     setVisible();
   }
