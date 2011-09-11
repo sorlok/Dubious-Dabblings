@@ -60,17 +60,18 @@ phoenix::Geometry SingleReel::getSuggestedMinimumSize()
 	//TODO: These values at least should be somewhat more.... er... static.
 	int margin = 5;
 	int spacing = 5;
-	phoenix::Geometry text = phoenix::Font("Arial, 14, bold").geometry("000");
+	int textW = digit1.minimumGeometry().width;
 	phoenix::Geometry square = std::get<0>(slots[0]).icon.minimumGeometry();
 
-	unsigned int w = margin*2 + text.width/2 + square.width*NUM_SLOTS + spacing*(NUM_SLOTS-1);
-	unsigned int h = margin*2 + text.height/2 + square.height;
+	unsigned int w = margin*2 + textW + spacing + square.width*NUM_SLOTS + spacing*(NUM_SLOTS-1);
+	unsigned int h = margin*2 + square.height;
 	return {0, 0, w, h};
 }
 
 
 AnchorLayout& SingleReel::getLayout()
 {
+	typedef AnchorPoint::Anchor Anchor;
 	AnchorPoint Centered = Axis::Centered(); //Makes things look cleaner.
 
 	//Perform layout of visible components.
@@ -80,9 +81,7 @@ AnchorLayout& SingleReel::getLayout()
 		layout.setMargin(5);
 		layout.setSkipGeomUpdates(true);
 
-		//layout.append(numLbl, {0.0}, {0.0});
-
-		//Attach right-to-left, so that we can easily overlap the numLbl if we want to.
+		//Attach right-to-left, for no reason in particular
 		phoenix::Sizable* last = nullptr;
 		for (int i=NUM_SLOTS-1; i>=0; i--) {
 			ImageIcon& icn = std::get<1>(slots[i]).icon;
@@ -90,13 +89,17 @@ AnchorLayout& SingleReel::getLayout()
 				//Test appending to the center; shouldn't do anything if components are the same height
 				layout.append(icn, {{}, {*last, -5}}, {Centered, {*last}});
 			} else {
-				layout.append(icn, {{}, {1.0, -5}}, {{numLbl}});
+				layout.append(icn, {{}, {1.0, -5}}, {{0.0}});
 			}
 			last = &icn;
 		}
 
 		//Test: out-of-order appending
-		layout.append(numLbl, {{0.0}}, {{0.0}});
+		int shim = 3; //Courier's a tall font
+		layout.append(digit1, {Centered, {digit2}}, {{}, {digit2, shim}});
+		layout.append(digit2, {{}, {*last, -5}}, {Centered, {*last}});
+		layout.append(digit3, {Centered, {digit2}}, {{digit2, -shim}});
+
 
 		layout.setSkipGeomUpdates(false);
 	}
@@ -113,7 +116,9 @@ void SingleReel::nullAll(const nall::png& defaultImg)
 		std::get<1>(slots[i]).icon.setImage(defaultImg);
 		std::get<2>(slots[i]).icon.setImage(defaultImg);
 	}
-	numLbl.setText("N/A");
+	digit1.setText("?");
+	digit2.setText("?");
+	digit3.setText("?");
 }
 
 
@@ -152,7 +157,10 @@ void SingleReel::loadData(const map<unsigned int, SlotImage>& imgLookup, unsigne
 		//The number
 		std::stringstream num;
 		num <<reelID;
-		numLbl.setText(PadString(num.str(), 3).c_str());
+		std::string digits = PadString(num.str(), 3);
+		digit1.setText(std::string(digits[0], 1).c_str());
+		digit2.setText(std::string(digits[1], 1).c_str());
+		digit3.setText(std::string(digits[2], 1).c_str());
 
 		//Check
 		if (src != dataStart+this->dataSize) {

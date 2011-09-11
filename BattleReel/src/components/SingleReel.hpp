@@ -45,7 +45,9 @@ public:
 	std::tuple<SingleSlot, SingleSlot, SingleSlot> slots[7];
 
 	SingleReel() : layoutDone(false) {
-		numLbl.setFont({"Arial, 14, bold"});
+		digit1.setFont({"Courier New, 14, bold"});
+		digit2.setFont({"Courier New, 14, bold"});
+		digit3.setFont({"Courier New, 14, bold"});
 	}
 	void loadData(const std::map<unsigned int, SlotImage>& imgLookup, unsigned char* dataStart=nullptr, unsigned int reelID=0);
 	AnchorLayout& getLayout();
@@ -61,7 +63,9 @@ private:
 	//For drawing
 	bool layoutDone;
 	AnchorLayout layout;
-	phoenix::Label numLbl;
+	phoenix::Label digit1;
+	phoenix::Label digit2;
+	phoenix::Label digit3;
 
 	//Location within the binary file, with a bounds check.
 	unsigned char* dataStart;

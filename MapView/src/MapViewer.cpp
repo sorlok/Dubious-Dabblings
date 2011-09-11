@@ -8,10 +8,10 @@
 //#include "TechTree.hpp"
 
 //Tests for the BSNES config menu via AttachLayout
-#include "BsnesMockup.hpp"
+//#include "BsnesMockup.hpp"
 
 //Main code (comment out if using one of the header-style tests, above.
-/*include <iostream>
+#include <iostream>
 
 #include <phoenix/phoenix.hpp>
 #include <nall/png.hpp>
@@ -190,5 +190,3 @@ int main(int argc, char* argv[])
   OS::main();
   return 0;
 }
-
-*/
