@@ -2,7 +2,7 @@
 //#include "Sample.hpp"
 
 //Tests for new AttachLayout
-//#include "LayoutTest.hpp"
+#include "LayoutTest.hpp"
 
 //Test "Tech Tree" mockup
 //#include "TechTree.hpp"
@@ -11,7 +11,7 @@
 //#include "BsnesMockup.hpp"
 
 //Main code (comment out if using one of the header-style tests, above.
-#include <iostream>
+/*#include <iostream>
 
 #include <phoenix/phoenix.hpp>
 #include <nall/png.hpp>
@@ -190,3 +190,4 @@ int main(int argc, char* argv[])
   OS::main();
   return 0;
 }
+*/

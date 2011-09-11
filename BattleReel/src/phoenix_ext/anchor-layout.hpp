@@ -72,6 +72,7 @@ private:
 	AnchorPoint least_;
 	AnchorPoint greatest_;
 	bool isFullAxis;
+	unsigned int forceSize;
 
 	//Default constructor; used by AnchorLayout. Puts a component at 0,0 with 0,0 width/height
 	Axis() : least_({}), greatest_({}), isFullAxis(false) {}
@@ -84,8 +85,10 @@ public:
 	//Construct an axis composed of a left/right or top/bottom pair of Attachments.
 	//Either one of these Attachments is optional, and may be set to {} to use the component's
 	// default width/height.
-	Axis(const AnchorPoint& least, const AnchorPoint& greatest=AnchorPoint()) {
+	//NOTE: forceSize only applies to "Centered" components
+	Axis(const AnchorPoint& least, const AnchorPoint& greatest=AnchorPoint(), unsigned int forceSize=0) {
 		isFullAxis = least.superSpecial;
+		this->forceSize = forceSize;
 		if (isFullAxis) {
 			least_ = greatest;
 			greatest_ = {};

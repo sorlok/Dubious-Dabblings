@@ -353,9 +353,9 @@ void AnchorLayout::CenterItem(nall::linear_vector<int>& res, int center, Axis& a
 	//Retrieve the item's width, divide by 2, and save the result
 	AnchorPoint& item = ltr ? axis.least_ : axis.greatest_;
 	int itemMin = args.isHoriz ? comp.minimumGeometry().width : comp.minimumGeometry().height;
-	int width = item.offset>0 ? item.offset : itemMin;
-	res[0] = center - width/2;
-	res[1] = center + width/2;
+	int width = axis.forceSize>0 ? axis.forceSize : itemMin;
+	res[0] = center + item.offset - width/2;
+	res[1] = center + item.offset + width/2;
 }
 
 

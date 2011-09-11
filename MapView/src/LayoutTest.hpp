@@ -74,7 +74,7 @@ struct Application : Window {
     layout.append(east, {{bigButton, 5}}, {Centered, {bigButton, 0, Anchor::Center}});
 
     //The final component simply takes up all remaining vertical space, and is centered horizontally
-    layout.append(bigButton, {Centered, {0.5, 300}}, {Centered, {0.5, 300}});
+    layout.append(bigButton, {Centered, {0.5}, 300}, {Centered, {0.5}, 300});
 
     //Hook it all up
     append(layout);
