@@ -1,4 +1,10 @@
-#include "attach-layout.hpp"
+#include "../BattleReel/src/phoenix_ext/anchor-layout.cpp"
+
+//NOTE: I am leaving this code here for reference, but it _is_ buggy. Please see "anchor-layout", which
+//      is the more stable version of this layout manager, and contains only minor differences.
+
+
+/*#include "attach-layout.hpp"
 
 //Copyright 2011 by Seth N. Hetu
 //Shared under the terms of the ISC license
@@ -337,15 +343,4 @@ void AttachLayout::setGeometry(const Geometry& containerGeometry)
 	}
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
+*/

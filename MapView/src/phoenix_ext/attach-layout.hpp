@@ -1,4 +1,10 @@
-#pragma once
+#include "../BattleReel/src/phoenix_ext/anchor-layout.hpp"
+
+//NOTE: I am leaving this code here for reference, but it _is_ buggy. Please see "anchor-layout", which
+//      is the more stable version of this layout manager, and contains only minor differences.
+
+
+/*#pragma once
 
 #include <phoenix.hpp>
 
@@ -176,3 +182,4 @@ private:
 		bool visible;
 	} state;
 };
+*/

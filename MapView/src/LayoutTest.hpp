@@ -7,12 +7,12 @@ using namespace nall;
 using namespace phoenix;
 
 //For brevity
-typedef Attachment::ANCHOR ANCHOR;
-typedef Attachment::SPECIAL SPECIAL;
+typedef AnchorPoint::Anchor Anchor;
+Axis::FullAxis Centered = Axis::FullAxis::Centered;
 
 
 struct Application : Window {
-  AttachLayout layout;
+  AnchorLayout layout;
 
   Label helloLabel;
   Button okButton;
@@ -39,22 +39,22 @@ struct Application : Window {
     std::cout <<"Big button: " <<&bigButton <<"\n";*/
 
     //HelloLabel is in the top-left corner.
-    layout.append(helloLabel, {0.0}, {0.0});
+    layout.append(helloLabel, {{0.0}}, {{0.0}});
 
     //OkButton is 10 pixelsunder HelloLabel
     layout.append(okButton, {0.0}, {helloLabel, 10});
 
     //QuitButton is right of OkButton. We force it to be 150 pixels long
-    layout.append(quitButton, {okButton, 10}, {okButton, 0, ANCHOR::TOP}, {quitButton, 150, ANCHOR::LEFT});
+    layout.append(quitButton, {{okButton, 10},{quitButton, 150, Anchor::Left}}, {{okButton, 0, Anchor::Top}});
 
     //Right button is at the far right side of the screen
-    layout.append(rightButton, {}, {okButton, 0, ANCHOR::TOP}, {1.0});
+    layout.append(rightButton, {{}, {1.0}}, {{okButton, 0, Anchor::Top}});
 
     //The next button just attaches to the left of this (we're testing right-attachments here)
-    layout.append(rightButtonBack, {}, {okButton, 0, ANCHOR::TOP}, {rightButton, -10});
+    layout.append(rightButtonBack, {{}, {rightButton, -10}}, {{okButton, 0, Anchor::Top}});
 
     //The final component simply takes up all remaining vertical space, and is centered horizontally
-    layout.append(bigButton, {SPECIAL::CENTERED, 0.5, 300}, {SPECIAL::CENTERED, 0.5, 300});
+    layout.append(bigButton, {Centered, {0.5, 300}}, {Centered, {0.5, 300}});
     append(layout);
 
     onClose = quitButton.onTick = [&layout] {
