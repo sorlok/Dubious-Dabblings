@@ -35,7 +35,7 @@ string PadString(const string& src, size_t len)
 
 
 
-SlotImage::SlotImage(const nall::string& name, unsigned char hexCode) : name(name), hexCode(hexCode), img()
+SlotImage::SlotImage(const nall::string& name, unsigned char hexCode, unsigned int comboID) : name(name), hexCode(hexCode), comboID(comboID), img()
 {
 	init(name);
 }

@@ -17,32 +17,40 @@ AnchorPoint Centered = Axis::Centered();
 
 
 const std::map<unsigned int, SlotImage> rouletteSlots = {
-	{0x6, {"accessory", 0x6}},
-	{0x5, {"all", 0x5}},
-	{0x8, {"armor", 0x8}},
-	{0x4, {"command", 0x4}},
-	{0x17, {"cure", 0x17}},
-	{0xE, {"frog", 0xE}},
-	{0x12, {"halfhp", 0x12}},
-	{0x14, {"halfhpmp", 0x14}},
-	{0x13, {"halfmp", 0x13}},
-	{0xA, {"halfspeed", 0xA}},
-	{0x3, {"independent", 0x3}},
-	{0x7, {"item", 0x7}},
-	{0x11, {"level10", 0x11}},
-	{0x10, {"level5", 0x10}},
-	{0x16, {"lucky", 0x16}},
-	{0x0, {"magic", 0x0}},
-	{0xC, {"mini", 0xC}},
-	{0xD, {"poison", 0xD}},
-	{0x2, {"summon", 0x2}},
-	{0x1, {"support", 0x1}},
-	{0xF, {"time", 0xF}},
-	{0x9, {"weapon", 0x9}},
-	{0x15, {"zeromp", 0x15}},
-	{0xFF, {"unknown", 0xFF}}
+	{0x6, {"accessory", 0x6, 0}},
+	{0x5, {"all", 0x5, 1}},
+	{0x8, {"armor", 0x8, 2}},
+	{0x4, {"command", 0x4, 3}},
+	{0x17, {"cure", 0x17, 4}},
+	{0xE, {"frog", 0xE, 5}},
+	{0x12, {"halfhp", 0x12, 6}},
+	{0x14, {"halfhpmp", 0x14, 7}},
+	{0x13, {"halfmp", 0x13, 8}},
+	{0xA, {"halfspeed", 0xA, 9}},
+	{0x3, {"independent", 0x3, 10}},
+	{0x7, {"item", 0x7, 11}},
+	{0x11, {"level10", 0x11, 12}},
+	{0x10, {"level5", 0x10, 13}},
+	{0x16, {"lucky", 0x16, 14}},
+	{0x0, {"magic", 0x0, 15}},
+	{0xC, {"mini", 0xC, 16}},
+	{0xD, {"poison", 0xD, 17}},
+	{0x2, {"summon", 0x2, 18}},
+	{0x1, {"support", 0x1, 19}},
+	{0xF, {"time", 0xF, 20}},
+	{0x9, {"weapon", 0x9, 21}},
+	{0x15, {"zeromp", 0x15, 22}},
+	{0xFF, {"unknown", 0xFF, 23}}
 };
 
+const std::vector<nall::string> comboLabels = {
+	"Accessory", "All Materia", "Armor", "Command",
+	"Full Cure", "Frog", "Half HP", "Half HP/MP",
+	"Half MP", "Half Speed", "Independent", "Item",
+	"Level -10", "Level -5", "Lucky 7!", "Magic",
+	"Mini", "Poison", "Summon", "Support", "Time",
+	"Weapon", "Zero MP", "Unknown"
+};
 
 
 struct Application : Window {
@@ -57,6 +65,12 @@ struct Application : Window {
   Button pgUp;
   Button pgDown;
   int page;
+
+  ImageIcon currEditReel[3];
+  ComboBox currEditType[3];
+  LineEdit currEditBpVal[3];
+  Label currEditBpLbl[3];
+  size_t numEditReels;
 
   size_t numTestReels;
   SingleReel testReels[4];
@@ -76,11 +90,12 @@ struct Application : Window {
   void create() {
     //Do window tasks
     setTitle("FF7 Battle Reel Editor");
-    setGeometry({ 130, 130, 650, 490 });
+    setGeometry({ 130, 130, 650, 500 });
 
     //Ensure that the testReel can at least size itself (we can add images later).
     page = 0;
     numTestReels = 4;
+    numEditReels = 3;
     for (size_t i=0; i<numTestReels; i++) {
     	testReels[i].loadData(rouletteSlots);
     }
@@ -93,6 +108,14 @@ struct Application : Window {
     pgDown.setText("PgDn");
     pgUp.setEnabled(false);
     pgDown.setEnabled(false);
+    for (size_t i=0; i<numEditReels; i++) {
+    	currEditReel[i].setImage(rouletteSlots.find(0xFF)->second.img);
+    	currEditBpLbl[i].setFont("Arial, 10, bold");
+    	currEditBpLbl[i].setText("BP");
+    	for (size_t j=0; j<comboLabels.size(); j++) {
+    		currEditType[i].append(comboLabels[j]);
+    	}
+    }
 
     //Layout
     layout.setMargin(10);
@@ -114,6 +137,17 @@ struct Application : Window {
     }
     layout.append(pgUp, {{testReels[0].getLayout()}}, {{testReels[0].getLayout(), 5, Anchor::Top}});
     layout.append(pgDown, {{testReels[numTestReels-1].getLayout()}}, {{}, {testReels[numTestReels-1].getLayout(), -5, Anchor::Bottom}});
+
+    for (size_t i=0; i<numEditReels; i++) {
+    	if (i==0) {
+    		layout.append(currEditType[i], {{testReels[0].getLayout(), 10, Anchor::Left}}, {{currEditReel[i], 5}});
+    	} else {
+    		layout.append(currEditType[i], {{currEditType[i-1], 20}}, {{currEditType[i-1], 0, Anchor::Top}});
+    	}
+    	layout.append(currEditReel[i], {Centered, {currEditType[i]}}, {{testReels[numTestReels-1].getLayout(), 20}});
+		layout.append(currEditBpLbl[i], {{}, {currEditType[i], 0, Anchor::Right}}, {{currEditType[i], 5}});
+		layout.append(currEditBpVal[i], {{currEditType[i], 0, Anchor::Left}, {currEditBpLbl[i], -5}}, {Centered, {currEditBpLbl[i], 1}});
+    }
 
     //Master layout
     append(layout);

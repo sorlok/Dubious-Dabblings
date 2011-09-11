@@ -15,8 +15,9 @@
 struct SlotImage {
 	nall::string name;
 	unsigned char hexCode;
+	unsigned int comboID;
 	nall::png img;
-	SlotImage(const nall::string& name, unsigned char hexCode);
+	SlotImage(const nall::string& name, unsigned char hexCode, unsigned int comboID);
 	SlotImage(const SlotImage& copy);
 
 private:
