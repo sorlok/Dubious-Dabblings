@@ -6,6 +6,7 @@
 #include "phoenix_ext/anchor-layout.hpp"
 #include "phoenix_ext/image-icon.hpp"
 #include "components/SingleReel.hpp"
+#include "utilities/ChunkReader.hpp"
 
 using std::cout;
 using std::endl;
@@ -47,6 +48,7 @@ const std::map<unsigned int, SlotImage> rouletteSlots = {
 struct Application : Window {
   AnchorLayout layout;
 
+  ChunkReader chReader;
   LineEdit fileName;
   Button loadFile;
   Button saveFile;
@@ -68,9 +70,10 @@ struct Application : Window {
     for (size_t i=0; i<numTestReels; i++) {
     	testReels[i].loadData(rouletteSlots);
     }
-    fileName.setText("co.bin");
+    fileName.setText("test/co.bin");
     loadFile.setText("Load File");
     saveFile.setText("Save Changes");
+    saveFile.setEnabled(false);
     quitButton.setText("Quit");
     pgUp.setText("PgUp");
     pgDown.setText("PgDn");
@@ -99,8 +102,18 @@ struct Application : Window {
     //Master layout
     append(layout);
 
-    loadFile.onTick = [&fileName] {
+    loadFile.onTick = [&fileName, &loadFile, &saveFile, &chReader] {
+    	fileName.setEnabled(false);
+    	loadFile.setEnabled(false);
 
+    	if (chReader.loadFile(fileName.text()()) && chReader.getNumFiles()==2) {
+    		//Update reels
+    		std::cout <<"Correct!\n";
+    	}
+
+    	fileName.setEnabled(true);
+    	loadFile.setEnabled(true);
+    	saveFile.setEnabled(true);
     };
 
     onClose = quitButton.onTick = [&testReels, &layout, &numTestReels] {
