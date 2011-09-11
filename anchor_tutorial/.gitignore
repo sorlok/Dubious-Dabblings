@@ -1,0 +1,3 @@
+#Ignore our own files
+anchor-layout.hpp
+anchor-layout.cpp
