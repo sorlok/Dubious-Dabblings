@@ -152,7 +152,7 @@ struct Application : Window {
     numIcons = 0;
     currFolder = "";
 
-    loadFiles("/usr/lib/chromium-browser");
+    loadFiles("");
 
     //Initialize callbacks
     for (size_t i=0; i<MAX_ICONS; i++) {

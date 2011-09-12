@@ -129,7 +129,6 @@ Geometry ThumbnailLayout::minimumGeometry()
 }
 
 
-#include <iostream>
 
 void ThumbnailLayout::setGeometry(const Geometry& containerGeometry)
 {
@@ -138,8 +137,6 @@ void ThumbnailLayout::setGeometry(const Geometry& containerGeometry)
 	if (state.skipGeomUpdate) {
 		return;
 	}
-
-	std::cout <<"--------------------\n";
 
 	//Save containerGeometry
 	state.lastKnownSize = containerGeometry;
@@ -157,8 +154,6 @@ void ThumbnailLayout::setGeometry(const Geometry& containerGeometry)
 			referenceGeom.height = child.height;
 		}
 	}
-
-	std::cout <<"Max: " <<referenceGeom.width <<"," <<referenceGeom.height <<"\n";
 
 	//Apply layout rules for each child  individually.
 	foreach(child, children) {

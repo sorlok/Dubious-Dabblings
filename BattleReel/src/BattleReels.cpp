@@ -1,7 +1,7 @@
 //Test; comment out entire source code to try it.
-#include "FileManager.hpp"
+//#include "FileManager.hpp"
 
-/*
+//Main code; comment out if you want to use one of the test cases.
 #include <phoenix/phoenix.hpp>
 #include <iostream>
 #include <string>
@@ -270,7 +270,3 @@ int main(int argc, char* argv[])
   OS::main();
   return 0;
 }
-
-
-
-*/
