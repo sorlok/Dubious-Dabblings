@@ -186,7 +186,7 @@ struct Application : Window {
     	int suggWidth = testReels[i].getSuggestedMinimumSize().width;
     	int suggHeight = testReels[i].getSuggestedMinimumSize().height;
     	if (!lastLayout) {
-    		layout.append(reel, {{0.0, 50}, {reel, suggWidth, Anchor::Left}}, {{loadFile, 20}, {reel, suggHeight, Anchor::Top}});
+    		layout.append(reel, {Centered, {0.5, -30}, suggWidth}, {{loadFile, 20}, {reel, suggHeight, Anchor::Top}});
     	} else {
     		layout.append(reel, {{*lastLayout, 0, Anchor::Left}, {reel, suggWidth, Anchor::Left}}, {{*lastLayout}, {reel, suggHeight, Anchor::Top}});
     	}
