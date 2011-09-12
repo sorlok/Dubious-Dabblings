@@ -29,11 +29,7 @@ struct Application : Window {
   layout.append(quitButton, {{quitButton, -150}, {1.0}}, {{okButton, 0, Anchor::Top}, {quitButton, 75}});
 
     okButton.onTick = [this] {
-//      layout.setSkipGeomUpdates(true);
-//      layout.remove(okButton);
-//      layout.setSkipGeomUpdates(false);
       layout.append(okButton, {Centered, {0.5}, 150}, {Centered, {0.2}, 75});
-//      layout.append(quitButton, {{quitButton, -150}, {1.0}}, {{okButton, 0, Anchor::Top}, {quitButton, 75}});
     };
 
 
