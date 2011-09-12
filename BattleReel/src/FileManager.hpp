@@ -59,7 +59,7 @@ struct Application : Window {
 
   void loadFiles(const nall::string& filename) {
 	  nall::string fullPath = {currFolder, "/", filename};
-	  if (!nall::file::exists(fullPath) || !nall::directory::exists(fullPath)) {
+	  if (!nall::file::exists(fullPath) && !nall::directory::exists(fullPath)) {
 		  std::cout <<"Couldn't find path: " <<fullPath <<"\n";
 		  return;
 	  }
@@ -70,40 +70,53 @@ struct Application : Window {
 		  numIcons = 0;
 		  lstring folders = nall::directory::folders(fullPath);
 		  lstring files = nall::directory::files(fullPath);
-		  int lastItem = folders.size() + files.size() - 1;
-		  if (lastItem==-1) {
+		  size_t numTotal = folders.size() + files.size();
+		  if (numTotal>MAX_ICONS) {
+			  numTotal = MAX_ICONS;
+		  }
+		  if (numTotal==0) {
 			  layout.setSkipGeomUpdates(false);
-		  }
-		  foreach(dirName, folders) {
-			  iconsImgs[numIcons].setImage(folderImg);
-			  iconsFilenameStrings[numIcons] = dirName.rtrim("/");
-			  iconsFilename[numIcons].setText(iconsFilenameStrings[numIcons]);
+		  } else {
+			  foreach(dirName, folders) {
+				  if (numIcons==MAX_ICONS) {
+					  break;
+				  }
 
-			  if (numIcons==lastItem) {
-				  layout.setSkipGeomUpdates(false);
+				  iconsImgs[numIcons].setImage(folderImg);
+				  iconsFilenameStrings[numIcons] = dirName.rtrim("/");
+				  iconsFilename[numIcons].setText(iconsFilenameStrings[numIcons]);
+
+				  if (numIcons+1==numTotal) {
+					  layout.setSkipGeomUpdates(false);
+				  }
+
+				  layout.append(iconsLayout[numIcons]);
+				  numIcons++;
 			  }
+			  foreach(fileName, files) {
+				  if (numIcons==MAX_ICONS) {
+					  break;
+				  }
 
-			  layout.append(iconsLayout[numIcons]);
-			  numIcons++;
-		  }
-		  foreach(fileName, files) {
-			  iconsImgs[numIcons].setImage(fileImg);
-			  iconsFilenameStrings[numIcons] = fileName;
-			  iconsFilename[numIcons].setText(iconsFilenameStrings[numIcons]);
-			  layout.append(iconsLayout[numIcons]);
+				  iconsImgs[numIcons].setImage(fileImg);
+				  iconsFilenameStrings[numIcons] = fileName;
+				  iconsFilename[numIcons].setText(iconsFilenameStrings[numIcons]);
 
-			  if (numIcons==lastItem) {
-				  layout.setSkipGeomUpdates(false);
+				  if (numIcons+1==numTotal) {
+					  layout.setSkipGeomUpdates(false);
+				  }
+
+				  layout.append(iconsLayout[numIcons]);
+
+				  numIcons++;
 			  }
-
-			  numIcons++;
 		  }
+
+		  currFolder = fullPath=="/" ? "" : fullPath;
 	  } else if (nall::file::exists(fullPath)){
 		  //Files simply open the message box
 		  MsgBox.setVisible();
 	  }
-
-	  currFolder = fullPath;
   }
 
   void create() {
@@ -139,7 +152,7 @@ struct Application : Window {
     numIcons = 0;
     currFolder = "";
 
-    loadFiles("");
+    loadFiles("/usr/lib/chromium-browser");
 
     //Initialize callbacks
     for (size_t i=0; i<MAX_ICONS; i++) {

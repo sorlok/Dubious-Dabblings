@@ -71,9 +71,19 @@ void ThumbnailLayout::remove(Sizable& sizable)
 
 void ThumbnailLayout::synchronize()
 {
+	if (children.size()==0) {
+		return;
+	}
+
 	//Ensure all sizables have been appended to the layout.
+	state.skipGeomUpdate = true;
+	size_t i = 0;
 	foreach(child, children) {
+		if (i+1==children.size()) {
+			state.skipGeomUpdate = false;
+		}
 		Layout::append(*child.sizable);
+		i++;
 	}
 }
 
@@ -119,6 +129,8 @@ Geometry ThumbnailLayout::minimumGeometry()
 }
 
 
+#include <iostream>
+
 void ThumbnailLayout::setGeometry(const Geometry& containerGeometry)
 {
 	//When closing the app (or if the user tells us to) we don't need to redo any internal geometry
@@ -126,6 +138,8 @@ void ThumbnailLayout::setGeometry(const Geometry& containerGeometry)
 	if (state.skipGeomUpdate) {
 		return;
 	}
+
+	std::cout <<"--------------------\n";
 
 	//Save containerGeometry
 	state.lastKnownSize = containerGeometry;
@@ -144,6 +158,8 @@ void ThumbnailLayout::setGeometry(const Geometry& containerGeometry)
 		}
 	}
 
+	std::cout <<"Max: " <<referenceGeom.width <<"," <<referenceGeom.height <<"\n";
+
 	//Apply layout rules for each child  individually.
 	foreach(child, children) {
 		//Reset?
@@ -151,6 +167,8 @@ void ThumbnailLayout::setGeometry(const Geometry& containerGeometry)
 			referenceGeom.x = 0;
 			referenceGeom.y += referenceGeom.height; //Might scroll offscreen
 		}
+
+		//std::cout <<"Ref geom: " <<referenceGeom.x <<"," <<referenceGeom.y <<" : " <<referenceGeom.width <<"," <<referenceGeom.height <<"\n";
 
 		//Pivot
 		double alignment = 0.5; //This can be customized later.
