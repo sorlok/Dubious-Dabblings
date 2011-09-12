@@ -14,6 +14,7 @@ struct Application : Window {
   Button okButton;
   Button fancyButton;
   Button quitButton;
+  Label normalLbl;
 
   void create() {
     setTitle("Anchor Layout Tutorial");
@@ -22,11 +23,12 @@ struct Application : Window {
     okButton.setText("Ok"); 
     fancyButton.setText("Fancy");
     quitButton.setText("Quit");
+    normalLbl.setText("A Very Wide Label With Lots Of Text");
 
-
-  layout.setMargin(5);
-  layout.append(okButton, {{0.0}, {okButton, 150}}, {{0.0}, {okButton, 75,}});
-  layout.append(quitButton, {{quitButton, -150}, {1.0}}, {{okButton, 0, Anchor::Top}, {quitButton, 75}});
+    layout.append(normalLbl, {{0.3}}, {{0.0, 5}});
+    layout.append(okButton, {Centered, {normalLbl, 0, Anchor::Right}}, {{normalLbl, 5}});
+    layout.append(fancyButton, {Centered, {okButton}, 150}, {{okButton, 5}, {fancyButton, 75}});
+    layout.append(quitButton, {Centered, {okButton}}, {{fancyButton, 5}});
 
     okButton.onTick = [this] {
       layout.append(okButton, {Centered, {0.5}, 150}, {Centered, {0.2}, 75});
