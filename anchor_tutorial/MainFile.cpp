@@ -21,27 +21,19 @@ struct Application : Window {
     okButton.setText("Ok"); 
     quitButton.setText("Quit");
 
-  //Set a margin for 1.0 and 0.0 percent values.
-  layout.setMargin(5);
-
-  //Horizontal layout for the Ok button
-  AnchorPoint okLeft(0.0);
-  AnchorPoint okRight(0.0, 150);
-
-  //Horizontal layout for the Quit button
-  AnchorPoint quitLeft(1.0, -150);
-  AnchorPoint quitRight(1.0);
-
-  //Vertical layout is the same for both buttons
   AnchorPoint bothTop(0.0);
-  AnchorPoint bothBottom(0.0, 75);
+  AnchorPoint bothBottom = {};
+  Axis bothVertical(bothTop, bothBottom);
 
-    Axis okHorizontal(okLeft, okRight);
-    Axis quitHorizontal(quitLeft, quitRight);
-    Axis bothVertical(bothTop, bothBottom);
+  AnchorPoint okCenter({0.333});
+  Axis okHorizontal(Centered, okCenter);
 
-    layout.append(okButton, okHorizontal, bothVertical);
-    layout.append(quitButton, quitHorizontal, bothVertical);
+  AnchorPoint quitCentered({0.667});
+  Axis quitHorizontal(Centered, quitCentered, 150);
+
+  layout.setMargin(5);
+  layout.append(okButton, okHorizontal, bothVertical);
+  layout.append(quitButton, quitHorizontal, bothVertical);
 
     append(layout);
 
