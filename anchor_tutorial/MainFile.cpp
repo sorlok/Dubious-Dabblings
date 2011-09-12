@@ -26,7 +26,7 @@ struct Application : Window {
     layout.setMargin(5);
     layout.append(okButton, {{0.0}}, {{0.0}});
     layout.append(quitButton, {{}, {1.0}}, {{0.0}});
-    layout.append(fancyButton, {{okButton, 5},{quitButton, -5}}, {{0.0}});
+    layout.append(fancyButton, {{okButton, 5, Anchor::Center},{quitButton, -5, Anchor::Center}}, {{0.0, 30}});
 
     append(layout);
 
