@@ -21,19 +21,10 @@ struct Application : Window {
     okButton.setText("Ok"); 
     quitButton.setText("Quit");
 
-  AnchorPoint bothTop(0.0);
-  AnchorPoint bothBottom = {};
-  Axis bothVertical(bothTop, bothBottom);
-
-  AnchorPoint okCenter({0.333});
-  Axis okHorizontal(Centered, okCenter);
-
-  AnchorPoint quitCentered({0.667});
-  Axis quitHorizontal(Centered, quitCentered, 150);
-
   layout.setMargin(5);
-  layout.append(okButton, okHorizontal, bothVertical);
-  layout.append(quitButton, quitHorizontal, bothVertical);
+  Axis vert = {{0.0},{0.0,75}};
+  layout.append(okButton, {{0.0},{0.0,150}}, vert);
+  layout.append(quitButton, {{1.0, -150},{1.0}}, vert);
 
     append(layout);
 

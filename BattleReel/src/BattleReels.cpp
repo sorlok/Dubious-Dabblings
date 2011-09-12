@@ -1,3 +1,7 @@
+//Test; comment out entire source code to try it.
+#include "FileManager.hpp"
+
+/*
 #include <phoenix/phoenix.hpp>
 #include <iostream>
 #include <string>
@@ -269,3 +273,4 @@ int main(int argc, char* argv[])
 
 
 
+*/
