@@ -66,10 +66,12 @@ struct Application : Window {
 		  //Directories repopulate the entire layout manager
 		  layout.removeAll();
 		  numIcons = 0;
-		  foreach(dirName, nall::directory::folders(fullPath)) {
+		  lstring folders = nall::directory::folders(fullPath);
+		  foreach(dirName, folders) {
 
 		  }
-		  foreach(fileName, nall::directory::files(fullPath)) {
+		  lstring files = nall::directory::files(fullPath);
+		  foreach(fileName, files) {
 			  iconsImgs[numIcons].setImage(fileImg);
 			  iconsFilenameStrings[numIcons] = fileName;
 			  iconsFilename[numIcons].setText(iconsFilenameStrings[numIcons]);
