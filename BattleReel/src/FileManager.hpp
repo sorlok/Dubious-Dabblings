@@ -1,4 +1,5 @@
 #include <phoenix/phoenix.hpp>
+#include <nall/directory.hpp>
 #include <iostream>
 #include <string>
 #include <map>
@@ -57,17 +58,30 @@ struct Application : Window {
   nall::string currFolder;
 
   void loadFiles(const nall::string& filename) {
-	  nall::string fullPath = {currFolder, filename};
-	  if (!nall::file::exists(fullPath)) {
+	  nall::string fullPath = {currFolder, "/", filename};
+	  if (!nall::file::exists(fullPath) || !nall::directory::exists(fullPath)) {
 		  return;
 	  }
-	  if (nall::dir(fullPath) != fullPath) {
+	  if (nall::directory::exists(fullPath)) {
+		  //Directories repopulate the entire layout manager
+		  layout.removeAll();
+		  numIcons = 0;
+		  foreach(dirName, nall::directory::folders(fullPath)) {
+
+		  }
+		  foreach(fileName, nall::directory::files(fullPath)) {
+			  iconsImgs[numIcons].setImage(fileImg);
+			  iconsFilenameStrings[numIcons] = fileName;
+			  iconsFilename[numIcons].setText(iconsFilenameStrings[numIcons]);
+			  layout.append(iconsLayout[numIcons]);
+			  numIcons++;
+		  }
+	  } else if (nall::file::exists(fullPath)){
 		  //Files simply open the message box
 		  MsgBox.setVisible();
-	  } else {
-		  //Directories repopulate the entire layout manager
-		  //layout.append(iconsLayout[i]);
 	  }
+
+	  currFolder = fullPath;
   }
 
   void create() {
@@ -79,10 +93,10 @@ struct Application : Window {
     MsgBox.create();
 
     //Initialize images
-	if (!folderImg.decode("imgs/folder.png")) {
+	if (!folderImg.decode("img/folder.png")) {
 		std::cout <<"Couldn't load image.\n";
 	}
-	if (!fileImg.decode("imgs/file.png")) {
+	if (!fileImg.decode("img/file.png")) {
 		std::cout <<"Couldn't load image.\n";
 	}
 
@@ -100,7 +114,7 @@ struct Application : Window {
     numIcons = 0;
     currFolder = "";
 
-    loadFiles("/");
+    loadFiles("");
 
     //Initialize callbacks
     for (size_t i=0; i<MAX_ICONS; i++) {
