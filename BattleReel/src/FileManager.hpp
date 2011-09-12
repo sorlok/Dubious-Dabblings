@@ -52,6 +52,7 @@ struct Application : Window {
   size_t MAX_ICONS;
   VerticalLayout iconsLayout[256];
   ImageIcon iconsImgs[256];
+  nall::string iconsFilenameStrings[256];
   Label iconsFilename[256];
   nall::string currFolder;
 
@@ -80,11 +81,9 @@ struct Application : Window {
     //Initialize images
 	if (!folderImg.decode("imgs/folder.png")) {
 		std::cout <<"Couldn't load image.\n";
-		return;
 	}
 	if (!fileImg.decode("imgs/file.png")) {
 		std::cout <<"Couldn't load image.\n";
-		return;
 	}
 
     //Initialize layouts
@@ -93,9 +92,10 @@ struct Application : Window {
     	iconsLayout[i].setAlignment(0.5);
     	iconsLayout[i].setMargin(5);
     	iconsImgs[i].setImage(fileImg);
-    	iconsFilename[i].setText("N/A");
-    	iconsLayout[i].append(iconsImgs[i]);
-    	iconsLayout[i].append(iconsFilename[i]);
+    	iconsFilenameStrings[i] = "N/A";
+    	iconsFilename[i].setText(iconsFilenameStrings[i]);
+    	iconsLayout[i].append(iconsImgs[i], 0, 0);
+    	iconsLayout[i].append(iconsFilename[i], 0, 0, 5);
     }
     numIcons = 0;
     currFolder = "";
@@ -106,7 +106,7 @@ struct Application : Window {
     for (size_t i=0; i<MAX_ICONS; i++) {
     	iconsImgs[i].onMotion = [this, i](unsigned int x, unsigned int y, phoenix::MOVE_FLAG moveFlag) {
 			if (moveFlag==phoenix::MOVE_FLAG::LEFT_UP) {
-				loadFiles(iconsFilename[i]);
+				loadFiles(iconsFilenameStrings[i]);
 			}
     	};
     }
