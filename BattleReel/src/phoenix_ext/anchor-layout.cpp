@@ -80,6 +80,7 @@ void AnchorLayout::append(phoenix::Sizable &sizable, const Axis& horizontal, con
 	if (res) {
 		res->horiz = horizontal;
 		res->vert = vertical;
+		setGeometry(state.lastKnownSize);
 		return;
 	}
 	//Else, add a new item
