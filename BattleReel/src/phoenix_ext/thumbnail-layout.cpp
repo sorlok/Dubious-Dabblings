@@ -46,6 +46,8 @@ ThumbnailLayout::Children* ThumbnailLayout::FindChild(nall::linear_vector<Childr
 void ThumbnailLayout::append(Sizable &sizable) {
 	if (FindChild(children, sizable)) {
 		return;
+	} else {
+		children.append({ &sizable, 0, 0 });
 	}
 	Layout::append(sizable);
 	if(window()) {
@@ -115,7 +117,6 @@ Geometry ThumbnailLayout::minimumGeometry()
 	// At least, I can't think of a reasonable use case for taking less than the maximum.
 	return state.lastKnownSize;
 }
-
 
 
 void ThumbnailLayout::setGeometry(const Geometry& containerGeometry)

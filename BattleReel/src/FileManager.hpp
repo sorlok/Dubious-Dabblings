@@ -60,22 +60,42 @@ struct Application : Window {
   void loadFiles(const nall::string& filename) {
 	  nall::string fullPath = {currFolder, "/", filename};
 	  if (!nall::file::exists(fullPath) || !nall::directory::exists(fullPath)) {
+		  std::cout <<"Couldn't find path: " <<fullPath <<"\n";
 		  return;
 	  }
 	  if (nall::directory::exists(fullPath)) {
 		  //Directories repopulate the entire layout manager
+		  layout.setSkipGeomUpdates(true);
 		  layout.removeAll();
 		  numIcons = 0;
 		  lstring folders = nall::directory::folders(fullPath);
-		  foreach(dirName, folders) {
-
-		  }
 		  lstring files = nall::directory::files(fullPath);
+		  int lastItem = folders.size() + files.size() - 1;
+		  if (lastItem==-1) {
+			  layout.setSkipGeomUpdates(false);
+		  }
+		  foreach(dirName, folders) {
+			  iconsImgs[numIcons].setImage(folderImg);
+			  iconsFilenameStrings[numIcons] = dirName.rtrim("/");
+			  iconsFilename[numIcons].setText(iconsFilenameStrings[numIcons]);
+
+			  if (numIcons==lastItem) {
+				  layout.setSkipGeomUpdates(false);
+			  }
+
+			  layout.append(iconsLayout[numIcons]);
+			  numIcons++;
+		  }
 		  foreach(fileName, files) {
 			  iconsImgs[numIcons].setImage(fileImg);
 			  iconsFilenameStrings[numIcons] = fileName;
 			  iconsFilename[numIcons].setText(iconsFilenameStrings[numIcons]);
 			  layout.append(iconsLayout[numIcons]);
+
+			  if (numIcons==lastItem) {
+				  layout.setSkipGeomUpdates(false);
+			  }
+
 			  numIcons++;
 		  }
 	  } else if (nall::file::exists(fullPath)){
@@ -130,7 +150,10 @@ struct Application : Window {
     //Master layout
     append(layout);
 
-    onClose = &OS::quit;
+    onClose = [&layout] {
+    	layout.setSkipGeomUpdates(true);
+    	OS::quit();
+    };
 
     setVisible();
   }
