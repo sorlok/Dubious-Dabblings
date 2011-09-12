@@ -121,12 +121,15 @@ struct Application : Window {
 	if (!fileImg.decode("img/file.png")) {
 		std::cout <<"Couldn't load image.\n";
 	}
+	folderImg.transform();
+	fileImg.transform();
 
     //Initialize layouts
 	MAX_ICONS = 256;
     for (size_t i=0; i<MAX_ICONS; i++) {
     	iconsLayout[i].setAlignment(0.5);
     	iconsLayout[i].setMargin(5);
+    	iconsImgs[i].setBkgrd(0xFFFFFFFF);
     	iconsImgs[i].setImage(fileImg);
     	iconsFilenameStrings[i] = "N/A";
     	iconsFilename[i].setText(iconsFilenameStrings[i]);

@@ -8,7 +8,7 @@
 using namespace phoenix;
 
 
-ImageIcon::ImageIcon() : Canvas(), img(nullptr)
+ImageIcon::ImageIcon() : Canvas(), img(nullptr), bkgrd(0)
 {
 }
 
@@ -43,11 +43,14 @@ void ImageIcon::setGeometry(const phoenix::Geometry &geometry)
 
 void ImageIcon::update()
 {
+	//First, fill it
+	uint32_t* buffer_ = buffer();
+	const Geometry& geom = geometry();
+	std::fill(buffer_, buffer_+geom.width*geom.height, bkgrd);
+
 	//Check if we have anything to paint.
 	if (img->data) {
 		//Canvas shorthands
-		uint32_t* buffer_ = buffer();
-		const Geometry& geom = geometry();
 		unsigned int srcW = img->info.width;
 		unsigned int srcH = img->info.height;
 
@@ -65,6 +68,7 @@ void ImageIcon::update()
 			//Iterate & copy
 			for (size_t row=0; row<srcH; row++) {
 				//Copy that row over
+				//TODO: This should really pain ONTO the background color
 				memcpy(dest, src, srcW*sizeof(uint32_t));
 
 				//Increment

@@ -12,6 +12,7 @@
  */
 struct ImageIcon : public phoenix::Canvas {
 	ImageIcon();
+	void setBkgrd(unsigned int argb) { bkgrd = argb; }
 	void setImage(const nall::png& image);
 	const nall::png& getImage() { return *img; }
 	virtual void update();
@@ -20,6 +21,7 @@ struct ImageIcon : public phoenix::Canvas {
 
 private:
 	const nall::png* img;
+	unsigned int bkgrd;
 };
 
 
