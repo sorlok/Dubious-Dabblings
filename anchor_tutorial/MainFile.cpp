@@ -21,13 +21,17 @@ struct Application : Window {
     okButton.setText("Ok"); 
     quitButton.setText("Quit");
 
-    AnchorPoint okLeft(0.0);
-    AnchorPoint okRight = {};
-    AnchorPoint quitLeft = {};
-    AnchorPoint quitRight(1.0);
-    AnchorPoint bothTop(0.0);
-    AnchorPoint bothBottom = {};
-    layout.append(quitButton, {Centered, {0.5}}, {Centered, {0.5}});
+  //Horizontal layout for the Ok button
+  AnchorPoint okLeft(0.0, 5);
+  AnchorPoint okRight = {};
+
+  //Horizontal layout for the Quit button
+  AnchorPoint quitLeft = {};
+  AnchorPoint quitRight(1.0, -5);
+
+  //Vertical layout is the same for both buttons
+  AnchorPoint bothTop(0.0, 5);
+  AnchorPoint bothBottom = {};
 
     Axis okHorizontal(okLeft, okRight);
     Axis quitHorizontal(quitLeft, quitRight);
