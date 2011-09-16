@@ -7,7 +7,7 @@ using namespace std;
 
 int main()
 {
-	lightweight_map<int> mymap;
+	lightweight_map<int, int> mymap;
 
 
 
