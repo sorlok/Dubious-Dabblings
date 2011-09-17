@@ -19,6 +19,11 @@ private:
 		node(Key key) : key(key), left(nullptr), right(nullptr) {}
 	};
 
+	struct slice_res {
+		node* parent;
+		node* child;
+	};
+
 
 public:
 	lightweight_map() : root(nullptr), realSize(0) {}
@@ -44,7 +49,7 @@ public:
 		return realSize;
 	}
 
-	node* recurse(Key key, node* parent, node*& curr, Action action) {
+	node* recurse(Key key, node* parent, node* curr, Action action) {
 		//Base case: No more nodes
 		if (!curr) {
 			//If we're searching or deleting, then we do nothing. For insertion, this is a valid
@@ -54,6 +59,16 @@ public:
 			} else if (action==Action::Insert) {
 				realSize++;
 				curr = new node(key);
+
+				//Add to parent
+				if (!parent) {
+					root = curr;
+				} else if (curr->key<parent->key) {
+					parent->left = curr;
+				} else {
+					parent->right = curr;
+				}
+
 				return curr;
 			}
 		}
@@ -66,17 +81,27 @@ public:
 			} else if (action==Action::Delete) {
 				//Retrieve a free node that should replace this node (and then be deleted)
 				// (We favor the left side of the tree)
-				node* toDelete = find_and_slice_replacement(parent, curr, true);
+				slice_res toDelete = find_sliceable(parent, curr, true);
+
+				std::cout <<"  To delete: " <<toDelete.child->key <<"\n";
+
+				if (toDelete.parent->left==toDelete.child) {
+					toDelete.parent->left = nullptr;
+				} else if (toDelete.parent->right==toDelete.child) {
+					toDelete.parent->right = nullptr;
+				} else {
+					root = nullptr;
+				}
 
 				//Now, replace this node with the one we found (the children do not change though)
-				if (curr!=toDelete) { //Avoid unneeded copying.
-					curr->data = toDelete->data;
-					curr->key = toDelete->key;
+				if (curr!=toDelete.child) { //Avoid unneeded copying.
+					curr->data = toDelete.child->data;
+					curr->key = toDelete.child->key;
 				}
 
 				//At this point, we can safely delete this node.
 				realSize--;
-				delete toDelete;
+				delete toDelete.child;
 				return nullptr;
 			}
 		}
@@ -89,40 +114,27 @@ public:
 		}
 	}
 
-	node* find_and_slice_replacement(node* parent, node* curr, bool first) {
+	slice_res find_sliceable(node* parent, node* curr, bool first) {
 		//All three cases (1 child, 2 children, no children) can be handled at once
 		//  if managed carefully
-		bool slice = false;
 		if (first) {
+			std::cout <<"  Children: " <<curr->left <<" , " <<curr->right <<"\n";
+
 			//How many children?
 			if (curr->left && curr->right) {
-				curr = find_and_slice_replacement(curr, curr->left, false);
+				return find_sliceable(curr, curr->left, false);
 			} else {
-				parent = curr;
-				curr = curr->left?curr->left:curr->right?curr->right:curr;
-				slice = true;
+				node* res = curr->left?curr->left:curr->right?curr->right:curr;
+				return {curr, res};
 			}
 		} else {
 			//Find right-most branch
 			if (curr->right) {
-				curr = find_and_slice_replacement(curr, curr->right, false);
+				return find_sliceable(curr, curr->right, false);
 			} else {
-				slice = true;
+				return {parent, curr};
 			}
 		}
-
-		//Slice it
-		if (slice) {
-			if (parent->left==curr) {
-				parent->left = nullptr;
-			} else if (parent->right==curr) {
-				parent->right = nullptr;
-			} else {
-				root = nullptr; //We're at the root node;
-			}
-		}
-
-		return curr;
 	}
 
 

@@ -34,7 +34,12 @@ int main()
 	}
 
 	//Now randomly delete roughly 1/5 of the map.
+	int maxChecks = ((TEST_SIZE/5)*3)/2;
 	while (mymap.size()>TEST_SIZE-TEST_SIZE/5) {
+		if (maxChecks--<=0) { //Avoid endless looping in buggy cases.
+			break;
+		}
+
 		int toDelete = rand() % TEST_SIZE;
 
 		std::cout <<"Deleting: " <<toDelete <<" from tree of size: " <<mymap.size()  <<"\n";
