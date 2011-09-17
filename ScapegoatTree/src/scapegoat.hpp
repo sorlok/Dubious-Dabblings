@@ -79,29 +79,31 @@ public:
 			if (action==Action::Find || action==Action::Insert)  {
 				return curr;
 			} else if (action==Action::Delete) {
-				//Retrieve a free node that should replace this node (and then be deleted)
-				// (We favor the left side of the tree)
-				slice_res toDelete = find_sliceable(parent, curr, true);
+				//Obtain a reference to this parent's pointer (left or right) that points to this object.
+				node*& parentPtr = parent->left==curr?parent->left:parent->right;
 
-				//std::cout <<"  To delete: " <<toDelete.child->key <<"\n";
-
-				if (toDelete.parent->left==toDelete.child) {
-					toDelete.parent->left = nullptr;
-				} else if (toDelete.parent->right==toDelete.child) {
-					toDelete.parent->right = nullptr;
-				} else if (toDelete.child==root) {
-					root = nullptr;
+				//Three posibilities (I tried generalizing them, but it took up more code).
+				if (!curr->left && !curr->right) {
+					//Simple case: We are deleting a node with no children; just delete it and set
+					// its parent pointer to null.
+					parentPtr = nullptr;
+					delete curr;
+				} else if (!curr->left || !curr->right) {
+					//Simple case 2: Only one child. Delete this node, and have the parent point to
+					// this child.
+					parentPtr = curr->left?curr->left:curr->right;
+					delete curr;
+				} else {
+					//Slightly more complex case: find the previous in-order node and copy
+					//   its contens here... then delete THAT node.
+					node* toDelete = find_and_slice_child(curr, curr->left);
+					curr->data = toDelete->data;
+					curr->key = toDelete->key;
+					delete toDelete;
 				}
 
-				//Now, replace this node with the one we found (the children do not change though)
-				if (curr!=toDelete.child) { //Avoid unneeded copying.
-					curr->data = toDelete.child->data;
-					curr->key = toDelete.child->key;
-				}
-
-				//At this point, we can safely delete this node.
+				//Either way return null
 				realSize--;
-				delete toDelete.child;
 				return nullptr;
 			}
 		}
@@ -114,28 +116,18 @@ public:
 		}
 	}
 
-	slice_res find_sliceable(node* parent, node* curr, bool first) {
-		//All three cases (1 child, 2 children, no children) can be handled at once
-		//  if managed carefully
-		if (first) {
-			//std::cout <<"  Children: " <<curr->left <<" , " <<curr->right <<"\n";
-
-			//How many children?
-			if (curr->left && curr->right) {
-				return find_sliceable(curr, curr->left, false);
-			} else if (curr->left || curr->right) {
-				node* res = curr->left?curr->left:curr->right;
-				return {curr, res};
-			} else {
-				return {parent, curr};
-			}
+	node* find_and_slice_child(node* parent, node* curr) {
+		if (curr->right) {
+			//Recursive case
+			return find_and_slice_child(curr, curr->right);
 		} else {
-			//Find right-most branch
-			if (curr->right) {
-				return find_sliceable(curr, curr->right, false);
-			} else {
-				return {parent, curr};
-			}
+			//Base case; sever from parent
+			node*& parentPtr = parent->left==curr?parent->left:parent->right;
+
+			//We are guaranteed to have no right pointer, so set the parent to point to the LEFT
+			//   child (if it's null that's fine too) and return the current node.
+			parentPtr = curr->left;
+			return curr;
 		}
 	}
 
@@ -154,6 +146,21 @@ public:
 		}
 		printJsonNode(file, root, 0);
 		file <<std::endl;
+		file.close();
+		return true;
+	}
+
+	bool printDot(const std::string& fName) {
+		std::ofstream file(fName);
+		if (!file.is_open()) {
+			return false;
+		}
+		file <<"digraph Tree {" <<std::endl;
+		if (root) {
+			file <<"root" <<" -> " <<root->key <<";" <<std::endl;
+			printDotNode(file, root, 1);
+		}
+		file <<"}" <<std::endl;
 		file.close();
 		return true;
 	}
@@ -178,6 +185,18 @@ private:
 		printJsonChild(file, "left", curr->left, tabLevel);
 		printJsonChild(file, "right", curr->right, tabLevel);
 		file <<std::endl <<tabs <<"}";
+	}
+
+	void printDotNode(std::ofstream& file, node* curr, size_t tabLevel) {
+		std::string tabs = std::string(tabLevel*2, ' ');
+		if (curr->left) {
+			file <<tabs <<curr->key <<" -> " <<curr->left->key <<";" <<std::endl;
+			printDotNode(file, curr->left, tabLevel+1);
+		}
+		if (curr->right) {
+			file <<tabs <<curr->key <<" -> " <<curr->right->key <<";" <<std::endl;
+			printDotNode(file, curr->right, tabLevel+1);
+		}
 	}
 
 #endif
