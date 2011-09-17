@@ -34,13 +34,13 @@ int main()
 	}
 
 	//Now randomly delete roughly 1/5 of the map.
-	/*while (mymap.size()>TEST_SIZE-TEST_SIZE/5) {
+	while (mymap.size()>TEST_SIZE-TEST_SIZE/5) {
 		int toDelete = rand() % TEST_SIZE;
 
 		std::cout <<"Deleting: " <<toDelete <<" from tree of size: " <<mymap.size()  <<"\n";
 
 		mymap.remove(toDelete);
-	}*/
+	}
 
 	//Print it, check it.
 	if (!mymap.printJson("tree.json.txt")) {

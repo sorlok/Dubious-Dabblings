@@ -76,7 +76,7 @@ public:
 
 				//At this point, we can safely delete this node, and return null.
 				realSize--;
-				delete curr;
+				delete toDelete;
 				return nullptr;
 			}
 		}
@@ -124,7 +124,24 @@ public:
 	}
 
 
+private:
+	node* root;
+	size_t realSize;
+
+
 #ifdef SCAPEGOAT_TREE_ALLOW_OUTPUT
+public:
+	bool printJson(const std::string& fName) {
+		std::ofstream file(fName);
+		if (!file.is_open()) {
+			return false;
+		}
+		printJsonNode(file, root, 0);
+		file <<std::endl;
+		file.close();
+		return true;
+	}
+
 private:
 	void printJsonChild(std::ofstream& file, const std::string& label, node* child, size_t tabLevel) {
 		std::string tabs = std::string(tabLevel*2+1, ' ');
@@ -147,23 +164,8 @@ private:
 		file <<std::endl <<tabs <<"}";
 	}
 
-public:
-	bool printJson(const std::string& fName) {
-		std::ofstream file(fName);
-		if (!file.is_open()) {
-			return false;
-		}
-		printJsonNode(file, root, 0);
-		file <<std::endl;
-		file.close();
-		return true;
-	}
 #endif
 
-
-private:
-	node* root;
-	size_t realSize;
 };
 
 
