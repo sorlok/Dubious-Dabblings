@@ -6,10 +6,7 @@
 #include <fstream>
 #include <list>
 
-//Scapegoat with output. Undef after to avoid cluttering the global namespace (this works, right?)
-#define SCAPEGOAT_TREE_ALLOW_OUTPUT
 #include "scapegoat.hpp"
-#undef SCAPEGOAT_TREE_ALLOW_OUTPUT
 
 using namespace std;
 
