@@ -3,9 +3,13 @@
 #include <ctime>
 
 #include <iostream>
+#include <fstream>
 #include <list>
 
+//Scapegoat with output. Undef after to avoid cluttering the global namespace (this works, right?)
+#define SCAPEGOAT_TREE_ALLOW_OUTPUT
 #include "scapegoat.hpp"
+#undef SCAPEGOAT_TREE_ALLOW_OUTPUT
 
 using namespace std;
 
@@ -42,9 +46,9 @@ int main()
 	}
 
 	//Print it, check it.
-	//TODO;
-
-
+	if (!mymap.printJson("tree.json.txt")) {
+		std::cout <<"Error: Couldn't print file.\n";
+	}
 
 
 	cout <<"Done\n";

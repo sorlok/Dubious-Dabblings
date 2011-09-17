@@ -1,5 +1,12 @@
 #pragma once
 
+//Define this to add a function called "printJson()", which uses STL filestreams
+#ifdef SCAPEGOAT_TREE_ALLOW_OUTPUT
+#include <fstream>
+#include <string>
+#endif
+
+
 
 template <class Key, class Data>
 class lightweight_map {
@@ -115,6 +122,42 @@ public:
 
 		return curr;
 	}
+
+
+#ifdef SCAPEGOAT_TREE_ALLOW_OUTPUT
+private:
+	void printJsonChild(std::ofstream& file, const std::string& label, node* child, size_t tabLevel) {
+		std::string tabs = std::string(tabLevel*2+1, ' ');
+		file <<"\n" <<tabs <<"\"" <<label <<"\":";
+		if (!child) {
+			file <<"{}" <<std::endl;
+		} else {
+			file <<std::endl;
+			printJsonNode(file, child, tabLevel+1);
+		}
+	}
+
+	void printJsonNode(std::ofstream& file, node* curr, size_t tabLevel) {
+		std::string tabs = std::string(tabLevel*2, ' ');
+		file <<tabs <<"{"
+		 	<<"\"key\":" <<"\"" <<curr->key <<"\", "
+			<<"\"value\":" <<"\"" <<curr->data <<"\",";
+		printJsonChild(file, "left", curr->left, tabLevel);
+		printJsonChild(file, "right", curr->right, tabLevel);
+		file <<tabs <<"}" <<std::endl;
+	}
+
+public:
+	bool printJson(const std::string& fName) {
+		std::ofstream file(fName);
+		if (!file.is_open()) {
+			return false;
+		}
+		printJsonNode(file, root, 0);
+		file.close();
+		return true;
+	}
+#endif
 
 
 private:
