@@ -37,7 +37,7 @@ public:
 		return realSize;
 	}
 
-	node* recurse(Key key, node* parent, node* curr, Action action) {
+	node* recurse(Key key, node* parent, node*& curr, Action action) {
 		//Base case: No more nodes
 		if (!curr) {
 			//If we're searching or deleting, then we do nothing. For insertion, this is a valid

@@ -12,8 +12,8 @@ using namespace std;
 
 int main()
 {
-	//Create a list of 1000 random numbers, 1...1000
-	const size_t TEST_SIZE = 1000;
+	//Create a list of X random numbers, 1...X
+	const size_t TEST_SIZE = 100;
 	list<int> randNum;
 	while (randNum.size()<TEST_SIZE) {
 		randNum.push_back(randNum.size()+1);
@@ -34,7 +34,7 @@ int main()
 
 	//Now randomly delete roughly 1/5 of the map.
 	while (mymap.size()>TEST_SIZE-TEST_SIZE/5) {
-		int toDelete = rand() % 1000;
+		int toDelete = rand() % TEST_SIZE;
 
 		std::cout <<"Deleting: " <<toDelete <<" from tree of size: " <<mymap.size()  <<"\n";
 
