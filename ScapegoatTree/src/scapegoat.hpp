@@ -28,6 +28,35 @@ private:
 public:
 	lightweight_map() : root(nullptr), realSize(0) {}
 
+	//The tunable alpha parameter determines how "unbalanced" the binary tree can become
+	// before a scapegoat is found and the entire tree balanced. It ensures that
+	// size(root->left) < alpha*size(root), and the same for root->right.
+	//Thus, an alpha of 0.5 represents a perfectly balanced tree, while an alpha
+	// of 1.0 considers a linked-list-esque (worst case) tree balanced.
+	//Obviously, setting this closer to 0.5 will slow down insertions.
+	void setAlpha(double value) {
+		if (value<0.5) {
+			alpha = 500;
+		} else if (value>1.0) {
+			alpha = 1000;
+		} else {
+			alpha = (size_t)(value*1000);
+		}
+	}
+
+	//The "rigid delete" flag allows fine-tuning deletes. When a delete is performed, the
+	// tree is not rebalanced until the number of deleted nodes since the last balancing
+	// equals half the total number of nodes in the tree. By setting this flag, the tree is
+	// rebalanced when the difference between the total number of nodes and the number of deleted
+	// nodes is one less than a power of two, which ensures that the tree remains perfectly
+	// balanced.
+	//In general, having a slightly unbalanced tree for deletion is not a problem, and with this
+	// flag off deletion is amortized log(n). If you want better lookup performance, we would
+	// recommend fiddling with the alpha parameter instead of the rigit flag.
+	void setRigidDelete(bool val) {
+		rigidDelete = val;
+	}
+
 	void insert(Key key, Data value) {
 		recurse(key, nullptr, root, Action::Insert)->data = value;
 	}
@@ -133,8 +162,15 @@ public:
 
 
 private:
+	//BST parameters
 	node* root;
 	size_t realSize;
+
+	//Parameters
+	size_t alpha;   //*1000
+	bool rigidDelete;
+
+	//Scapegoat tree parameters
 
 
 #ifdef SCAPEGOAT_TREE_ALLOW_OUTPUT
