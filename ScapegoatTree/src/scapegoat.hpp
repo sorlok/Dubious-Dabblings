@@ -83,13 +83,13 @@ public:
 				// (We favor the left side of the tree)
 				slice_res toDelete = find_sliceable(parent, curr, true);
 
-				std::cout <<"  To delete: " <<toDelete.child->key <<"\n";
+				//std::cout <<"  To delete: " <<toDelete.child->key <<"\n";
 
 				if (toDelete.parent->left==toDelete.child) {
 					toDelete.parent->left = nullptr;
 				} else if (toDelete.parent->right==toDelete.child) {
 					toDelete.parent->right = nullptr;
-				} else {
+				} else if (toDelete.child==root) {
 					root = nullptr;
 				}
 
@@ -118,7 +118,7 @@ public:
 		//All three cases (1 child, 2 children, no children) can be handled at once
 		//  if managed carefully
 		if (first) {
-			std::cout <<"  Children: " <<curr->left <<" , " <<curr->right <<"\n";
+			//std::cout <<"  Children: " <<curr->left <<" , " <<curr->right <<"\n";
 
 			//How many children?
 			if (curr->left && curr->right) {
