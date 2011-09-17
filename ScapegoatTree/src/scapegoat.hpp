@@ -74,7 +74,7 @@ public:
 					curr->key = toDelete->key;
 				}
 
-				//At this point, we can safely delete this node, and return null.
+				//At this point, we can safely delete this node.
 				realSize--;
 				delete toDelete;
 				return nullptr;
@@ -95,12 +95,12 @@ public:
 		bool slice = false;
 		if (first) {
 			//How many children?
-			if (!curr->left || !curr->right) {
+			if (curr->left && curr->right) {
+				curr = find_and_slice_replacement(curr, curr->left, false);
+			} else {
 				parent = curr;
 				curr = curr->left?curr->left:curr->right?curr->right:curr;
 				slice = true;
-			} else {
-				curr = find_and_slice_replacement(curr, curr->left, false);
 			}
 		} else {
 			//Find right-most branch
@@ -117,7 +117,9 @@ public:
 				parent->left = nullptr;
 			} else if (parent->right==curr) {
 				parent->right = nullptr;
-			} //else: we're at the root node. (See code above.)
+			} else {
+				root = nullptr; //We're at the root node;
+			}
 		}
 
 		return curr;
