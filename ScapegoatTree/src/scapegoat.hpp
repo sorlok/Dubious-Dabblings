@@ -130,7 +130,7 @@ private:
 		std::string tabs = std::string(tabLevel*2+1, ' ');
 		file <<"\n" <<tabs <<"\"" <<label <<"\":";
 		if (!child) {
-			file <<"{}" <<std::endl;
+			file <<"{}";
 		} else {
 			file <<std::endl;
 			printJsonNode(file, child, tabLevel+1);
@@ -144,7 +144,7 @@ private:
 			<<"\"value\":" <<"\"" <<curr->data <<"\",";
 		printJsonChild(file, "left", curr->left, tabLevel);
 		printJsonChild(file, "right", curr->right, tabLevel);
-		file <<tabs <<"}" <<std::endl;
+		file <<std::endl <<tabs <<"}";
 	}
 
 public:
@@ -154,6 +154,7 @@ public:
 			return false;
 		}
 		printJsonNode(file, root, 0);
+		file <<std::endl;
 		file.close();
 		return true;
 	}
