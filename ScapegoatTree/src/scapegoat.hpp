@@ -123,9 +123,11 @@ public:
 			//How many children?
 			if (curr->left && curr->right) {
 				return find_sliceable(curr, curr->left, false);
-			} else {
-				node* res = curr->left?curr->left:curr->right?curr->right:curr;
+			} else if (curr->left || curr->right) {
+				node* res = curr->left?curr->left:curr->right;
 				return {curr, res};
+			} else {
+				return {parent, curr};
 			}
 		} else {
 			//Find right-most branch
