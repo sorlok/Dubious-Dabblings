@@ -6,6 +6,9 @@
 #include <string>
 #endif
 
+//Needed for log2
+#include <cmath>
+
 
 
 template <class Key, class Data>
@@ -95,12 +98,15 @@ public:
 		if (res) {
 			//NOTE: Finding the parent will not be necessary in the final algorithm, since
 			//      it will be part of the Scapegoat lookup.
-			node* parent = root;
-			while (parent->left!=res && parent->right!=res) {
-				if (key<parent->key) {
-					parent = parent->left;
-				} else {
-					parent = parent->right;
+			node* parent = nullptr;
+			if (root!=res) {
+				parent = root;
+				while (parent->left!=res && parent->right!=res) {
+					if (key<parent->key) {
+						parent = parent->left;
+					} else {
+						parent = parent->right;
+					}
 				}
 			}
 
@@ -109,9 +115,8 @@ public:
 	}
 
 private:
-	//Conceptually: Insert all nodes reachable from this one into a list, nulling their children
-	//  pointers as we go. Then sort the list. Then repeatedly insert the median into the new
-	//  subtree.
+	//Conceptually: Turn our tree into the worst possible binary search tree. Then turn that
+	//  into the best-possible binary search tree.
 	void rebalance(node* parent, node* from) {
 		//Check if we're replacing the root node.
 		//bool resetRoot = (root==from);
@@ -120,6 +125,7 @@ private:
 		node*& sectionStart = !parent?root:parent->left==from?parent->left:parent->right;
 		node* curr = from;
 		node* prev = parent;
+		size_t len = 0;
 		while (curr) {
 			if (curr->left) {
 				//Rotate the left subtree in
@@ -128,13 +134,41 @@ private:
 				//Advance down the right sub-tree
 				prev = curr;
 				curr = curr->right;
+				len++;
 			}
 		}
 
 		//sectionStart->right->right...->right (until right is null) is now a linked-list.
-		//
+		//Perform len-1 compressions. (This is based on several similar tree-balancing algorithms)
+		int numCompressions = (int)log2(len)-1;
+		while (numCompressions-- > 0) {
+			std::cout <<"start is: " <<sectionStart->key <<"\n";
 
+			//Iterate down the entire RHS of the tree
+			prev = parent;
+			for (curr=sectionStart; curr;) {
+				//Deal with pairs of nodes.
+				node* oldCurr = curr;
+				curr = curr->right;
 
+				//Update the nodes themselves
+				if (curr) {
+					std::cout <<"   swapping: " <<oldCurr->key <<" and " <<curr->key <<"\n";
+
+					//Update the parent pointer
+					node*& parentPtr = !prev?root:prev->left==oldCurr?prev->left:prev->right;
+					parentPtr = curr;
+					prev = curr;
+
+					//Swap
+					oldCurr->right = curr->left;
+					curr->left = oldCurr;
+
+					//Increment
+					curr = curr->right;
+				}
+			}
+		}
 	}
 
 
