@@ -6,9 +6,17 @@
 #include <string>
 #endif
 
-//Needed for log2
+//Needed for log2, log10
+//cmath links by default, so I don't think this is an onerous dependency.
 #include <cmath>
 
+//
+//TODO: The original paper by Rivest has a good deal of analysis on performance
+//      of different rebalancing/insertion/etc. algorithms. I'd like to modify
+//      this code to use the best ones from that paper (in particular, a number of
+//      non-recursive algorithms were identified as ideal).
+//Link: http://publications.csail.mit.edu/lcs/pubs/pdf/MIT-LCS-TR-700.pdf
+//
 
 
 //
