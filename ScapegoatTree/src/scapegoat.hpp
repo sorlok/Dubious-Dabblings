@@ -57,6 +57,17 @@ public:
 		rigidDelete = val;
 	}
 
+	//Because of the way Scapegoat trees operate, it's possible to avoid
+	// rebalancing them without affecting the overall algorithm much.
+	//Thus, auto-balancing may be turned off. When switched on again, the
+	// "forceRebalance" flag causes a rebalancing of the tree at the root.
+	void setAutoBalance(bool val, bool forceRebalance) {
+		autoBalance = val;
+		if (autoBalance && forceRebalance) {
+			rebalance(root);
+		}
+	}
+
 	void insert(Key key, Data value) {
 		recurse(key, nullptr, root, Action::Insert)->data = value;
 	}
@@ -76,6 +87,19 @@ public:
 
 	size_t size() {
 		return realSize;
+	}
+
+	//TEMP:
+	void test_rebalance(Key key) {
+		node* res = recurse(key, nullptr, root, Action::Find);
+		if (res) {
+			rebalance(res);
+		}
+	}
+
+private:
+	void rebalance(node* from) {
+
 	}
 
 	node* recurse(Key key, node* parent, node* curr, Action action) {
@@ -169,6 +193,7 @@ private:
 	//Parameters
 	size_t alpha;   //*1000
 	bool rigidDelete;
+	bool autoBalance;
 
 	//Scapegoat tree parameters
 

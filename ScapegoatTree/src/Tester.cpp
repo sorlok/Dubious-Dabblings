@@ -73,6 +73,9 @@ int main()
 		mymap.remove(id);
 	}*/
 
+	//Test rebalancing
+	mymap.test_rebalance(89);
+
 
 	//Print it, check it.
 	if (!mymap.printDot("tree.dot")) {
