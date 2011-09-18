@@ -57,7 +57,7 @@ public:
 		} else if (value>1.0) {
 			alpha = 1000;
 		} else {
-			alpha = (size_t)(value*1000);
+			alpha = static_cast<size_t>(value*1000);
 		}
 	}
 
@@ -88,7 +88,9 @@ public:
 	}
 
 	void insert(Key key, Data value) {
-		recurse(key, nullptr, root, 0, Action::Insert)->data = value;
+		bool unbalanced = false;
+		size_t nodeSize = 0;
+		recurse(key, nullptr, root, 0, Action::Insert, unbalanced, nodeSize)->data = value;
 	}
 
 	bool find(Key key, Data& result) {
@@ -101,7 +103,9 @@ public:
 	}
 
 	void remove(Key key) {
-		recurse(key, nullptr, root, 0, Action::Delete);
+		bool unbalanced = false; //Doesn't matter
+		size_t nodeSize = 0; //Doesn't matter
+		recurse(key, nullptr, root, 0, Action::Delete, unbalanced, nodeSize);
 	}
 
 	size_t size() {
@@ -154,7 +158,7 @@ private:
 		//sectionStart->right->right...->right (until right is null) is now a linked-list.
 		//Perform len-1 compressions. (This is based on several similar tree-balancing algorithms)
 		//First step differs slightly if n+1 is not an exact power of 2.
-		int leafCount = len + 1 - (int)pow(2, (int)(log2(len+1)));
+		int leafCount = len + 1 - static_cast<int>(pow(2, static_cast<int>((log2(len+1)))));
 		sectionStart = compress(sectionStart, leafCount);
 
 		//Now, the normal number of compressions
@@ -206,8 +210,42 @@ private:
 		return pivot;
 	}
 
+	size_t calc_size(node* curr) {
+		if (!curr) {
+			return 0;
+		}
 
-	node* recurse(Key key, node* parent, node* curr, size_t nodeHeight, Action action) {
+		//A little wordy, but I'd like to avoid an extra function call per leaf node.
+		size_t res = 1; //Count yourself
+		if (curr->left) {
+			res += calc_size(curr->left);
+		}
+		if (curr->right) {
+			res += calc_size(curr->right);
+		}
+		return res;
+	}
+
+	void checkScapegoat(node* parent, node* curr, size_t nodeHeight, bool& unbalanced, size_t& nodeSize) {
+		//Avoid lots-o-null-checks
+		if (curr==root) {
+			rebalance(nullptr, root);
+			unbalanced = false;
+		} else {
+			size_t thresh = static_cast<size_t>((alpha*log2(nodeSize))/1000);
+			if(nodeHeight > thresh) {
+				rebalance(parent, curr);
+				unbalanced = false;
+			} else {
+				//Since this node isn't to blame, update the nodeSize parameter for the parent node.
+				node* sibling = parent->left==curr?parent->right:parent->left;
+				nodeSize = nodeSize + calc_size(sibling) + 1;
+			}
+		}
+	}
+
+
+	node* recurse(Key key, node* parent, node* curr, size_t nodeHeight, Action action, bool& unbalanced, size_t& nodeSize) {
 		//Base case: No more nodes
 		if (!curr) {
 			//If we're searching or deleting, then we do nothing. For insertion, this is a valid
@@ -227,6 +265,20 @@ private:
 					parent->right = curr;
 				}
 
+				//Balance
+				if (autoBalance) {
+					//Dirty math hack:
+					double realAlpha = alpha / 1000.0;
+					size_t thresh = static_cast<size_t>(log10(realSize)/log10(1/realAlpha));
+
+					//From Rivest's paper: We know the tree is not height-balanced if:
+					if (++nodeHeight > thresh) {
+						unbalanced = true;
+						nodeSize = 1;
+						checkScapegoat(parent, curr, nodeHeight, unbalanced, nodeSize);
+					}
+				}
+
 				return curr;
 			}
 		}
@@ -235,6 +287,8 @@ private:
 		if (curr->key==key) {
 			//If we're searching or inserting, return this node. If we're deleting, check.
 			if (action==Action::Find || action==Action::Insert)  {
+				//"Insert" here means inserting a node that already exists, so we
+				// don't need to check for a scapegoat.
 				return curr;
 			} else if (action==Action::Delete) {
 				//Obtain a reference to this parent's pointer (left or right) that points to this object.
@@ -267,11 +321,19 @@ private:
 		}
 
 		//Recursive case
+		node* res = nullptr;
 		if (key<curr->key) {
-			return recurse(key, curr, curr->left, nodeHeight+1, action);
+			res = recurse(key, curr, curr->left, nodeHeight+1, action, unbalanced, nodeSize);
 		} else {
-			return recurse(key, curr, curr->right, nodeHeight+1, action);
+			res = recurse(key, curr, curr->right, nodeHeight+1, action, unbalanced, nodeSize);
 		}
+
+		//If this tree is still unbalanced, are we the scapegoat?
+		if (unbalanced) {
+			checkScapegoat(parent, curr, nodeHeight, unbalanced, nodeSize);
+		}
+
+		return res;
 	}
 
 	node* find_and_slice_child(node* parent, node* curr) {
