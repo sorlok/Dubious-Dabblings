@@ -14,6 +14,9 @@ ThumbnailLayout::ThumbnailLayout()
 	state.enabled = true;
 	state.visible = true;
 	state.skipGeomUpdate = false;
+
+	//Optimize for lookup
+	children.setAlpha(0.65);
 }
 
 
