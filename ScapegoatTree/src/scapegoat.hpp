@@ -10,12 +10,19 @@
 //cmath links by default, so I don't think this is an onerous dependency.
 #include <cmath>
 
+//Needed for "traverse"; will probably replace with nall/function later.
+#include <functional>
+
+
+
 //
 //TODO: The original paper by Rivest has a good deal of analysis on performance
 //      of different rebalancing/insertion/etc. algorithms. I'd like to modify
 //      this code to use the best ones from that paper (in particular, a number of
 //      non-recursive algorithms were identified as ideal).
 //Link: http://publications.csail.mit.edu/lcs/pubs/pdf/MIT-LCS-TR-700.pdf
+//
+//TODO: Also, our global "recurse" function is heavy-handed. Better to specialize in this case.
 //
 
 
@@ -134,7 +141,10 @@ public:
 	}
 
 	bool find(Key key, Data& result) {
-		node* res = recurse(key, nullptr, root, Action::Find);
+		bool unbalanced = false; //Doesn't matter
+		size_t nodeSize = 0; //Doesn't matter
+		node* scapegoat = nullptr; //Doesn't matter
+		node* res = recurse(key, nullptr, root, 0, Action::Find, unbalanced, nodeSize, scapegoat);
 		if (res) {
 			result = res->data;
 			return true;
@@ -142,11 +152,19 @@ public:
 		return false;
 	}
 
+	Key& rootKey() {
+		return root->key;
+	}
+
 	void remove(Key key) {
 		bool unbalanced = false; //Doesn't matter
 		size_t nodeSize = 0; //Doesn't matter
 		node* scapegoat = nullptr; //Doesn't matter
 		recurse(key, nullptr, root, 0, Action::Delete, unbalanced, nodeSize, scapegoat);
+	}
+
+	void traverse(std::function<void (const Key& key, Data& data)> action) {
+		traverse_r(root, action);
 	}
 
 	size_t size() {
@@ -158,6 +176,19 @@ private:
 	size_t alphaHeight(size_t val) {
 		double realAlpha = alpha / 1000.0;
 		return static_cast<size_t>(log10(val)/log10(1/realAlpha));
+	}
+
+	void traverse_r(node* curr, std::function<void (const Key& key, Data& data)> action) {
+		//Perform for the current node
+		action(curr->key, curr->data);
+
+		//Recurse
+		if (curr->left) {
+			traverse_r(curr->left, action);
+		}
+		if (curr->right) {
+			traverse_r(curr->right, action);
+		}
 	}
 
 	//Conceptually: Turn our tree into the worst possible binary search tree. Then turn that
@@ -193,49 +224,6 @@ private:
 		r->right = s->left;
 		s->left = r;
 		return s;
-	}
-
-
-	node* compress(node* start, size_t amount) {
-		//Shouldn't happen, but just to be extra-safe:
-		if (!start->right) {
-			return start;
-		}
-
-		//Iterate down "amount" of the RHS of the tree
-		node* newRoot = start->right;
-		while (amount-- > 0) {
-			//Get the child node; advance the parent pointer; re-position the child node.
-			node* curr = start->right;
-			node* next = curr->right;
-			start->right = curr->left;
-			curr->left = start;
-			if (amount>0) {
-				//Anticipate the next folding
-				curr->right = next->right;
-			}
-			start = next;
-		}
-
-		//Return the new root so that this sub-tree can be re-assigned.
-		return newRoot;
-	}
-
-
-	//Clockwise rotation, then return the new "root" node (left)
-	node* rotate_cw(node* parent, node* at) {
-		//Can't rotate with no left child
-		node* pivot = at->left;
-		if (!pivot) {
-			return at;
-		}
-
-		//Simple
-		node*& parentPtr = !parent?root:parent->left==at?parent->left:parent->right;
-		at->left = pivot->right;
-		pivot->right = at;
-		parentPtr = pivot;
-		return pivot;
 	}
 
 	size_t calc_size(node* curr) {
@@ -327,7 +315,7 @@ private:
 				return curr;
 			} else if (action==Action::Delete) {
 				//Obtain a reference to this parent's pointer (left or right) that points to this object.
-				node*& parentPtr = parent->left==curr?parent->left:parent->right;
+				node*& parentPtr = !parent?root:parent->left==curr?parent->left:parent->right;
 
 				//Three posibilities (I tried generalizing them, but it took up more code).
 				if (!curr->left && !curr->right) {
@@ -349,8 +337,28 @@ private:
 					delete toDelete;
 				}
 
-				//Either way return null
+				//Update size
 				realSize--;
+
+				//Check if rebalancing is necessary
+				if (autoBalance) {
+					bool outOfBalance = false;
+					if (!rigidDelete) {
+						//Check if our size is less than half the max size (alpha modifies this slightly)
+						outOfBalance = realSize < (alpha*maxSize)/1000;
+					} else {
+						//Check if the size is one less than an exact power of two
+						outOfBalance = !(realSize&(realSize+1));
+					}
+
+					//If so, rebalance at the root and reset maxSize
+					if (outOfBalance) {
+						rebalance(nullptr, root, realSize);
+						maxSize = realSize;
+					}
+				}
+
+				//Return null
 				return nullptr;
 			}
 		}

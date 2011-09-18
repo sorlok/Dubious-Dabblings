@@ -5,6 +5,7 @@
 #pragma once
 
 #include <phoenix.hpp>
+#include "scapegoat.hpp"
 
 
 class ThumbnailLayout : public phoenix::Layout {
@@ -22,9 +23,12 @@ public:
 	virtual phoenix::Geometry minimumGeometry();
 	virtual void setGeometry(const phoenix::Geometry &geometry);
 
+	//Workaround
+	void synchHack(phoenix::Sizable* sizable);
+
 	//Mildly useful
 	void removeAll();
-	void setSkipGeomUpdates(bool val) { state.skipGeomUpdate = val; }
+	void setSkipGeomUpdates(bool val) { /*state.skipGeomUpdate = val;*/ } //TODO: Enable later
 
 	//Constructor/destructor
 	ThumbnailLayout();
@@ -36,9 +40,9 @@ private:
 		unsigned int width;
 		unsigned int height;
 	};
-	nall::linear_vector<Children> children;
+	lightweight_map<Sizable*, Children> children;
 
-	static Children* FindChild(nall::linear_vector<Children>& children, const Sizable& find);
+	//static Children* FindChild(nall::linear_vector<Children>& children, const Sizable& find);
 
 	struct State {
 		bool enabled;

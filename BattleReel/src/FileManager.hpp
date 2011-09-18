@@ -152,7 +152,7 @@ struct Application : Window {
     numIcons = 0;
     currFolder = "";
 
-    loadFiles("");
+    loadFiles("/usr/lib");
 
     //Initialize callbacks
     for (size_t i=0; i<MAX_ICONS; i++) {

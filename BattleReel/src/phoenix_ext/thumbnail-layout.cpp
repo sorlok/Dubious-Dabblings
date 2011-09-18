@@ -27,12 +27,13 @@ ThumbnailLayout::~ThumbnailLayout()
 void ThumbnailLayout::removeAll()
 {
 	while(children.size()>0) {
-		remove(*children[0].sizable);
+		children.remove(children.rootKey());
+		//remove(*children[0].sizable);
 	}
 }
 
 
-ThumbnailLayout::Children* ThumbnailLayout::FindChild(nall::linear_vector<Children>& children, const Sizable& find)
+/*ThumbnailLayout::Children* ThumbnailLayout::FindChild(nall::linear_vector<Children>& children, const Sizable& find)
 {
 	foreach(child, children) {
 		if(child.sizable == &find) {
@@ -40,14 +41,16 @@ ThumbnailLayout::Children* ThumbnailLayout::FindChild(nall::linear_vector<Childr
 		}
 	}
 	return nullptr;
-}
+}*/
 
 
 void ThumbnailLayout::append(Sizable &sizable) {
-	if (FindChild(children, sizable)) {
+	Children res;
+	if (children.find(&sizable, res)) {
+	//if (FindChild(children, sizable)) {
 		return;
 	} else {
-		children.append({ &sizable, 0, 0 });
+		children.insert(&sizable, {&sizable, 0, 0 });
 	}
 	Layout::append(sizable);
 	if(window()) {
@@ -59,13 +62,22 @@ void ThumbnailLayout::append(Sizable &sizable) {
 void ThumbnailLayout::remove(Sizable& sizable)
 {
 	//Rmove this item if it exists.
-	for(unsigned n=0; n<children.size(); n++) {
-		if(children[n].sizable == &sizable) {
-			children.remove(n);
+	Children res;
+	if (children.find(&sizable, res)) {
+	//for(unsigned n=0; n<children.size(); n++) {
+		//if(children[n].sizable == &sizable) {
+			children.remove(&sizable);
 			Layout::remove(sizable);
-			break;
-		}
+			//break;
+		//}
 	}
+}
+
+
+void ThumbnailLayout::synchHack(Sizable* sizable)
+{
+	//This is required due to a bug in const-casting.
+	Layout::append(*sizable);
 }
 
 
@@ -78,30 +90,30 @@ void ThumbnailLayout::synchronize()
 	//Ensure all sizables have been appended to the layout.
 	state.skipGeomUpdate = true;
 	size_t i = 0;
-	foreach(child, children) {
+	children.traverse([&i, this](Sizable* key, Children& child){
 		if (i+1==children.size()) {
 			state.skipGeomUpdate = false;
 		}
-		Layout::append(*child.sizable);
+		synchHack(child.sizable);
 		i++;
-	}
+	});
 }
 
 
 void ThumbnailLayout::setEnabled(bool enabled)
 {
 	state.enabled = enabled;
-	foreach(child, children) {
+	children.traverse([&enabled](const Sizable* key, Children& child){
 		child.sizable->setEnabled(dynamic_cast<Widget*>(child.sizable) ? child.sizable->enabled() : enabled);
-	}
+	});
 }
 
 void ThumbnailLayout::setVisible(bool visible)
 {
 	state.visible = visible;
-	foreach(child, children) {
+	children.traverse([&visible](const Sizable* key, Children& child){
 		child.sizable->setVisible(dynamic_cast<Widget*>(child.sizable) ? child.sizable->visible() : visible);
-	}
+	});
 }
 
 bool ThumbnailLayout::enabled()
@@ -143,7 +155,7 @@ void ThumbnailLayout::setGeometry(const Geometry& containerGeometry)
 
 	//First, save each child's minimum width, and get the maximum width/height of all children
 	Geometry referenceGeom = {0, 0, 0, 0};
-	foreach(child, children) {
+	children.traverse([&referenceGeom](const Sizable* key, Children& child){
 		child.width = child.sizable->minimumGeometry().width;
 		child.height = child.sizable->minimumGeometry().height;
 
@@ -153,10 +165,10 @@ void ThumbnailLayout::setGeometry(const Geometry& containerGeometry)
 		if (child.height>referenceGeom.height) {
 			referenceGeom.height = child.height;
 		}
-	}
+	});
 
 	//Apply layout rules for each child  individually.
-	foreach(child, children) {
+	children.traverse([&referenceGeom, &containerGeometry](const Sizable* key, Children& child){
 		//Reset?
 		if (referenceGeom.x+referenceGeom.width > containerGeometry.width) {
 			referenceGeom.x = 0;
@@ -176,7 +188,7 @@ void ThumbnailLayout::setGeometry(const Geometry& containerGeometry)
 
 	    //Increment
 	    referenceGeom.x += referenceGeom.width;
-	}
+	});
 
 }
 

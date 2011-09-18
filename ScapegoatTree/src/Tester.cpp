@@ -39,11 +39,11 @@ void loadRandom(lightweight_map<int, int>& mymap, size_t TEST_SIZE)
 	std::cout <<"}" <<endl;
 }
 
-void deleteRandom(lightweight_map<int, int>& mymap)
+void deleteRandom(lightweight_map<int, int>& mymap, double amt)
 {
 	size_t TEST_SIZE = mymap.size();
 	std::cout <<"Remove: {";
-	while (mymap.size()>TEST_SIZE-TEST_SIZE/5) {
+	while (mymap.size()>TEST_SIZE-(int)(TEST_SIZE*amt)) {
 		int toDelete = rand() % TEST_SIZE;
 		mymap.remove(toDelete);
 
@@ -58,10 +58,13 @@ int main()
 {
 	//Load random.
 	lightweight_map<int, int> mymap;
-	loadRandom(mymap, 10);
+	loadRandom(mymap, 100);
 
-	//Now randomly delete roughly 1/5 of the map.
-	deleteRandom(mymap);
+	//Now randomly delete a certain percentage of that tree.
+	deleteRandom(mymap, 0.2);
+
+	//Add a few more
+	loadRandom(mymap, 10);
 
 	//Specific tests
 	/*list<int> add_order = {5, 37, 13, 58, 89, 34, 90, 96, 29, 84, 92, 40, 42, 22, 51, 3, 15, 2, 31, 47, 59, 20, 66, 14, 72, 68, 9, 88, 12, 86, 62, 75, 82, 61, 91, 81, 67, 71, 26, 35, 23, 17, 95, 16, 30, 6, 50, 21, 46, 24, 78, 93, 79, 19, 18, 11, 25, 76, 77, 28, 4, 48, 44, 56, 69, 45, 49, 63, 94, 1, 55, 10, 43, 32, 33, 36, 85, 98, 70, 74, 65, 73, 60, 64, 39, 38, 83, 54, 52, 100, 41, 8, 97, 99, 57, 27, 80, 7, 87, 53};
@@ -74,11 +77,7 @@ int main()
 		mymap.remove(id);
 	}*/
 
-	//Test rebalancing
-	//mymap.test_rebalance(89);
-
-
-	//Print it, check it.
+	//Print a GraphVis input file for this tree.
 	if (!mymap.printDot("tree.dot")) {
 		std::cout <<"Error: Couldn't print file.\n";
 	}
