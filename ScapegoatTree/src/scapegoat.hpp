@@ -29,7 +29,7 @@ private:
 
 
 public:
-	lightweight_map() : root(nullptr), realSize(0) {}
+	lightweight_map() : root(nullptr), realSize(0), alpha(500), rigidDelete(false), autoBalance(true) {}
 
 	//The tunable alpha parameter determines how "unbalanced" the binary tree can become
 	// before a scapegoat is found and the entire tree balanced. It ensures that
