@@ -93,14 +93,67 @@ public:
 	void test_rebalance(Key key) {
 		node* res = recurse(key, nullptr, root, Action::Find);
 		if (res) {
-			rebalance(res);
+			//NOTE: Finding the parent will not be necessary in the final algorithm, since
+			//      it will be part of the Scapegoat lookup.
+			node* parent = root;
+			while (parent->left!=res && parent->right!=res) {
+				if (key<parent->key) {
+					parent = parent->left;
+				} else {
+					parent = parent->right;
+				}
+			}
+
+			rebalance(parent, res);
 		}
 	}
 
 private:
-	void rebalance(node* from) {
+	//Conceptually: Insert all nodes reachable from this one into a list, nulling their children
+	//  pointers as we go. Then sort the list. Then repeatedly insert the median into the new
+	//  subtree.
+	void rebalance(node* parent, node* from) {
+		//Check if we're replacing the root node.
+		//bool resetRoot = (root==from);
+
+		//Probably easiest to just hijack our existing node* structure.
+		node*& sectionStart = !parent?root:parent->left==from?parent->left:parent->right;
+		node* curr = from;
+		node* prev = parent;
+		while (curr) {
+			if (curr->left) {
+				//Rotate the left subtree in
+				curr = rotate_cw(prev, curr);
+			} else {
+				//Advance down the right sub-tree
+				prev = curr;
+				curr = curr->right;
+			}
+		}
+
+		//sectionStart->right->right...->right (until right is null) is now a linked-list.
+		//
+
 
 	}
+
+
+	//Clockwise rotation, then return the new "root" node (left)
+	node* rotate_cw(node* parent, node* at) {
+		//Can't rotate with no left child
+		node* pivot = at->left;
+		if (!pivot) {
+			return at;
+		}
+
+		//Simple
+		node*& parentPtr = !parent?root:parent->left==at?parent->left:parent->right;
+		at->left = pivot->right;
+		pivot->right = at;
+		parentPtr = pivot;
+		return pivot;
+	}
+
 
 	node* recurse(Key key, node* parent, node* curr, Action action) {
 		//Base case: No more nodes
