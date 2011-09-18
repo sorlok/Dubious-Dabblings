@@ -118,14 +118,11 @@ private:
 	//Conceptually: Turn our tree into the worst possible binary search tree. Then turn that
 	//  into the best-possible binary search tree.
 	void rebalance(node* parent, node* from) {
-		//Check if we're replacing the root node.
-		//bool resetRoot = (root==from);
-
 		//Probably easiest to just hijack our existing node* structure.
 		node*& sectionStart = !parent?root:parent->left==from?parent->left:parent->right;
 		node* curr = from;
 		node* prev = parent;
-		size_t len = 0;
+		int len = 0;
 		while (curr) {
 			if (curr->left) {
 				//Rotate the left subtree in
@@ -140,35 +137,40 @@ private:
 
 		//sectionStart->right->right...->right (until right is null) is now a linked-list.
 		//Perform len-1 compressions. (This is based on several similar tree-balancing algorithms)
-		int numCompressions = (int)log2(len+1) - 1;
-		while (numCompressions-- > 0) {
-			std::cout <<"start is: " <<sectionStart->key <<"\n";
+		//First step differs slightly if n+1 is not an exact power of 2.
+		int leafCount = len + 1 - (int)pow(2, (int)(log2(len+1)));
+		sectionStart = compress(sectionStart, leafCount);
 
-			//Iterate down the entire RHS of the tree
-			prev = parent;
-			for (curr=sectionStart; curr;) {
-				//Deal with pairs of nodes.
-				node* oldCurr = curr;
-				curr = curr->right;
-
-				//Update the nodes themselves
-				if (curr) {
-					std::cout <<"   swapping: " <<oldCurr->key <<" and " <<curr->key <<"\n";
-
-					//Update the parent pointer
-					node*& parentPtr = !prev?root:prev->left==oldCurr?prev->left:prev->right;
-					parentPtr = curr;
-					prev = curr;
-
-					//Swap
-					oldCurr->right = curr->left;
-					curr->left = oldCurr;
-
-					//Increment
-					curr = curr->right;
-				}
-			}
+		//Now, the normal number of compressions
+		for (len=len-leafCount; len>1; len>>=1) {
+			sectionStart = compress(sectionStart, len>>1);
 		}
+	}
+
+
+	node* compress(node* start, size_t amount) {
+		//Shouldn't happen, but just to be extra-safe:
+		if (!start->right) {
+			return start;
+		}
+
+		//Iterate down "amount" of the RHS of the tree
+		node* newRoot = start->right;
+		while (amount-- > 0) {
+			//Get the child node; advance the parent pointer; re-position the child node.
+			node* curr = start->right;
+			node* next = curr->right;
+			start->right = curr->left;
+			curr->left = start;
+			if (amount>0) {
+				//Anticipate the next folding
+				curr->right = next->right;
+			}
+			start = next;
+		}
+
+		//Return the new root so that this sub-tree can be re-assigned.
+		return newRoot;
 	}
 
 
