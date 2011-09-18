@@ -28,6 +28,18 @@ private:
 	};
 
 
+	//BST parameters
+	node* root;
+	size_t realSize;
+
+	//Parameters
+	size_t alpha;   //*1000
+	bool rigidDelete;
+	bool autoBalance;
+
+	//Scapegoat tree parameters
+
+
 public:
 	lightweight_map() : root(nullptr), realSize(0), alpha(500), rigidDelete(false), autoBalance(true) {}
 
@@ -272,19 +284,6 @@ private:
 			return curr;
 		}
 	}
-
-
-private:
-	//BST parameters
-	node* root;
-	size_t realSize;
-
-	//Parameters
-	size_t alpha;   //*1000
-	bool rigidDelete;
-	bool autoBalance;
-
-	//Scapegoat tree parameters
 
 
 #ifdef SCAPEGOAT_TREE_ALLOW_OUTPUT
