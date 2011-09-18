@@ -47,57 +47,6 @@ private:
 		node* child;
 	};
 
-	//Lightweight class for stacks of a fixed size.
-	template <class T>
-	struct simple_stack {
-		simple_stack(size_t size) : sp(0), maxsz(size) {
-			entries = new T[size];
-		}
-		~simple_stack() {
-			if (sp!=0) {
-				std::cout <<"ERROR: Stack deleted with extra entries\n"; //TEMP
-			}
-			delete [] entries;
-		}
-
-		void push(const T& val) {
-			if (sp==maxsz) {
-				std::cout <<"ERROR: Stack overflow\n";  //TEMP
-				throw 1;
-			}
-			entries[sp++] = val;
-		}
-
-		T pop() {
-			if (sp==0) {
-				std::cout <<"ERROR: Stack underflow\n"; //TEMP
-				throw 1;
-			}
-			return entries[--sp];
-		}
-
-		T& top() {
-			if (sp==0) {
-				std::cout <<"ERROR: Stack is empty\n"; //TEMP
-				throw 1;
-			}
-			return entries[sp-1];
-		}
-
-		const T& second() {
-			if (sp<=1) {
-				std::cout <<"ERROR: Stack has <=1 element\n"; //TEMP
-				throw 1;
-			}
-			return entries[sp-2];
-		}
-
-	private:
-		T* entries;
-		size_t sp;
-		size_t maxsz;
-	};
-
 
 	//BST parameters
 	node* root;
@@ -211,184 +160,40 @@ private:
 		return static_cast<size_t>(log10(val)/log10(1/realAlpha));
 	}
 
-	//What type of node are we inserting? (Used in rebalancing)
-	enum class InsertType { Left, Right, NonLeaf };
-
-	struct builditem {
-		node* currNode;
-		size_t height;
-		bool lacksRightSon;
-		bool lacksFather;
-	};
-
-	struct balanceargs {
-		int slotsInLastLevel;
-		int nodesForLastLevel;
-		double ratio;
-		simple_stack<node*> runningStack;
-		simple_stack<builditem> buildingStack;
-	};
-
 	//Conceptually: Turn our tree into the worst possible binary search tree. Then turn that
 	//  into the best-possible binary search tree.
 	void rebalance(node* parent, node* from, size_t nodeSize) {
-		//Simple parameters
-		InsertType iType = InsertType::Left;
-		balanceargs args = {
-			static_cast<int>(pow(2, static_cast<int>(log2(nodeSize)))),
-			0,
-			0,
-			simple_stack<node*>(alphaHeight(nodeSize)+2),
-			simple_stack<builditem>(log2(nodeSize)+1)
-		};
-		args.nodesForLastLevel = nodeSize - args.slotsInLastLevel + 1;
-		args.ratio = ((double)args.nodesForLastLevel)/args.slotsInLastLevel;
-
-		//Stack sizes are bound as follows
-		simple_stack<node*> runningStack();
-		simple_stack<node*> buildingStack();
-
-		//Begin!
-		args.runningStack.push(from);
-		while (nodeSize-- > 0) {
-			iType = addNewNode(getNextNode(args), iType, args);
-		}
+		node temp(0);
+		node* flatRoot = flatten(from, &temp);
+		buildTree(nodeSize, flatRoot);
 
 		//The only thing left to do is update the parent.
 		node*& sectionStart = !parent?root:parent->left==from?parent->left:parent->right;
-		sectionStart = args.buildingStack.pop().currNode;
+		sectionStart = temp.left;
 	}
 
-	node* getNextNode(balanceargs& args) {
-		//Pick the next node to calculate (in-order). Determine its parent.
-		node* nextNode = args.runningStack.top();
-		node* fatherNode = nullptr;
-		while (nextNode->left) {
-			fatherNode = nextNode;
-			nextNode = nextNode->left;
+	node* flatten(node* start, node* store) {
+		if (!start) {
+			return store;
 		}
-
-		//Slice this node from its parent node, unless it's at the top of the stack (then pop it)
-		if (nextNode == args.runningStack.top()) {
-			args.runningStack.pop();
-		} else {
-			fatherNode->left = nullptr;
-		}
-
-		//If there are right children, they will need to be processed later.
-		if (nextNode->right) {
-			args.runningStack.push(nextNode->right);
-		}
-
-		return nextNode;
+		start->right = flatten(start->right, store);
+		return flatten(start->left, start);
 	}
 
-
-	InsertType addNewNode(node* nextNode, InsertType iType, balanceargs& args) {
-		if (iType != InsertType::NonLeaf) {
-			//Inserting a leaf node
-			args.slotsInLastLevel--;
-			if (((double)args.nodesForLastLevel)/args.slotsInLastLevel < args.ratio) {
-				return skipALeaf(nextNode, iType, args);
-			} else {
-				args.nodesForLastLevel--;
-				return addALeaf(nextNode, iType, args);
-			}
-		} else {
-			return addNonLeaf(nextNode, args);
+	node* buildTree(int nodeSize, node* curr) {
+		//Base case.
+		if (nodeSize==0) {
+			curr->left = nullptr;
+			return curr;
 		}
+
+		//Recursive case
+		node* r = buildTree(static_cast<int>(ceil((nodeSize-1)/2)), curr);
+		node* s = buildTree(static_cast<int>(floor((nodeSize-1)/2)), r->right);
+		r->right = s->left;
+		s->left = r;
+		return s;
 	}
-
-	InsertType skipALeaf(node* nextNode, InsertType iType, balanceargs& args) {
-		if (iType==InsertType::Left) {
-			nextNode->left = nullptr;
-			if (args.buildingStack.top().height==2) {
-				args.buildingStack.top().currNode->right = nextNode;
-				if (!args.buildingStack.top().lacksFather) {
-					args.buildingStack.pop();
-				} else {
-					args.buildingStack.top().lacksRightSon = false;
-				}
-				args.buildingStack.push({nextNode, 1, true, false});
-			} else {
-				args.buildingStack.push({nextNode, 1, true, true});
-			}
-			return InsertType::Right;
-		} else {
-			args.buildingStack.top().currNode->right = nullptr;
-			if (!args.buildingStack.top().lacksFather) {
-				args.buildingStack.pop();
-			} else {
-				args.buildingStack.top().lacksRightSon = false;
-			}
-			return addNonLeaf(nextNode, args);
-		}
-	}
-
-	InsertType addALeaf(node* nextNode, InsertType iType, balanceargs& args) {
-		nextNode->right = nullptr;
-		nextNode->left = nullptr;
-		if (iType==InsertType::Left) {
-			args.buildingStack.push({nextNode, 0, false, true});
-		} else {
-			if (args.buildingStack.top().lacksFather) {
-				args.buildingStack.top().lacksRightSon = false;
-			} else {
-				args.buildingStack.pop();
-			}
-		}
-		return InsertType::NonLeaf;
-	}
-
-	InsertType addNonLeaf(node* nextNode, balanceargs& args) {
-		nextNode->left = args.buildingStack.top().currNode;
-		int nextNodeHeight = args.buildingStack.top().height + 1;
-		args.buildingStack.pop();
-		if (args.buildingStack.second().height == nextNodeHeight+1) {
-			if (!args.buildingStack.top().lacksFather) {
-				args.buildingStack.pop();
-			} else {
-				args.buildingStack.top().lacksRightSon = false;
-			}
-			args.buildingStack.push({nextNode, nextNodeHeight, true, false});
-		} else {
-			args.buildingStack.push({nextNode, nextNodeHeight, true, true});
-		}
-		if (args.buildingStack.top().height > 1) {
-			return InsertType::Left;
-		} else {
-			return InsertType::Right;
-		}
-	}
-
-		//Probably easiest to just hijack our existing node* structure.
-/*		node*& sectionStart = !parent?root:parent->left==from?parent->left:parent->right;
-		node* curr = from;
-		node* prev = parent;
-		int len = 0;
-		while (curr) {
-			if (curr->left) {
-				//Rotate the left subtree in
-				curr = rotate_cw(prev, curr);
-			} else {
-				//Advance down the right sub-tree
-				prev = curr;
-				curr = curr->right;
-				len++;
-			}
-		}
-
-		//sectionStart->right->right...->right (until right is null) is now a linked-list.
-		//Perform len-1 compressions. (This is based on several similar tree-balancing algorithms)
-		//First step differs slightly if n+1 is not an exact power of 2.
-		int leafCount = len + 1 - static_cast<int>(pow(2, static_cast<int>((log2(len+1)))));
-		sectionStart = compress(sectionStart, leafCount);
-
-		//Now, the normal number of compressions
-		for (len=len-leafCount; len>1; len>>=1) {
-			sectionStart = compress(sectionStart, len>>1);
-		}
-	}*/
 
 
 	node* compress(node* start, size_t amount) {
@@ -563,7 +368,7 @@ private:
 		if (unbalanced) {
 			if (scapegoat==curr) {
 				std::cout <<"   Scapegoat found: " <<curr->key <<" with parent: " <<parent <<"\n";
-				rebalance(parent, curr, nodeSize);
+				rebalance(parent, curr, nodeSize+1);
 				unbalanced = false;
 			} else {
 				checkScapegoat(parent, curr, nodeHeight, unbalanced, nodeSize, scapegoat);
