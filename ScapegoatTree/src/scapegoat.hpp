@@ -30,7 +30,6 @@ private:
 
 	//BST parameters
 	node* root;
-	size_t realSize;
 
 	//Parameters
 	size_t alpha;   //*1000
@@ -38,10 +37,13 @@ private:
 	bool autoBalance;
 
 	//Scapegoat tree parameters
+	size_t realSize;
+	size_t numMarked;
+	//int maxHeight;
 
 
 public:
-	lightweight_map() : root(nullptr), realSize(0), alpha(500), rigidDelete(false), autoBalance(true) {}
+	lightweight_map() : root(nullptr), alpha(500), rigidDelete(false), autoBalance(true), realSize(0), numMarked(0)/*, maxHeight(-1)*/ {}
 
 	//The tunable alpha parameter determines how "unbalanced" the binary tree can become
 	// before a scapegoat is found and the entire tree balanced. It ensures that
@@ -76,6 +78,8 @@ public:
 	// rebalancing them without affecting the overall algorithm much.
 	//Thus, auto-balancing may be turned off. When switched on again, the
 	// "forceRebalance" flag causes a rebalancing of the tree at the root.
+	//There is still a small amount of constant-time bookkeeping that takes place
+	// with this flag off. It was not deemed worthwhile to remove.
 	void setAutoBalance(bool val, bool forceRebalance) {
 		autoBalance = val;
 		if (autoBalance && forceRebalance) {
@@ -84,7 +88,7 @@ public:
 	}
 
 	void insert(Key key, Data value) {
-		recurse(key, nullptr, root, Action::Insert)->data = value;
+		recurse(key, nullptr, root, 0, Action::Insert)->data = value;
 	}
 
 	bool find(Key key, Data& result) {
@@ -97,7 +101,7 @@ public:
 	}
 
 	void remove(Key key) {
-		recurse(key, nullptr, root, Action::Delete);
+		recurse(key, nullptr, root, 0, Action::Delete);
 	}
 
 	size_t size() {
@@ -203,7 +207,7 @@ private:
 	}
 
 
-	node* recurse(Key key, node* parent, node* curr, Action action) {
+	node* recurse(Key key, node* parent, node* curr, size_t nodeHeight, Action action) {
 		//Base case: No more nodes
 		if (!curr) {
 			//If we're searching or deleting, then we do nothing. For insertion, this is a valid
@@ -264,9 +268,9 @@ private:
 
 		//Recursive case
 		if (key<curr->key) {
-			return recurse(key, curr, curr->left, action);
+			return recurse(key, curr, curr->left, nodeHeight+1, action);
 		} else {
-			return recurse(key, curr, curr->right, action);
+			return recurse(key, curr, curr->right, nodeHeight+1, action);
 		}
 	}
 
