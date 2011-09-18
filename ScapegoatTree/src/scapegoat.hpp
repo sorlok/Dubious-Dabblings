@@ -188,8 +188,8 @@ private:
 		}
 
 		//Recursive case
-		node* r = buildTree(static_cast<int>(ceil((nodeSize-1)/2)), curr);
-		node* s = buildTree(static_cast<int>(floor((nodeSize-1)/2)), r->right);
+		node* r = buildTree(static_cast<int>(ceil((nodeSize-1.0)/2)), curr);
+		node* s = buildTree(static_cast<int>(floor((nodeSize-1.0)/2)), r->right);
 		r->right = s->left;
 		s->left = r;
 		return s;
@@ -307,7 +307,6 @@ private:
 					if (++nodeHeight>thresh) {
 						//Check the threshhold
 						if (realSize>=minRebalanceSize) {
-							std::cout <<"Node triggered scapegoat search: " <<curr->key <<" with height: " <<nodeHeight <<" and threshhold " <<thresh <<" (rounded down from " <<(log10(realSize)/log10(1/realAlpha)) <<")" <<"\n";
 							unbalanced = true;
 							nodeSize = 0;
 							checkScapegoat(parent, curr, nodeHeight, unbalanced, nodeSize, scapegoat);
@@ -367,7 +366,6 @@ private:
 		//If this tree is still unbalanced, are we the scapegoat?
 		if (unbalanced) {
 			if (scapegoat==curr) {
-				std::cout <<"   Scapegoat found: " <<curr->key <<" with parent: " <<parent <<"\n";
 				rebalance(parent, curr, nodeSize+1);
 				unbalanced = false;
 			} else {
