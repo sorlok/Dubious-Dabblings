@@ -11,6 +11,18 @@
 
 
 
+//
+// A light-weight map based on Scapegoat trees, with constant-space per-node overhead.
+// A quick note on tuning: You should never have to consider tuning the parameters
+//   "rigidDelete" and "minRebalanceSize", except in truly extreme cases. The parameter
+//   "autoRebalance" may be switched off when adding large numbers of components (and then
+//   switched on again with "force" set to true after), but, again, this is unlikely to
+//   matter much. The only parameter you may want to tinker with is "alpha", which by default
+//   is set to a value which favors around a 20 to 1 ratio of searches to insertions. If your
+//   ratio is lower, you may want to bump the alpha value up to 0.6 or 0.65.
+//
+// TL/DR: You can use lightweight_map with the default parameters and it will perform fine.
+//
 template <class Key, class Data>
 class lightweight_map {
 private:
@@ -35,15 +47,17 @@ private:
 	size_t alpha;   //*1000
 	bool rigidDelete;
 	bool autoBalance;
+	size_t minRebalanceSize;
 
 	//Scapegoat tree parameters
 	size_t realSize;
 	size_t numMarked;
-	//int maxHeight;
 
 
 public:
-	lightweight_map() : root(nullptr), alpha(500), rigidDelete(false), autoBalance(true), realSize(0), numMarked(0)/*, maxHeight(-1)*/ {}
+	lightweight_map(double alpha=0.55) : root(nullptr), rigidDelete(false), autoBalance(true), minRebalanceSize(3), realSize(0), numMarked(0) {
+		setAlpha(alpha);
+	}
 
 	//The tunable alpha parameter determines how "unbalanced" the binary tree can become
 	// before a scapegoat is found and the entire tree balanced. It ensures that
@@ -51,6 +65,9 @@ public:
 	//Thus, an alpha of 0.5 represents a perfectly balanced tree, while an alpha
 	// of 1.0 considers a linked-list-esque (worst case) tree balanced.
 	//Obviously, setting this closer to 0.5 will slow down insertions.
+	//Typical alpha values between 0.55 and 0.65 exhibit good performance. We choose 0.55 as
+	// the default alpha value on the assumption that the user will typically perform more searches
+	// than modifications.
 	void setAlpha(double value) {
 		if (value<0.5) {
 			alpha = 500;
@@ -84,6 +101,20 @@ public:
 		autoBalance = val;
 		if (autoBalance && forceRebalance) {
 			rebalance(root);
+		}
+	}
+
+	//Set the minimum size of the tree before rebalancing takes place. If the size of the tree after
+	// insertion is >= this value (which itself must be >0), then the auto-balance algorithm will
+	// be run (if autoBalance is true, of course).
+	//By default, this is set to 3, which is the minimum size of a tree where re-balancing will have
+	// any effect. We would advise caution on setting this any higher, since storing pointers in a
+	// scapegoat tree can easily lead to a worst-case insertion order (as pointers can easily be allocated
+	// in increasing order). We forsee no cases where increasing this value will improve performance,
+	// especially since alpha is better for fine-tuning.
+	void setMinRebalanceSize(size_t val) {
+		if (val>0) {
+			minRebalanceSize = val;
 		}
 	}
 
@@ -227,19 +258,35 @@ private:
 	}
 
 	void checkScapegoat(node* parent, node* curr, size_t nodeHeight, bool& unbalanced, size_t& nodeSize) {
+		std::cout <<"  Checking " <<curr->key <<" as scapegoat...\n";
+
 		//Avoid lots-o-null-checks
 		if (curr==root) {
-			rebalance(nullptr, root);
+			std::cout <<"    Yes! (root)\n";
+
+			if (realSize>=minRebalanceSize) {
+				rebalance(nullptr, root);
+			} else {
+				std::cout <<"    ...but it's trivial.\n";
+			}
 			unbalanced = false;
 		} else {
 			size_t thresh = static_cast<size_t>((alpha*log2(nodeSize))/1000);
 			if(nodeHeight > thresh) {
-				rebalance(parent, curr);
+				std::cout <<"    Yes!\n";
+
+				if (realSize>=minRebalanceSize) {
+					rebalance(parent, curr);
+				} else {
+					std::cout <<"    ...but it's trivial.\n";
+				}
 				unbalanced = false;
 			} else {
 				//Since this node isn't to blame, update the nodeSize parameter for the parent node.
 				node* sibling = parent->left==curr?parent->right:parent->left;
 				nodeSize = nodeSize + calc_size(sibling) + 1;
+
+				std::cout <<"    No, new node size it: " <<nodeSize <<"\n";
 			}
 		}
 	}
@@ -272,7 +319,9 @@ private:
 					size_t thresh = static_cast<size_t>(log10(realSize)/log10(1/realAlpha));
 
 					//From Rivest's paper: We know the tree is not height-balanced if:
-					if (++nodeHeight > thresh) {
+					if (++nodeHeight>thresh) {
+						std::cout <<"Node triggered scapegoat search: " <<curr->key <<" with height: " <<nodeHeight <<" and threshhold " <<thresh <<" (rounded down from " <<(log10(realSize)/log10(1/realAlpha)) <<")" <<"\n";
+
 						unbalanced = true;
 						nodeSize = 1;
 						checkScapegoat(parent, curr, nodeHeight, unbalanced, nodeSize);
