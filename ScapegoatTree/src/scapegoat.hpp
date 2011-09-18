@@ -140,7 +140,7 @@ private:
 
 		//sectionStart->right->right...->right (until right is null) is now a linked-list.
 		//Perform len-1 compressions. (This is based on several similar tree-balancing algorithms)
-		int numCompressions = (int)log2(len)-1;
+		int numCompressions = (int)log2(len+1) - 1;
 		while (numCompressions-- > 0) {
 			std::cout <<"start is: " <<sectionStart->key <<"\n";
 
