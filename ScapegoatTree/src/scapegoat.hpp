@@ -156,7 +156,7 @@ public:
 private:
 	//Conceptually: Turn our tree into the worst possible binary search tree. Then turn that
 	//  into the best-possible binary search tree.
-	void rebalance(node* parent, node* from) {
+	void rebalance(node* parent, node* from, size_t nodeSize) {
 		//Probably easiest to just hijack our existing node* structure.
 		node*& sectionStart = !parent?root:parent->left==from?parent->left:parent->right;
 		node* curr = from;
@@ -246,23 +246,24 @@ private:
 	}
 
 	void checkScapegoat(node* parent, node* curr, size_t nodeHeight, bool& unbalanced, size_t& nodeSize, node*& scapegoat) {
-		//The root node is always rebalanced
-		if (parent==root) {
-			scapegoat = parent;
-			return;
-		}
-
-		//Nodes effectively check to see if their parents are scapegoats.
+		//Some computation
 		size_t siblingSize = calc_size(parent->left==curr?parent->right:parent->left);
 		size_t parentSize = nodeSize + siblingSize + 1;
 		size_t threshhold = (alpha*parentSize)/1000;
-		if (nodeSize<=threshhold && siblingSize<=threshhold) {
-			//We're balanced; update the parent's size
-			nodeSize = parentSize;
-		} else {
-			//Found a scapegoat
+
+		if (parent==root) {
+			//The root node is always rebalanced
 			scapegoat = parent;
+		} else {
+			//Nodes effectively check to see if their parents are scapegoats.
+			if (nodeSize>threshhold || siblingSize>threshhold) {
+				//Found a scapegoat
+				scapegoat = parent;
+			}
 		}
+
+		//The parent will need to know its own size for balancing/continuing the search.
+		nodeSize = parentSize;
 	}
 
 
@@ -358,7 +359,7 @@ private:
 		if (unbalanced) {
 			if (scapegoat==curr) {
 				std::cout <<"   Scapegoat found: " <<curr->key <<" with parent: " <<parent <<"\n";
-				rebalance(parent, curr);
+				rebalance(parent, curr, nodeSize);
 				unbalanced = false;
 			} else {
 				checkScapegoat(parent, curr, nodeHeight, unbalanced, nodeSize, scapegoat);
