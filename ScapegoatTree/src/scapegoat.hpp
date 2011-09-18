@@ -59,11 +59,11 @@ private:
 
 	//Scapegoat tree parameters
 	size_t realSize;
-	size_t numMarked;
+	size_t maxSize;
 
 
 public:
-	lightweight_map(double alpha=0.55) : root(nullptr), rigidDelete(false), autoBalance(true), minRebalanceSize(3), realSize(0), numMarked(0) {
+	lightweight_map(double alpha=0.55) : root(nullptr), rigidDelete(false), autoBalance(true), minRebalanceSize(3), realSize(0), maxSize(0) {
 		setAlpha(alpha);
 	}
 
@@ -129,7 +129,8 @@ public:
 	void insert(Key key, Data value) {
 		bool unbalanced = false;
 		size_t nodeSize = 0;
-		recurse(key, nullptr, root, 0, Action::Insert, unbalanced, nodeSize)->data = value;
+		node* scapegoat = nullptr;
+		recurse(key, nullptr, root, 0, Action::Insert, unbalanced, nodeSize, scapegoat)->data = value;
 	}
 
 	bool find(Key key, Data& result) {
@@ -144,33 +145,12 @@ public:
 	void remove(Key key) {
 		bool unbalanced = false; //Doesn't matter
 		size_t nodeSize = 0; //Doesn't matter
-		recurse(key, nullptr, root, 0, Action::Delete, unbalanced, nodeSize);
+		node* scapegoat = nullptr; //Doesn't matter
+		recurse(key, nullptr, root, 0, Action::Delete, unbalanced, nodeSize, scapegoat);
 	}
 
 	size_t size() {
 		return realSize;
-	}
-
-	//TEMP:
-	void test_rebalance(Key key) {
-		node* res = recurse(key, nullptr, root, Action::Find);
-		if (res) {
-			//NOTE: Finding the parent will not be necessary in the final algorithm, since
-			//      it will be part of the Scapegoat lookup.
-			node* parent = nullptr;
-			if (root!=res) {
-				parent = root;
-				while (parent->left!=res && parent->right!=res) {
-					if (key<parent->key) {
-						parent = parent->left;
-					} else {
-						parent = parent->right;
-					}
-				}
-			}
-
-			rebalance(parent, res);
-		}
 	}
 
 private:
@@ -265,42 +245,28 @@ private:
 		return res;
 	}
 
-	void checkScapegoat(node* parent, node* curr, size_t nodeHeight, bool& unbalanced, size_t& nodeSize) {
-		std::cout <<"  Checking " <<curr->key <<" as scapegoat...\n";
+	void checkScapegoat(node* parent, node* curr, size_t nodeHeight, bool& unbalanced, size_t& nodeSize, node*& scapegoat) {
+		//The root node is always rebalanced
+		if (parent==root) {
+			scapegoat = parent;
+			return;
+		}
 
-		//Avoid lots-o-null-checks
-		if (curr==root) {
-			std::cout <<"    Yes! (root)\n";
-
-			if (realSize>=minRebalanceSize) {
-				rebalance(nullptr, root);
-			} else {
-				std::cout <<"    ...but it's trivial.\n";
-			}
-			unbalanced = false;
+		//Nodes effectively check to see if their parents are scapegoats.
+		size_t siblingSize = calc_size(parent->left==curr?parent->right:parent->left);
+		size_t parentSize = nodeSize + siblingSize + 1;
+		size_t threshhold = (alpha*parentSize)/1000;
+		if (nodeSize<=threshhold && siblingSize<=threshhold) {
+			//We're balanced; update the parent's size
+			nodeSize = parentSize;
 		} else {
-			size_t thresh = static_cast<size_t>((alpha*log2(nodeSize))/1000);
-			if(nodeHeight > thresh) {
-				std::cout <<"    Yes!\n";
-
-				if (realSize>=minRebalanceSize) {
-					rebalance(parent, curr);
-				} else {
-					std::cout <<"    ...but it's trivial.\n";
-				}
-				unbalanced = false;
-			} else {
-				//Since this node isn't to blame, update the nodeSize parameter for the parent node.
-				node* sibling = parent->left==curr?parent->right:parent->left;
-				nodeSize = nodeSize + calc_size(sibling) + 1;
-
-				std::cout <<"    No, new node size it: " <<nodeSize <<"\n";
-			}
+			//Found a scapegoat
+			scapegoat = parent;
 		}
 	}
 
 
-	node* recurse(Key key, node* parent, node* curr, size_t nodeHeight, Action action, bool& unbalanced, size_t& nodeSize) {
+	node* recurse(Key key, node* parent, node* curr, size_t nodeHeight, Action action, bool& unbalanced, size_t& nodeSize, node*& scapegoat) {
 		//Base case: No more nodes
 		if (!curr) {
 			//If we're searching or deleting, then we do nothing. For insertion, this is a valid
@@ -309,6 +275,7 @@ private:
 				return nullptr;
 			} else if (action==Action::Insert) {
 				realSize++;
+				maxSize = realSize>maxSize?realSize:maxSize;
 				curr = new node(key);
 
 				//Add to parent
@@ -328,11 +295,13 @@ private:
 
 					//From Rivest's paper: We know the tree is not height-balanced if:
 					if (++nodeHeight>thresh) {
-						std::cout <<"Node triggered scapegoat search: " <<curr->key <<" with height: " <<nodeHeight <<" and threshhold " <<thresh <<" (rounded down from " <<(log10(realSize)/log10(1/realAlpha)) <<")" <<"\n";
-
-						unbalanced = true;
-						nodeSize = 1;
-						checkScapegoat(parent, curr, nodeHeight, unbalanced, nodeSize);
+						//Check the threshhold
+						if (realSize>=minRebalanceSize) {
+							std::cout <<"Node triggered scapegoat search: " <<curr->key <<" with height: " <<nodeHeight <<" and threshhold " <<thresh <<" (rounded down from " <<(log10(realSize)/log10(1/realAlpha)) <<")" <<"\n";
+							unbalanced = true;
+							nodeSize = 0;
+							checkScapegoat(parent, curr, nodeHeight, unbalanced, nodeSize, scapegoat);
+						}
 					}
 				}
 
@@ -380,14 +349,20 @@ private:
 		//Recursive case
 		node* res = nullptr;
 		if (key<curr->key) {
-			res = recurse(key, curr, curr->left, nodeHeight+1, action, unbalanced, nodeSize);
+			res = recurse(key, curr, curr->left, nodeHeight+1, action, unbalanced, nodeSize, scapegoat);
 		} else {
-			res = recurse(key, curr, curr->right, nodeHeight+1, action, unbalanced, nodeSize);
+			res = recurse(key, curr, curr->right, nodeHeight+1, action, unbalanced, nodeSize, scapegoat);
 		}
 
 		//If this tree is still unbalanced, are we the scapegoat?
 		if (unbalanced) {
-			checkScapegoat(parent, curr, nodeHeight, unbalanced, nodeSize);
+			if (scapegoat==curr) {
+				std::cout <<"   Scapegoat found: " <<curr->key <<" with parent: " <<parent <<"\n";
+				rebalance(parent, curr);
+				unbalanced = false;
+			} else {
+				checkScapegoat(parent, curr, nodeHeight, unbalanced, nodeSize, scapegoat);
+			}
 		}
 
 		return res;
