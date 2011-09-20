@@ -9,6 +9,16 @@
 #include <iostream>  //Temporary
 
 
+//Helper functions, since this will take the place of cmath
+//These are not as powerful, as they only handle positive numerator/denominator pairs.
+static int u_floor(unsigned int num, unsigned int denom) {
+	return num/denom;
+}
+static int u_ceil(unsigned int num, unsigned int denom) {
+	return 1 + (num-1)/denom;
+}
+
+
 template <class T>
 class fast_log {
 public:

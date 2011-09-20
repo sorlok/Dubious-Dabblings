@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
-#include <cmath>
+//#include <cmath>
 
 #include <iostream>
 #include <fstream>
@@ -59,14 +59,14 @@ void deleteRandom(lightweight_map<int, int>& mymap, double amt)
 int main()
 {
 	//Load random.
-/*	lightweight_map<int, int> mymap;
+	lightweight_map<int, int> mymap;
 	loadRandom(mymap, 100);
 
 	//Now randomly delete a certain percentage of that tree.
 	deleteRandom(mymap, 0.2);
 
 	//Add a few more
-	loadRandom(mymap, 10);*/
+	loadRandom(mymap, 10);
 
 	//Specific tests
 	/*list<int> add_order = {5, 37, 13, 58, 89, 34, 90, 96, 29, 84, 92, 40, 42, 22, 51, 3, 15, 2, 31, 47, 59, 20, 66, 14, 72, 68, 9, 88, 12, 86, 62, 75, 82, 61, 91, 81, 67, 71, 26, 35, 23, 17, 95, 16, 30, 6, 50, 21, 46, 24, 78, 93, 79, 19, 18, 11, 25, 76, 77, 28, 4, 48, 44, 56, 69, 45, 49, 63, 94, 1, 55, 10, 43, 32, 33, 36, 85, 98, 70, 74, 65, 73, 60, 64, 39, 38, 83, 54, 52, 100, 41, 8, 97, 99, 57, 27, 80, 7, 87, 53};
@@ -80,13 +80,13 @@ int main()
 	}*/
 
 	//Print a GraphVis input file for this tree.
-	/*if (!mymap.printDot("tree.dot")) {
+	if (!mymap.printDot("tree.dot")) {
 		std::cout <<"Error: Couldn't print file.\n";
-	}*/
+	}
 
 
 	//Fast log test
-	float alpha = 1.0F / 0.55F;
+	/*float alpha = 1.0F / 0.55F;
 	fast_log<int> logB2(2);
 	fast_log<float> logAlpha(alpha);
 	for (size_t i=0; i<1000; i++) {
@@ -112,7 +112,7 @@ int main()
 		if (logAlpha.ceil(toCheckF) != ((int)ceil(actLogAlpha))) {
 			std::cout <<"Ceiling<float> mismtach.\n";
 		}
-	}
+	}*/
 
 
 	cout <<"Done\n";

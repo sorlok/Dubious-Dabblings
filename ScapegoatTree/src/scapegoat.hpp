@@ -8,10 +8,15 @@
 
 //Needed for log2, log10
 //cmath links by default, so I don't think this is an onerous dependency.
-#include <cmath>
+//#include <cmath>
 
 //Needed for "traverse"; will probably replace with nall/function later.
 #include <functional>
+
+//Faster logarithms. Avoids floating-point math altogether if the
+//  base is an integer; otherwise, simplifies the log calculation down to
+//  "floor" and "ceiling".
+#include "fastlog.hpp"
 
 
 
@@ -54,6 +59,9 @@ private:
 		node* child;
 	};
 
+	//Log lookups
+	fast_log<int> log2;
+	fast_log<float> logA;
 
 	//BST parameters
 	node* root;
@@ -70,7 +78,7 @@ private:
 
 
 public:
-	lightweight_map(double alpha=0.55) : root(nullptr), rigidDelete(false), autoBalance(true), minRebalanceSize(3), realSize(0), maxSize(0) {
+	lightweight_map(double alpha=0.55) : log2(2), logA(1.0/alpha), root(nullptr), rigidDelete(false), autoBalance(true), minRebalanceSize(3), realSize(0), maxSize(0) {
 		setAlpha(alpha);
 	}
 
@@ -83,6 +91,9 @@ public:
 	//Typical alpha values between 0.55 and 0.65 exhibit good performance. We choose 0.55 as
 	// the default alpha value on the assumption that the user will typically perform more searches
 	// than modifications.
+	//NOTE: This must be done in the constructor now for "fastlog" to work.
+	//TODO: We can simply clear the "fastlog" array; it's not a disaster. Re-enable this later.
+private:  //TEMP
 	void setAlpha(double value) {
 		if (value<0.5) {
 			alpha = 500;
@@ -92,6 +103,7 @@ public:
 			alpha = static_cast<size_t>(value*1000);
 		}
 	}
+public:  //TEMP
 
 	//The "rigid delete" flag allows fine-tuning deletes. When a delete is performed, the
 	// tree is not rebalanced until the number of deleted nodes since the last balancing
@@ -173,10 +185,11 @@ public:
 
 private:
 	//Helper
-	size_t alphaHeight(size_t val) {
-		double realAlpha = alpha / 1000.0;
-		return static_cast<size_t>(log10(val)/log10(1/realAlpha));
-	}
+	/*size_t alphaHeight(size_t val) {
+		return logA.log(val);
+		//double realAlpha = alpha / 1000.0;
+		//return static_cast<size_t>(log10(val)/log10(1/realAlpha));
+	}*/
 
 	void traverse_r(node* curr, std::function<void (const Key& key, Data& data)> action) {
 		//Perform for the current node
@@ -219,8 +232,8 @@ private:
 		}
 
 		//Recursive case
-		node* r = buildTree(static_cast<int>(ceil((nodeSize-1.0)/2)), curr);
-		node* s = buildTree(static_cast<int>(floor((nodeSize-1.0)/2)), r->right);
+		node* r = buildTree(u_ceil(nodeSize-1, 2), curr);
+		node* s = buildTree(u_floor(nodeSize-1, 2), r->right);
 		r->right = s->left;
 		s->left = r;
 		return s;
@@ -286,7 +299,7 @@ private:
 				}
 
 				//Balance
-				if (autoBalance) {
+				if (autoBalance && realSize>0) {
 					//Dirty math hack:
 					double realAlpha = alpha / 1000.0;
 					size_t thresh = static_cast<size_t>(log10(realSize)/log10(1/realAlpha));
@@ -341,7 +354,7 @@ private:
 				realSize--;
 
 				//Check if rebalancing is necessary
-				if (autoBalance) {
+				if (autoBalance && realSize>0) {
 					bool outOfBalance = false;
 					if (!rigidDelete) {
 						//Check if our size is less than half the max size (alpha modifies this slightly)
