@@ -21,13 +21,10 @@
 
 
 //
-//TODO: The original paper by Rivest has a good deal of analysis on performance
-//      of different rebalancing/insertion/etc. algorithms. I'd like to modify
-//      this code to use the best ones from that paper (in particular, a number of
-//      non-recursive algorithms were identified as ideal).
-//Link: http://publications.csail.mit.edu/lcs/pubs/pdf/MIT-LCS-TR-700.pdf
-//
-//TODO: Also, our global "recurse" function is heavy-handed. Better to specialize in this case.
+//TODO LIST:
+//           1. Remove our global "recurse" function; replace with specializations.
+//           2. Use the "better" scapegoat selection discussed by Rivest.
+//           3. Check Rivest's "fast" tree sort to see if we introduced a rounding error. Re-enable it if it'll work.
 //
 
 
@@ -177,8 +174,8 @@ public:
 		recurse(key, nullptr, root, 0, Action::Delete, unbalanced, nodeSize, scapegoat);
 	}
 
-	void traverse(std::function<void (const Key& key, Data& data)> action) {
-		traverse_r(root, action);
+	void for_each(std::function<void (const Key& key, Data& data)> action) {
+		traverse(root, action);
 	}
 
 	size_t size() {
@@ -186,16 +183,16 @@ public:
 	}
 
 private:
-	void traverse_r(node* curr, std::function<void (const Key& key, Data& data)> action) {
+	void traverse(node* curr, std::function<void (const Key& key, Data& data)> action) {
 		//Perform for the current node
 		action(curr->key, curr->data);
 
 		//Recurse
 		if (curr->left) {
-			traverse_r(curr->left, action);
+			traverse(curr->left, action);
 		}
 		if (curr->right) {
-			traverse_r(curr->right, action);
+			traverse(curr->right, action);
 		}
 	}
 
