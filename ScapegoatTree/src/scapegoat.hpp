@@ -302,7 +302,7 @@ private:
 				if (autoBalance && realSize>0) {
 					//Dirty math hack:
 					double realAlpha = alpha / 1000.0;
-					size_t thresh = static_cast<size_t>(log10(realSize)/log10(1/realAlpha));
+					size_t thresh = logA.log(realSize);
 
 					//From Rivest's paper: We know the tree is not height-balanced if:
 					if (++nodeHeight>thresh) {
