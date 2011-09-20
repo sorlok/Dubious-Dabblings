@@ -93,8 +93,11 @@ public:
 	// than modifications.
 	//NOTE: This must be done in the constructor now for "fastlog" to work.
 	//TODO: We can simply clear the "fastlog" array; it's not a disaster. Re-enable this later.
-private:  //TEMP
 	void setAlpha(double value) {
+		//Reset log lookup
+		logA.setBase(1.0/value);
+
+		//Save
 		if (value<0.5) {
 			alpha = 500;
 		} else if (value>1.0) {
@@ -103,7 +106,6 @@ private:  //TEMP
 			alpha = static_cast<size_t>(value*1000);
 		}
 	}
-public:  //TEMP
 
 	//The "rigid delete" flag allows fine-tuning deletes. When a delete is performed, the
 	// tree is not rebalanced until the number of deleted nodes since the last balancing

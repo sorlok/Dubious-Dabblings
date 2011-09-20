@@ -1,13 +1,6 @@
 #pragma once
 
-//Helper class for computing floor/ceilings of logarithms in record time.
-
-
 #include <nall/vector.hpp>
-
-
-#include <iostream>  //Temporary
-
 
 //Helper functions, since this will take the place of cmath
 //These are not as powerful, as they only handle positive numerator/denominator pairs.
@@ -19,20 +12,30 @@ static int u_ceil(unsigned int num, unsigned int denom) {
 }
 
 
+//Helper class for computing floor/ceilings of logarithms in record time.
 template <class T>
 class fast_log {
 public:
 	//Our array requires at least one element: log(0)==1
 	// You can instruct it to initialize more elements if you want.
-	fast_log(T base, size_t numInitialElements=1) : Base(base) {
+	fast_log(T baseVal, size_t numInitialElements=1) {
+		setBase(baseVal);
 		T next = 1;
-		lookup.append(1);
 		while (lookup.size()<numInitialElements) {
-			next = next*Base;
+			next = next*baseVal;
 			lookup.append(next);
 		}
 	}
 
+	//Reset the base
+	void setBase(T newBase) {
+		//Save, reset
+		base = newBase;
+		lookup.reset();
+
+		//Add base case
+		lookup.append(1);
+	}
 
 	//Floor/Ceiling lookup functions basically just delegate
 	unsigned int floor(T value) {
@@ -47,12 +50,12 @@ public:
 
 
 private:
+	//Parameters
 	nall::linear_vector<T> lookup;
-	const T Base;
+	T base;
 
+	//Lookup
 	enum class Search { Floor, Ceiling };
-
-
 	unsigned int search_log(T value, Search type) {
 		//Two different ways to search. The binary_search could
 		// call expand_search anyway, but we'll save time and jump there
@@ -71,7 +74,7 @@ private:
 	//Expand the array until the result has been found.
 	unsigned int expand_search(T value, Search type, unsigned int lastIndex) {
 		while (value>lookup[lastIndex]) {
-			lookup.append(lookup[lastIndex++]*Base);
+			lookup.append(lookup[lastIndex++]*base);
 		}
 		return found(value, type, lastIndex-1, lastIndex);
 	}

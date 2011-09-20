@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
-//#include <cmath>
+#include <cmath>
 
 #include <iostream>
 #include <fstream>
@@ -86,9 +86,11 @@ int main()
 
 
 	//Fast log test
-	/*float alpha = 1.0F / 0.55F;
-	fast_log<int> logB2(2);
-	fast_log<float> logAlpha(alpha);
+	float alpha = 1.0F / 0.55F;
+	fast_log<int> logB2(2, 100);
+	fast_log<float> logAlpha(alpha, 100);
+	logB2.setBase(2);
+	logAlpha.setBase(alpha);
 	for (size_t i=0; i<1000; i++) {
 		int toCheckI = rand() % 1000+1;
 		float toCheckF = toCheckI / 0.33F;
@@ -112,7 +114,7 @@ int main()
 		if (logAlpha.ceil(toCheckF) != ((int)ceil(actLogAlpha))) {
 			std::cout <<"Ceiling<float> mismtach.\n";
 		}
-	}*/
+	}
 
 
 	cout <<"Done\n";
