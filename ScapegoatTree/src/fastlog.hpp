@@ -15,7 +15,7 @@ static int u_floor(unsigned int num, unsigned int denom) {
 	return num/denom;
 }
 static int u_ceil(unsigned int num, unsigned int denom) {
-	return 1 + (num-1)/denom;
+	return num==0 ? 0 : 1 + (num-1)/denom;
 }
 
 

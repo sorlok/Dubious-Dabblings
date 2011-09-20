@@ -184,13 +184,6 @@ public:  //TEMP
 	}
 
 private:
-	//Helper
-	/*size_t alphaHeight(size_t val) {
-		return logA.log(val);
-		//double realAlpha = alpha / 1000.0;
-		//return static_cast<size_t>(log10(val)/log10(1/realAlpha));
-	}*/
-
 	void traverse_r(node* curr, std::function<void (const Key& key, Data& data)> action) {
 		//Perform for the current node
 		action(curr->key, curr->data);
@@ -301,7 +294,6 @@ private:
 				//Balance
 				if (autoBalance && realSize>0) {
 					//Dirty math hack:
-					double realAlpha = alpha / 1000.0;
 					size_t thresh = logA.log(realSize);
 
 					//From Rivest's paper: We know the tree is not height-balanced if:
