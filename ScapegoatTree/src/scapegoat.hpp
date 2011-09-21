@@ -199,6 +199,12 @@ private:
 	//Conceptually: Turn our tree into the worst possible binary search tree. Then turn that
 	//  into the best-possible binary search tree.
 	void rebalance(node* parent, node* from, size_t nodeSize) {
+		//If we're doing a full rebalance, reset the size to avoid rebalancing on the
+		//  next delete.
+		if (!parent) {
+			maxSize = realSize;
+		}
+
 		node temp(0);
 		node* flatRoot = flatten(from, &temp);
 		buildTree(nodeSize, flatRoot);
@@ -358,7 +364,6 @@ private:
 					//If so, rebalance at the root and reset maxSize
 					if (outOfBalance) {
 						rebalance(nullptr, root, realSize);
-						maxSize = realSize;
 					}
 				}
 
