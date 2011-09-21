@@ -126,7 +126,7 @@ public:
 	void setAutoBalance(bool val, bool forceRebalance) {
 		autoBalance = val;
 		if (autoBalance && forceRebalance) {
-			rebalance(root);
+			rebalance(nullptr, root, realSize);
 		}
 	}
 
