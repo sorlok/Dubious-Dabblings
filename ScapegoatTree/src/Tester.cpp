@@ -61,13 +61,13 @@ int main()
 {
 	//Load random.
 	lightweight_map<int, int> mymap;
-	loadRandom(mymap, 20000);
+	loadRandom(mymap, 100);
 
 	//Now randomly delete a certain percentage of that tree.
-	deleteRandom(mymap, 0.9995);
+	deleteRandom(mymap, 0.2);
 
 	//Add a few more
-	loadRandom(mymap, 5);
+	loadRandom(mymap, 10);
 
 	//Specific tests
 	//list<int> add_order = {5, 37, 13, 58, 89, 34, 90, 96, 29, 84, 92, 40, 42, 22, 51, 3, 15, 2, 31, 47, 59, 20, 66, 14, 72, 68, 9, 88, 12, 86, 62, 75, 82, 61, 91, 81, 67, 71, 26, 35, 23, 17, 95, 16, 30, 6, 50, 21, 46, 24, 78, 93, 79, 19, 18, 11, 25, 76, 77, 28, 4, 48, 44, 56, 69, 45, 49, 63, 94, 1, 55, 10, 43, 32, 33, 36, 85, 98, 70, 74, 65, 73, 60, 64, 39, 38, 83, 54, 52, 100, 41, 8, 97, 99, 57, 27, 80, 7, 87, 53};
