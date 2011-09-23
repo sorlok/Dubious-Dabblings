@@ -4,11 +4,24 @@
 
 //Helper functions, since this will take the place of cmath
 //These are not as powerful, as they only handle positive numerator/denominator pairs.
+//These shouldn't really be used unless you know what you're doing; they have obvious caveats.
 static int u_floor(unsigned int num, unsigned int denom) {
 	return num/denom;
 }
 static int u_ceil(unsigned int num, unsigned int denom) {
 	return num==0 ? 0 : 1 + (num-1)/denom;
+}
+static unsigned int power(unsigned int base, unsigned int exponent) {
+	//Exponential by squaring.
+	int result = 1;
+	while (exponent!=0) {
+		if (exponent & 1) {
+            result *= base;
+		}
+		exponent >>= 1;
+		base *= base;
+	}
+    return result;
 }
 
 

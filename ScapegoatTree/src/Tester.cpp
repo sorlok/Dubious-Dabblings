@@ -1,8 +1,3 @@
-#include <cstdio>
-#include <cstdlib>
-#include <ctime>
-#include <cmath>
-
 #include <iostream>
 #include <fstream>
 #include <list>
@@ -10,6 +5,11 @@
 #include "scapegoat.hpp"
 //#include "scapegoat-display.hpp"
 #include "fastlog.hpp"
+
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
 
 using namespace std;
 
@@ -61,6 +61,7 @@ int main()
 {
 	//Load random.
 	lightweight_map<int, int> mymap;
+	mymap.setUseFastRebalancing(true);
 	loadRandom(mymap, 100);
 
 	//Now randomly delete a certain percentage of that tree.
