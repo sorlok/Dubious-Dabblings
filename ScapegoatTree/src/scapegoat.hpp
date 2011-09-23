@@ -43,8 +43,6 @@
 template <class Key, class Data>
 class lightweight_map {
 private:
-	enum class Action  { Find, Insert, Delete };
-
 	struct node {
 		Key    key;     Data  data;
 		node*  left;    node* right;
@@ -148,14 +146,11 @@ public:
 		bool unbalanced = false;
 		size_t nodeSize = 0;
 		node* scapegoat = nullptr;
-		recurse(key, nullptr, root, 0, Action::Insert, unbalanced, nodeSize, scapegoat)->data = value;
+		insert_r(key, nullptr, root, 0, unbalanced, nodeSize, scapegoat)->data = value;
 	}
 
 	bool find(Key key, Data& result) {
-		bool unbalanced = false; //Doesn't matter
-		size_t nodeSize = 0; //Doesn't matter
-		node* scapegoat = nullptr; //Doesn't matter
-		node* res = recurse(key, nullptr, root, 0, Action::Find, unbalanced, nodeSize, scapegoat);
+		node* res = find_r(key, nullptr, root);
 		if (res) {
 			result = res->data;
 			return true;
@@ -168,10 +163,7 @@ public:
 	}
 
 	void remove(Key key) {
-		bool unbalanced = false; //Doesn't matter
-		size_t nodeSize = 0; //Doesn't matter
-		node* scapegoat = nullptr; //Doesn't matter
-		recurse(key, nullptr, root, 0, Action::Delete, unbalanced, nodeSize, scapegoat);
+		remove_r(key, nullptr, root);
 	}
 
 	void for_each(std::function<void (const Key& key, Data& data)> action) {
@@ -275,109 +267,144 @@ private:
 	}
 
 
-	node* recurse(Key key, node* parent, node* curr, size_t nodeHeight, Action action, bool& unbalanced, size_t& nodeSize, node*& scapegoat) {
-		//Base case: No more nodes
+	//Find a node recursively
+	node* find_r(Key key, node* parent, node* curr) {
+		//Base case: Nothing found
 		if (!curr) {
-			//If we're searching or deleting, then we do nothing. For insertion, this is a valid
-			//  location for a new node.
-			if (action==Action::Find || action==Action::Delete) {
-				return nullptr;
-			} else if (action==Action::Insert) {
-				realSize++;
-				maxSize = realSize>maxSize?realSize:maxSize;
-				curr = new node(key);
-
-				//Add to parent
-				if (!parent) {
-					root = curr;
-				} else if (curr->key<parent->key) {
-					parent->left = curr;
-				} else {
-					parent->right = curr;
-				}
-
-				//Balance
-				if (autoBalance && realSize>0) {
-					//Dirty math hack:
-					size_t thresh = logA.log(realSize);
-
-					//From Rivest's paper: We know the tree is not height-balanced if:
-					if (++nodeHeight>thresh) {
-						//Check the threshhold
-						if (realSize>=minRebalanceSize) {
-							unbalanced = true;
-							nodeSize = 0;
-							checkScapegoat(parent, curr, nodeHeight, unbalanced, nodeSize, scapegoat);
-						}
-					}
-				}
-
-				return curr;
-			}
+			return nullptr;
 		}
 
 		//Base case: Node found
 		if (curr->key==key) {
-			//If we're searching or inserting, return this node. If we're deleting, check.
-			if (action==Action::Find || action==Action::Insert)  {
-				//"Insert" here means inserting a node that already exists, so we
-				// don't need to check for a scapegoat.
-				return curr;
-			} else if (action==Action::Delete) {
-				//Obtain a reference to this parent's pointer (left or right) that points to this object.
-				node*& parentPtr = !parent?root:parent->left==curr?parent->left:parent->right;
+			return curr;
+		}
 
-				//Three posibilities (I tried generalizing them, but it took up more code).
-				if (!curr->left && !curr->right) {
-					//Simple case: We are deleting a node with no children; just delete it and set
-					// its parent pointer to null.
-					parentPtr = nullptr;
-					delete curr;
-				} else if (!curr->left || !curr->right) {
-					//Simple case 2: Only one child. Delete this node, and have the parent point to
-					// this child.
-					parentPtr = curr->left?curr->left:curr->right;
-					delete curr;
-				} else {
-					//Slightly more complex case: find the previous in-order node and copy
-					//   its contens here... then delete THAT node.
-					node* toDelete = find_and_slice_child(curr, curr->left);
-					curr->data = toDelete->data;
-					curr->key = toDelete->key;
-					delete toDelete;
-				}
+		//Recursive case
+		if (key<curr->key) {
+			return find_r(key, curr, curr->left);
+		} else {
+			return find_r(key, curr, curr->right);
+		}
+	}
 
-				//Update size
-				realSize--;
 
-				//Check if rebalancing is necessary
-				if (autoBalance && realSize>0) {
-					bool outOfBalance = false;
-					if (!rigidDelete) {
-						//Check if our size is less than half the max size (alpha modifies this slightly)
-						outOfBalance = realSize < (alpha*maxSize)/1000;
-					} else {
-						//Check if the size is one less than an exact power of two
-						outOfBalance = !(realSize&(realSize+1));
-					}
 
-					//If so, rebalance at the root and reset maxSize
-					if (outOfBalance) {
-						rebalance(nullptr, root, realSize);
-					}
-				}
+	//Remove a node, recursive version
+	node* remove_r(Key key, node* parent, node* curr) {
+		//Base case: Not found
+		if (!curr) {
+			return nullptr;
+		}
 
-				//Return null
-				return nullptr;
+		//Base case: Node found
+		if (curr->key==key) {
+			//Obtain a reference to this parent's pointer (left or right) that points to this object.
+			node*& parentPtr = !parent?root:parent->left==curr?parent->left:parent->right;
+
+			//Three posibilities (I tried generalizing them, but it took up more code).
+			if (!curr->left && !curr->right) {
+				//Simple case: We are deleting a node with no children; just delete it and set
+				// its parent pointer to null.
+				parentPtr = nullptr;
+				delete curr;
+			} else if (!curr->left || !curr->right) {
+				//Simple case 2: Only one child. Delete this node, and have the parent point to
+				// this child.
+				parentPtr = curr->left?curr->left:curr->right;
+				delete curr;
+			} else {
+				//Slightly more complex case: find the previous in-order node and copy
+				//   its contens here... then delete THAT node.
+				node* toDelete = find_and_slice_child(curr, curr->left);
+				curr->data = toDelete->data;
+				curr->key = toDelete->key;
+				delete toDelete;
 			}
+
+			//Update size
+			realSize--;
+
+			//Check if rebalancing is necessary
+			if (autoBalance && realSize>0) {
+				bool outOfBalance = false;
+				if (!rigidDelete) {
+					//Check if our size is less than half the max size (alpha modifies this slightly)
+					outOfBalance = realSize < (alpha*maxSize)/1000;
+				} else {
+					//Check if the size is one less than an exact power of two
+					outOfBalance = !(realSize&(realSize+1));
+				}
+
+				//If so, rebalance at the root and reset maxSize
+				if (outOfBalance) {
+					rebalance(nullptr, root, realSize);
+				}
+			}
+
+			//Return null
+			return nullptr;
+		}
+
+		//Recursive case
+		if (key<curr->key) {
+			return remove_r(key, curr, curr->left);
+		} else {
+			return remove_r(key, curr, curr->right);
+		}
+	}
+
+
+
+
+	node* insert_r(Key key, node* parent, node* curr, size_t nodeHeight, bool& unbalanced, size_t& nodeSize, node*& scapegoat) {
+		//Base case: No more nodes
+		if (!curr) {
+			//If nothing found, this is the valid position for a new node.
+			realSize++;
+			maxSize = realSize>maxSize?realSize:maxSize;
+			curr = new node(key);
+
+			//Add to parent
+			if (!parent) {
+				root = curr;
+			} else if (curr->key<parent->key) {
+				parent->left = curr;
+			} else {
+				parent->right = curr;
+			}
+
+			//Balance
+			if (autoBalance && realSize>0) {
+				//Dirty math hack:
+				size_t thresh = logA.log(realSize);
+
+				//From Rivest's paper: We know the tree is not height-balanced if:
+				if (++nodeHeight>thresh) {
+					//Check the threshhold
+					if (realSize>=minRebalanceSize) {
+						unbalanced = true;
+						nodeSize = 0;
+						checkScapegoat(parent, curr, nodeHeight, unbalanced, nodeSize, scapegoat);
+					}
+				}
+			}
+
+			return curr;
+		}
+
+		//Base case: Node found
+		if (curr->key==key) {
+			//"Insert" here means inserting a node that already exists, so we
+			// don't need to check for a scapegoat.
+			return curr;
 		}
 
 		//Recursive case
 		node* res = nullptr;
 		if (key<curr->key) {
-			res = recurse(key, curr, curr->left, nodeHeight+1, action, unbalanced, nodeSize, scapegoat);
+			res = insert_r(key, curr, curr->left, nodeHeight+1, unbalanced, nodeSize, scapegoat);
 		} else {
-			res = recurse(key, curr, curr->right, nodeHeight+1, action, unbalanced, nodeSize, scapegoat);
+			res = insert_r(key, curr, curr->right, nodeHeight+1, unbalanced, nodeSize, scapegoat);
 		}
 
 		//If this tree is still unbalanced, are we the scapegoat?
