@@ -1,11 +1,5 @@
 #pragma once
 
-//Define this to add a function called "printJson()", which uses STL filestreams
-#ifdef SCAPEGOAT_TREE_ALLOW_OUTPUT
-#include <fstream>
-#include <string>
-#endif
-
 //Needed for log2, log10
 //cmath links by default, so I don't think this is an onerous dependency.
 //#include <cmath>
@@ -22,10 +16,22 @@
 
 //
 //TODO LIST:
-//           1. Remove our global "recurse" function; replace with specializations.
 //           2. Use the "better" scapegoat selection discussed by Rivest.
 //           3. Check Rivest's "fast" tree sort to see if we introduced a rounding error. Re-enable it if it'll work.
 //
+
+
+
+#ifdef SCAPEGOAT_TREE_ALLOW_OUTPUT
+//Forward declaration
+template <class Key, class Data>
+class lightweight_map;
+
+//Friend templates
+template <class Key, class Data>
+bool PrintDot(const char* fName, const lightweight_map<Key, Data>& tree);
+#endif
+
 
 
 //
@@ -70,6 +76,12 @@ private:
 	//Scapegoat tree parameters
 	size_t realSize;
 	size_t maxSize;
+
+
+	//Friends
+#ifdef SCAPEGOAT_TREE_ALLOW_OUTPUT
+	friend bool PrintDot <> (const char* fName, const lightweight_map<Key, Data>& tree);
+#endif
 
 
 public:
@@ -457,77 +469,13 @@ private:
 	//"Fast" tree rebalancer and related functions
 	//////////////////////////////////////////////////////
 
-
-
-
-	//////////////////////////////////////////////////////
-	//Various optional output functions
-	//////////////////////////////////////////////////////
-
-#ifdef SCAPEGOAT_TREE_ALLOW_OUTPUT
-public:
-	bool printJson(const std::string& fName) {
-		std::ofstream file(fName);
-		if (!file.is_open()) {
-			return false;
-		}
-		printJsonNode(file, root, 0);
-		file <<std::endl;
-		file.close();
-		return true;
-	}
-
-	bool printDot(const std::string& fName) {
-		std::ofstream file(fName);
-		if (!file.is_open()) {
-			return false;
-		}
-		file <<"digraph Tree {" <<std::endl;
-		if (root) {
-			file <<"root" <<" -> " <<root->key <<";" <<std::endl;
-			printDotNode(file, root, 1);
-		}
-		file <<"}" <<std::endl;
-		file.close();
-		return true;
-	}
-
-private:
-	void printJsonChild(std::ofstream& file, const std::string& label, node* child, size_t tabLevel) {
-		std::string tabs = std::string(tabLevel*2+1, ' ');
-		file <<"\n" <<tabs <<"\"" <<label <<"\":";
-		if (!child) {
-			file <<"{}";
-		} else {
-			file <<std::endl;
-			printJsonNode(file, child, tabLevel+1);
-		}
-	}
-
-	void printJsonNode(std::ofstream& file, node* curr, size_t tabLevel) {
-		std::string tabs = std::string(tabLevel*2, ' ');
-		file <<tabs <<"{"
-		 	<<"\"key\":" <<"\"" <<curr->key <<"\", "
-			<<"\"value\":" <<"\"" <<curr->data <<"\",";
-		printJsonChild(file, "left", curr->left, tabLevel);
-		printJsonChild(file, "right", curr->right, tabLevel);
-		file <<std::endl <<tabs <<"}";
-	}
-
-	void printDotNode(std::ofstream& file, node* curr, size_t tabLevel) {
-		std::string tabs = std::string(tabLevel*2, ' ');
-		if (curr->left) {
-			file <<tabs <<curr->key <<" -> " <<curr->left->key <<";" <<std::endl;
-			printDotNode(file, curr->left, tabLevel+1);
-		}
-		if (curr->right) {
-			file <<tabs <<curr->key <<" -> " <<curr->right->key <<";" <<std::endl;
-			printDotNode(file, curr->right, tabLevel+1);
-		}
-	}
-
-#endif
-
 };
 
+
+
+
+//Define this to add output functions, which use STL filestreams
+#ifdef SCAPEGOAT_TREE_ALLOW_OUTPUT
+#include "scapegoat-display.hpp"
+#endif
 

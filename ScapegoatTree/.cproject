@@ -28,7 +28,7 @@
 <option id="gnu.cpp.compiler.option.preprocessor.def.1565994751" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="SCAPEGOAT_TREE_ALLOW_OUTPUT"/>
 </option>
-<option id="gnu.cpp.compiler.option.include.paths.47539832" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+<option id="gnu.cpp.compiler.option.include.paths.47539832" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../phoenix&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.695584611" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
@@ -502,7 +502,7 @@
 <option id="gnu.cpp.compiler.option.preprocessor.def.585920792" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="SCAPEGOAT_TREE_ALLOW_OUTPUT"/>
 </option>
-<option id="gnu.cpp.compiler.option.include.paths.154430204" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+<option id="gnu.cpp.compiler.option.include.paths.154430204" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../phoenix&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1698402909" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>

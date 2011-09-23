@@ -8,6 +8,7 @@
 #include <list>
 
 #include "scapegoat.hpp"
+//#include "scapegoat-display.hpp"
 #include "fastlog.hpp"
 
 using namespace std;
@@ -80,7 +81,7 @@ int main()
 	}*/
 
 	//Print a GraphVis input file for this tree.
-	if (!mymap.printDot("tree.dot")) {
+	if (!PrintDot("tree.dot", mymap)) {
 		std::cout <<"Error: Couldn't print file.\n";
 	}
 
