@@ -4,6 +4,8 @@
 //cmath links by default, so I don't think this is an onerous dependency.
 //#include <cmath>
 
+#include <nall/vector.hpp>
+
 //Needed for "traverse"; will probably replace with nall/function later.
 #include <functional>
 
@@ -155,10 +157,9 @@ public:
 	}
 
 	void insert(Key key, Data value) {
-		bool unbalanced = false;
-		size_t nodeSize = 0;
-		node* scapegoat = nullptr;
-		insert_r(key, nullptr, root, 0, unbalanced, nodeSize, scapegoat)->data = value;
+		nall::linear_vector<node*> parentStack;
+		parentStack.append(nullptr);
+		insert_r(key, parentStack, root, 0)->data = value;
 	}
 
 	bool find(Key key, Data& result) {
@@ -235,25 +236,30 @@ private:
 		return res;
 	}
 
-	void checkScapegoat(node* parent, node* curr, size_t nodeHeight, bool& unbalanced, size_t& nodeSize, node*& scapegoat) {
-		//Some computation
-		size_t siblingSize = calc_size(parent->left==curr?parent->right:parent->left);
-		size_t parentSize = nodeSize + siblingSize + 1;
-		size_t threshhold = (alpha*parentSize)/1000;
+	//AncestorID starts at zero and increases by one for every time we jump up to an ancestor.
+	void findAndBalanceScapegoat(nall::linear_vector<node*>& parentStack, node* curr, size_t nodeSize, size_t ancestorID) {
+		bool foundScapegoat = false;
+		while (!foundScapegoat) {
+			//Step 1: Pop the stack, compute the parent size, and replace curr with parent; update ancestorID
+			node* parent = parentStack[parentStack.size()-1];
+			parentStack.resize(parentStack.size()-1);
+			size_t siblingSize = calc_size(parent->left==curr?parent->right:parent->left);
+			nodeSize = nodeSize + siblingSize + 1;
+			curr = parent;
+			ancestorID++;
 
-		if (parent==root) {
-			//The root node is always rebalanced
-			scapegoat = parent;
-		} else {
-			//Nodes effectively check to see if their parents are scapegoats.
-			if (nodeSize>threshhold || siblingSize>threshhold) {
-				//Found a scapegoat
-				scapegoat = parent;
+			//Step 2: Check if this node is the root; if not, apply the formula.
+			//        (Note that the root node satisfies the formula, but we want to be extra-safe here).
+			foundScapegoat = (curr==root);
+			if (!foundScapegoat) {
+				foundScapegoat = (ancestorID > logA.log(nodeSize));
+			}
+
+			//Step 3: Rebalance if this is the scapegoat
+			if (foundScapegoat) {
+				rebalance(parentStack[parentStack.size()-1], curr, nodeSize);
 			}
 		}
-
-		//The parent will need to know its own size for balancing/continuing the search.
-		nodeSize = parentSize;
 	}
 
 
@@ -280,6 +286,8 @@ private:
 
 
 	//Remove a node, recursive version
+	//NOTE: Since removing a node can rebalance the tree, ensure that NO processing occurs
+	//      after any recursive call.
 	node* remove_r(Key key, node* parent, node* curr) {
 		//Base case: Not found
 		if (!curr) {
@@ -346,7 +354,10 @@ private:
 
 
 
-	node* insert_r(Key key, node* parent, node* curr, size_t nodeHeight, bool& unbalanced, size_t& nodeSize, node*& scapegoat) {
+	//Inserting a node, recursive version
+	//NOTE: Since inserting a node can rebalance the tree, ensure that NO processing occurs
+	//      after any recursive call.
+	node* insert_r(Key key, nall::linear_vector<node*>& parentStack, node* curr, size_t nodeHeight/*, bool& unbalanced, size_t& nodeSize, node*& scapegoat*/) {
 		//Base case: No more nodes
 		if (!curr) {
 			//If nothing found, this is the valid position for a new node.
@@ -354,14 +365,10 @@ private:
 			maxSize = realSize>maxSize?realSize:maxSize;
 			curr = new node(key);
 
-			//Add to parent
-			if (!parent) {
-				root = curr;
-			} else if (curr->key<parent->key) {
-				parent->left = curr;
-			} else {
-				parent->right = curr;
-			}
+			//Add to the parent
+			node* parent = parentStack[parentStack.size()-1];
+			node*& parentPtr = !parent?root:parent->left==curr?parent->left:parent->right;
+			parentPtr = curr;
 
 			//Balance
 			if (autoBalance && realSize>0) {
@@ -372,9 +379,8 @@ private:
 				if (++nodeHeight>thresh) {
 					//Check the threshhold
 					if (realSize>=minRebalanceSize) {
-						unbalanced = true;
-						nodeSize = 0;
-						checkScapegoat(parent, curr, nodeHeight, unbalanced, nodeSize, scapegoat);
+						//NOTE: This will rebalance the tree; do NOTHING except return after this.
+						findAndBalanceScapegoat(parentStack, curr, 1, 0);
 					}
 				}
 			}
@@ -390,15 +396,15 @@ private:
 		}
 
 		//Recursive case
-		node* res = nullptr;
+		parentStack.append(curr);
 		if (key<curr->key) {
-			res = insert_r(key, curr, curr->left, nodeHeight+1, unbalanced, nodeSize, scapegoat);
+			return insert_r(key, parentStack, curr->left, nodeHeight+1);/*, unbalanced, nodeSize, scapegoat);*/
 		} else {
-			res = insert_r(key, curr, curr->right, nodeHeight+1, unbalanced, nodeSize, scapegoat);
+			return insert_r(key, parentStack, curr->right, nodeHeight+1);/*, unbalanced, nodeSize, scapegoat);*/
 		}
 
 		//If this tree is still unbalanced, are we the scapegoat?
-		if (unbalanced) {
+		/*if (unbalanced) {
 			if (scapegoat==curr) {
 				rebalance(parent, curr, nodeSize+1);
 				unbalanced = false;
@@ -407,7 +413,7 @@ private:
 			}
 		}
 
-		return res;
+		return res;*/
 	}
 
 	node* find_and_slice_child(node* parent, node* curr) {
