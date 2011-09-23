@@ -197,37 +197,15 @@ private:
 			maxSize = realSize;
 		}
 
-		node temp(0);
-		node* flatRoot = flatten(from, &temp);
-		buildTree(nodeSize, flatRoot);
-
-		//The only thing left to do is update the parent.
-		node*& sectionStart = !parent?root:parent->left==from?parent->left:parent->right;
-		sectionStart = temp.left;
-	}
-
-	node* flatten(node* start, node* store) {
-		if (!start) {
-			return store;
+		//Pick "fast" or "simple" depending on the flag set.
+		bool useFastRebalancing = false;
+		if (useFastRebalancing) {
+			//tree_rebalance_fast(parent, from, nodeSize);
+		} else {
+			tree_rebalance_simple(parent, from, nodeSize);
 		}
-		start->right = flatten(start->right, store);
-		return flatten(start->left, start);
 	}
 
-	node* buildTree(int nodeSize, node* curr) {
-		//Base case.
-		if (nodeSize==0) {
-			curr->left = nullptr;
-			return curr;
-		}
-
-		//Recursive case
-		node* r = buildTree(u_ceil(nodeSize-1, 2), curr);
-		node* s = buildTree(u_floor(nodeSize-1, 2), r->right);
-		r->right = s->left;
-		s->left = r;
-		return s;
-	}
 
 	size_t calc_size(node* curr) {
 		if (!curr) {
@@ -435,6 +413,56 @@ private:
 		}
 	}
 
+
+	//////////////////////////////////////////////////////
+	//"Simple" tree rebalancer and related functions
+	//////////////////////////////////////////////////////
+
+	void tree_rebalance_simple(node* parent, node* from, size_t nodeSize) {
+		node temp(0);
+		node* flatRoot = flatten(from, &temp);
+		buildTree(nodeSize, flatRoot);
+
+		//The only thing left to do is update the parent.
+		node*& sectionStart = !parent?root:parent->left==from?parent->left:parent->right;
+		sectionStart = temp.left;
+	}
+
+	node* flatten(node* start, node* store) {
+		if (!start) {
+			return store;
+		}
+		start->right = flatten(start->right, store);
+		return flatten(start->left, start);
+	}
+
+	node* buildTree(int nodeSize, node* curr) {
+		//Base case.
+		if (nodeSize==0) {
+			curr->left = nullptr;
+			return curr;
+		}
+
+		//Recursive case
+		node* r = buildTree(u_ceil(nodeSize-1, 2), curr);
+		node* s = buildTree(u_floor(nodeSize-1, 2), r->right);
+		r->right = s->left;
+		s->left = r;
+		return s;
+	}
+
+
+
+	//////////////////////////////////////////////////////
+	//"Fast" tree rebalancer and related functions
+	//////////////////////////////////////////////////////
+
+
+
+
+	//////////////////////////////////////////////////////
+	//Various optional output functions
+	//////////////////////////////////////////////////////
 
 #ifdef SCAPEGOAT_TREE_ALLOW_OUTPUT
 public:
