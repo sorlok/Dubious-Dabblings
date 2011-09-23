@@ -85,13 +85,21 @@ bool PrintDot(const char* fName, const lightweight_map<Key, Data>& tree) {
 			std::string tabs = std::string(nodes.size()*2, ' ');
 			curr = nodes.back();
 			nodes.pop_back();
+
+			//Print order: left to right.
 			if (curr->left) {
 				file <<tabs <<curr->key <<" -> " <<curr->left->key <<";" <<std::endl;
-				nodes.push_back(curr->left);
 			}
 			if (curr->right) {
 				file <<tabs <<curr->key <<" -> " <<curr->right->key <<";" <<std::endl;
+			}
+
+			//Stack order: right to left.
+			if (curr->right) {
 				nodes.push_back(curr->right);
+			}
+			if (curr->left) {
+				nodes.push_back(curr->left);
 			}
 		}
 	}
