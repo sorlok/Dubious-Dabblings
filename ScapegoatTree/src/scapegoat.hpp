@@ -357,7 +357,7 @@ private:
 	//Inserting a node, recursive version
 	//NOTE: Since inserting a node can rebalance the tree, ensure that NO processing occurs
 	//      after any recursive call.
-	node* insert_r(Key key, nall::linear_vector<node*>& parentStack, node* curr, size_t nodeHeight/*, bool& unbalanced, size_t& nodeSize, node*& scapegoat*/) {
+	node* insert_r(Key key, nall::linear_vector<node*>& parentStack, node* curr, size_t nodeHeight) {
 		//Base case: No more nodes
 		if (!curr) {
 			//If nothing found, this is the valid position for a new node.
@@ -367,7 +367,7 @@ private:
 
 			//Add to the parent
 			node* parent = parentStack[parentStack.size()-1];
-			node*& parentPtr = !parent?root:parent->left==curr?parent->left:parent->right;
+			node*& parentPtr = !parent?root:key<parent->key?parent->left:parent->right;
 			parentPtr = curr;
 
 			//Balance; check threshhold
@@ -377,11 +377,8 @@ private:
 
 				//From Rivest's paper: We know the tree is not height-balanced if:
 				if (++nodeHeight>thresh) {
-					//Check the threshhold
-					if (realSize>=minRebalanceSize) {
-						//NOTE: This will rebalance the tree; do NOTHING except return after this.
-						findAndBalanceScapegoat(parentStack, curr, 1, 0);
-					}
+					//NOTE: This will rebalance the tree; do NOTHING except return after this.
+					findAndBalanceScapegoat(parentStack, curr, 1, 0);
 				}
 			}
 
@@ -398,22 +395,10 @@ private:
 		//Recursive case
 		parentStack.append(curr);
 		if (key<curr->key) {
-			return insert_r(key, parentStack, curr->left, nodeHeight+1);/*, unbalanced, nodeSize, scapegoat);*/
+			return insert_r(key, parentStack, curr->left, nodeHeight+1);
 		} else {
-			return insert_r(key, parentStack, curr->right, nodeHeight+1);/*, unbalanced, nodeSize, scapegoat);*/
+			return insert_r(key, parentStack, curr->right, nodeHeight+1);
 		}
-
-		//If this tree is still unbalanced, are we the scapegoat?
-		/*if (unbalanced) {
-			if (scapegoat==curr) {
-				rebalance(parent, curr, nodeSize+1);
-				unbalanced = false;
-			} else {
-				checkScapegoat(parent, curr, nodeHeight, unbalanced, nodeSize, scapegoat);
-			}
-		}
-
-		return res;*/
 	}
 
 	node* find_and_slice_child(node* parent, node* curr) {
