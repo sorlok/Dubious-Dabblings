@@ -323,7 +323,7 @@ private:
 			realSize--;
 
 			//Check if rebalancing is necessary
-			if (autoBalance && realSize>0) {
+			if (autoBalance && realSize>=minRebalanceSize) {
 				bool outOfBalance = false;
 				if (!rigidDelete) {
 					//Check if our size is less than half the max size (alpha modifies this slightly)
@@ -370,8 +370,8 @@ private:
 			node*& parentPtr = !parent?root:parent->left==curr?parent->left:parent->right;
 			parentPtr = curr;
 
-			//Balance
-			if (autoBalance && realSize>0) {
+			//Balance; check threshhold
+			if (autoBalance && realSize>=minRebalanceSize) {
 				//Dirty math hack:
 				size_t thresh = logA.log(realSize);
 
