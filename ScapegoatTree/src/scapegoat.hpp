@@ -472,6 +472,19 @@ private:
 	//What type of node are we inserting?
 	enum class InsertType { Left, Right, NonLeaf };
 
+	//Helper class for representing fractions
+	struct Fraction {
+		unsigned int numerator;
+		unsigned int denominator;
+		Fraction (unsigned int num=1, unsigned int denom=1) : numerator(num), denominator(denom)  {}
+
+		bool lessThan(const Fraction& f) {
+			bool res = numerator*f.denominator < denominator*f.numerator;
+			//std::cout <<"Comparing: " <<numerator <<"/" <<denominator <<" < " <<f.numerator <<"/" <<f.denominator <<" => " <<res <<"\n";
+			return res;
+		}
+	};
+
 	//Lightweight class for stacks of a fixed size.
 	// Builds on nall::linear_array, but adds bounds checking to help us catch flaws in our algorithm.
 	template <class T>
@@ -527,29 +540,21 @@ private:
 		bool lacksFather;
 	};
 
-	/*struct balanceargs {
-		int slotsInLastLevel;
-		int nodesForLastLevel;
-		double ratio;
-		simple_stack<node*> runningStack;
-		simple_stack<builditem> buildingStack;
-	};*/
-
 	//"Global" variables for use in this algorithm
 	InsertType iType;
 	int slotsInLastLevel;
 	int nodesForLastLevel;
-	double ratio;
+	Fraction ratio;
 	simple_stack<node*>* runningStack;
 	simple_stack<builditem>* buildingStack;
 
 
 	void tree_rebalance_fast(node* parent, node* from, size_t nodeSize) {
-		//Simple parameters. (Perhaps we can remove the double later?)
+		//Simple parameters.
 		iType = InsertType::Left;
 		slotsInLastLevel = power(2, log2.log(nodeSize));
 		nodesForLastLevel = nodeSize - slotsInLastLevel + 1;
-		ratio = ((double)nodesForLastLevel)/slotsInLastLevel;
+		ratio = Fraction(nodesForLastLevel, slotsInLastLevel);
 
 		//We use pointers to statically-allocated objects to test their destructors.
 		simple_stack<node*> runningStack_I(logA.log(nodeSize)+2);
@@ -601,8 +606,8 @@ private:
 		if (iType != InsertType::NonLeaf) {
 			//Inserting a leaf node
 			slotsInLastLevel--;
-			double newRatio = ((double)nodesForLastLevel)/slotsInLastLevel;  //Double used here.
-			if (newRatio < ratio) {
+			Fraction newRatio(nodesForLastLevel, slotsInLastLevel);
+			if (newRatio.lessThan(ratio)) {
 				return skipALeaf(nextNode, iType);
 			} else {
 				nodesForLastLevel--;
