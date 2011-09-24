@@ -473,55 +473,56 @@ private:
 	enum class InsertType { Left, Right, NonLeaf };
 
 	//Lightweight class for stacks of a fixed size.
-		template <class T>
-		struct simple_stack {
-			simple_stack(size_t size) : sp(0), maxsz(size) {
-				entries = new T[size];
+	// Builds on nall::linear_array, but adds bounds checking to help us catch flaws in our algorithm.
+	template <class T>
+	struct simple_stack {
+		simple_stack(size_t size) : maxsz(size) {
+			entries.reserve(size);
+		}
+		~simple_stack() {
+			if (entries.size()!=0) {
+				std::cout <<"ERROR: Stack deleted with extra entries\n"; //TEMP
 			}
-			~simple_stack() {
-				if (sp!=0) {
-					std::cout <<"ERROR: Stack deleted with extra entries\n"; //TEMP
-				}
-				delete [] entries;
-			}
+		}
 
-			void push(const T& val) {
-				if (sp==maxsz) {
-					std::cout <<"ERROR: Stack overflow\n";  //TEMP
-					throw 1;
-				}
-				entries[sp++] = val;
+		void push(const T& val) {
+			if (entries.size()==maxsz) {
+				std::cout <<"ERROR: Stack overflow\n";  //TEMP
+				throw 1;
 			}
+			entries.append(val);
+		}
 
-			T pop() {
-				if (sp==0) {
-					std::cout <<"ERROR: Stack underflow\n"; //TEMP
-					throw 1;
-				}
-				return entries[--sp];
+		T pop() {
+			if (entries.size()==0) {
+				std::cout <<"ERROR: Stack underflow\n"; //TEMP
+				throw 1;
 			}
+			T res = entries[entries.size()-1];
+			entries.resize(entries.size()-1);
+			return res;
+		}
 
-			T& top() {
-				if (sp==0) {
-					std::cout <<"ERROR: Stack is empty\n"; //TEMP
-					throw 1;
-				}
-				return entries[sp-1];
+		T& top() {
+			if (entries.size()==0) {
+				std::cout <<"ERROR: Stack is empty\n"; //TEMP
+				throw 1;
 			}
+			return entries[entries.size()-1];
+		}
 
-			const T& second() {
-				if (sp<=1) {
-					std::cout <<"ERROR: Stack has <=1 element\n"; //TEMP
-					throw 1;
-				}
-				return entries[sp-2];
+		const T& second() {
+			if (entries.size()<=1) {
+				std::cout <<"ERROR: Stack has <=1 element\n"; //TEMP
+				throw 1;
 			}
+			return entries[entries.size()-2];
+		}
 
-		private:
-			T* entries;
-			size_t sp;
-			size_t maxsz;
-		};
+	private:
+		nall::linear_vector<T> entries;
+		size_t maxsz;
+	};
 
 	struct builditem {
 		node* currNode;
@@ -550,10 +551,6 @@ private:
 		};
 		args.nodesForLastLevel = nodeSize - args.slotsInLastLevel + 1;
 		args.ratio = ((double)args.nodesForLastLevel)/args.slotsInLastLevel;
-
-		//Stack sizes are bound as follows
-		simple_stack<node*> runningStack();
-		simple_stack<node*> buildingStack();
 
 		//Begin!
 		args.runningStack.push(from);
