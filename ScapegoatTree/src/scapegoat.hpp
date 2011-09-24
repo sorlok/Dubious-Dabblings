@@ -550,6 +550,8 @@ private:
 
 
 	void tree_rebalance_fast(node* parent, node* from, size_t nodeSize) {
+		std::cout <<"\nRebalancing at node: " <<from->key <<" with size: " <<nodeSize <<"\n";
+
 		//Simple parameters.
 		iType = InsertType::Left;
 		slotsInLastLevel = power(2, log2.log(nodeSize));
