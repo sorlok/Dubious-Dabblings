@@ -220,11 +220,16 @@ private:
 		}
 
 		//Pick "fast" or "simple" depending on the flag set.
+		node* res;
 		if (useFastRebalancing) {
-			tree_rebalance_fast(parent, from, nodeSize);
+			res = tree_rebalance_fast(from, nodeSize);
 		} else {
-			tree_rebalance_simple(parent, from, nodeSize);
+			res = tree_rebalance_simple(from, nodeSize);
 		}
+
+		//Reset the parent pointer
+		node*& sectionStart = !parent?root:parent->left==from?parent->left:parent->right;
+		sectionStart = res;
 	}
 
 
@@ -261,6 +266,8 @@ private:
 			foundScapegoat = (curr==root);
 			if (!foundScapegoat) {
 				foundScapegoat = (ancestorID > logA.log(nodeSize));
+			} else {
+				std::cout <<"root reached; testing: " <<(ancestorID > logA.log(nodeSize)) <<"\n";
 			}
 
 			//Step 3: Rebalance if this is the scapegoat
@@ -378,13 +385,11 @@ private:
 			node*& parentPtr = !parent?root:key<parent->key?parent->left:parent->right;
 			parentPtr = curr;
 
-			//Balance; check threshhold
+			//Balance; check threshhold. Note that nodeHeight should _not_ be incremented here.
 			if (autoBalance && realSize>=minRebalanceSize) {
 				//From Rivest's paper: We know the tree is not height-balanced if:
 				size_t thresh = logA.log(realSize);
-				if (nodeHeight>thresh) { //Note: Height was 1 less than it should be.
-					std::cout <<"Real size: " <<realSize <<" threshold : " <<thresh <<" node height: " <<nodeHeight <<" triggered rebalance.\n";
-
+				if (nodeHeight>thresh) {
 					//NOTE: This will rebalance the tree; do NOTHING except return after this.
 					findAndBalanceScapegoat(parentStack, curr, 1, 0);
 				}
@@ -429,14 +434,15 @@ private:
 	//"Simple" tree rebalancer and related functions
 	//////////////////////////////////////////////////////
 
-	void tree_rebalance_simple(node* parent, node* from, size_t nodeSize) {
+	node* tree_rebalance_simple(node* from, size_t nodeSize) {
 		node temp(0);
 		node* flatRoot = flatten(from, &temp);
 		buildTree(nodeSize, flatRoot);
 
 		//The only thing left to do is update the parent.
-		node*& sectionStart = !parent?root:parent->left==from?parent->left:parent->right;
-		sectionStart = temp.left;
+		//node*& sectionStart = !parent?root:parent->left==from?parent->left:parent->right;
+		//sectionStart = temp.left;
+		return temp.left;
 	}
 
 	node* flatten(node* start, node* store) {
@@ -548,7 +554,7 @@ private:
 	simple_stack<builditem>* buildingStack;
 
 
-	void tree_rebalance_fast(node* parent, node* from, size_t nodeSize) {
+	node* tree_rebalance_fast(node* from, size_t nodeSize) {
 		std::cout <<"\nRebalancing at node: " <<from->key <<" with size: " <<nodeSize <<"\n";
 
 		//Simple parameters.
@@ -570,12 +576,15 @@ private:
 		}
 
 		//The only thing left to do is update the parent.
-		node*& sectionStart = !parent?root:parent->left==from?parent->left:parent->right;
-		sectionStart = buildingStack->pop().currNode;
+		//node*& sectionStart = !parent?root:parent->left==from?parent->left:parent->right;
+		//sectionStart = buildingStack->pop().currNode;
+		node* res = buildingStack->pop().currNode;
 
 		//Shouldn't matter.
 		runningStack = nullptr;
 		buildingStack = nullptr;
+
+		return res;
 	}
 
 	node* getNextNode() {
