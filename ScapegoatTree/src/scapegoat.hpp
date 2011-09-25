@@ -18,7 +18,6 @@
 
 //
 //TODO LIST:
-//           2. Use the "better" scapegoat selection discussed by Rivest.
 //           3. Check Rivest's "fast" tree sort to see if we introduced a rounding error. Re-enable it if it'll work.
 //
 
@@ -381,11 +380,11 @@ private:
 
 			//Balance; check threshhold
 			if (autoBalance && realSize>=minRebalanceSize) {
-				//Dirty math hack:
-				size_t thresh = logA.log(realSize);
-
 				//From Rivest's paper: We know the tree is not height-balanced if:
-				if (++nodeHeight>thresh) {
+				size_t thresh = logA.log(realSize);
+				if (nodeHeight>thresh) { //Note: Height was 1 less than it should be.
+					std::cout <<"Real size: " <<realSize <<" threshold : " <<thresh <<" node height: " <<nodeHeight <<" triggered rebalance.\n";
+
 					//NOTE: This will rebalance the tree; do NOTHING except return after this.
 					findAndBalanceScapegoat(parentStack, curr, 1, 0);
 				}
