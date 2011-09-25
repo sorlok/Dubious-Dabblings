@@ -120,9 +120,9 @@ public:
 	//Temporary: This will become the default as soon as it's tested. At that point I may keep
 	//           the "safe" rebalancing, or I may remove it (the paper's pretty solid, it would
 	//           only be my implementation that's in question.)
-	void setUseFastRebalancing(bool value) {
+	/*void setUseFastRebalancing(bool value) {
 		useFastRebalancing = value;
-	}
+	}*/
 
 
 	//The "rigid delete" flag allows fine-tuning deletes. When a delete is performed, the
@@ -222,7 +222,7 @@ private:
 		//Pick "fast" or "simple" depending on the flag set.
 		node* res;
 		if (useFastRebalancing) {
-			res = tree_rebalance_fast(from, nodeSize);
+			//res = tree_rebalance_fast(from, nodeSize);
 		} else {
 			res = tree_rebalance_simple(from, nodeSize);
 		}
@@ -267,7 +267,7 @@ private:
 			if (!foundScapegoat) {
 				foundScapegoat = (ancestorID > logA.log(nodeSize));
 			} else {
-				std::cout <<"root reached; testing: " <<(ancestorID > logA.log(nodeSize)) <<"\n";
+				//std::cout <<"root reached; testing: " <<(ancestorID > logA.log(nodeSize)) <<"\n";
 			}
 
 			//Step 3: Rebalance if this is the scapegoat
@@ -475,7 +475,7 @@ private:
 	//////////////////////////////////////////////////////
 
 	//What type of node are we inserting?
-	enum class InsertType { Left, Right, NonLeaf };
+	/*enum class InsertType { Left, Right, NonLeaf };
 
 	//Helper class for representing fractions
 	struct Fraction {
@@ -613,6 +613,7 @@ private:
 
 
 	InsertType addNewNode(node* nextNode, InsertType iType) {
+		std::cout <<"Add new node\n";
 		if (iType != InsertType::NonLeaf) {
 			//Inserting a leaf node
 			slotsInLastLevel--;
@@ -629,6 +630,7 @@ private:
 	}
 
 	InsertType skipALeaf(node* nextNode, InsertType iType) {
+		std::cout <<"  Skip a leaf\n";
 		if (iType == InsertType::Left) {
 			//Skipping a left leaf
 			nextNode->left = nullptr;
@@ -657,6 +659,7 @@ private:
 	}
 
 	InsertType addALeaf(node* nextNode, InsertType iType) {
+		std::cout <<"  Add a leaf\n";
 		nextNode->right = nullptr;
 		nextNode->left = nullptr;
 		if (iType==InsertType::Left) {
@@ -673,6 +676,7 @@ private:
 	}
 
 	InsertType addNonLeaf(node* nextNode) {
+		std::cout <<"  Add non-leaf\n";
 		nextNode->left = buildingStack->top().currNode;
 		unsigned int nextNodeHeight = buildingStack->top().height + 1;
 		buildingStack->pop();
@@ -692,7 +696,7 @@ private:
 		} else {
 			return InsertType::Right;
 		}
-	}
+	}*/
 
 };
 
