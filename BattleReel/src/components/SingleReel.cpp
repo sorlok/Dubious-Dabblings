@@ -79,7 +79,8 @@ AnchorLayout& SingleReel::getLayout()
 		layoutDone = true;
 
 		layout.setMargin(5);
-		layout.setSkipGeomUpdates(true);
+
+		//ScopedLayoutLock layoutlock(&layout);
 
 		//Attach right-to-left, for no reason in particular
 		phoenix::Sizable* last = nullptr;
@@ -99,9 +100,6 @@ AnchorLayout& SingleReel::getLayout()
 		layout.append(digit1, {Centered, {digit2}}, {{}, {digit2, shim}});
 		layout.append(digit2, {{}, {*last, -5}}, {Centered, {*last}});
 		layout.append(digit3, {Centered, {digit2}}, {{digit2, -shim}});
-
-
-		layout.setSkipGeomUpdates(false);
 	}
 
 	return layout;

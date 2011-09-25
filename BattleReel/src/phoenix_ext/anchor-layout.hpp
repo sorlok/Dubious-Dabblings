@@ -6,6 +6,13 @@
 #include <phoenix.hpp>
 #include "scapegoat.hpp"
 
+
+//TEMP: Remove this later.
+#ifdef ANCHOR_LAYOUT_ERRORS_ON
+#include <iostream>
+#endif
+
+
 class AnchorPoint {
 private:
 	//Type of AnchorPoint
@@ -142,8 +149,7 @@ public:
 	virtual phoenix::Geometry minimumGeometry();
 	virtual void setGeometry(const phoenix::Geometry &geometry);
 
-	//Mildly useful
-	void setSkipGeomUpdates(bool val) { state.skipGeomUpdate = val; }
+	//For clarity.
 	void setMargin(size_t margin) { state.margin = margin; }
 
 	//Constructor/destructor
@@ -151,6 +157,10 @@ public:
 	virtual ~AnchorLayout();
 
 private:
+	//For "geometry locking"
+	void setSkipGeomUpdates(bool val) { state.skipGeomUpdate = val; }
+	friend class ScopedLayoutLock;
+
 	struct Children {
 		Sizable *sizable;
 		Axis horiz;
@@ -183,5 +193,47 @@ private:
 		size_t margin;
 		phoenix::Geometry lastKnownSize;
 		bool skipGeomUpdate;
+		bool skippedAnUpdate;
 	} state;
 };
+
+
+
+//Used to help manage layout changes
+class ScopedLayoutLock {
+public:
+	ScopedLayoutLock(AnchorLayout* layout) {
+		append(layout);
+	}
+
+	~ScopedLayoutLock() {
+		foreach(layout, layouts) {
+			std::cout <<"LAYOUT HAS BEEN UNLOCKED\n";
+
+			layout->setSkipGeomUpdates(false);
+			if (layout->state.skippedAnUpdate) {
+				layout->setGeometry(layout->state.lastKnownSize);
+			}
+		}
+	}
+
+	void append(AnchorLayout* layout) {
+		if (layout->state.skipGeomUpdate) {
+			return;
+		}
+
+		layout->state.skippedAnUpdate = false;
+		layout->setSkipGeomUpdates(true);
+		layouts.append(layout);
+
+		std::cout <<"LAYOUT IS LOCKED\n";
+	}
+
+private:
+	//Non-copyable
+	ScopedLayoutLock (const ScopedLayoutLock &)  = delete;
+	ScopedLayoutLock& operator= (const ScopedLayoutLock &)  = delete;
+
+	nall::linear_vector<AnchorLayout*> layouts;
+};
+

@@ -36,6 +36,7 @@ AnchorLayout::AnchorLayout() : children(0.65)
 	state.visible = true;
 	state.margin = 0;
 	state.skipGeomUpdate = false;
+	state.skippedAnUpdate = false;
 }
 
 
@@ -67,12 +68,15 @@ void AnchorLayout::append(phoenix::Sizable &sizable, const Axis& horizontal, con
 {
 	typedef AnchorPoint::Type Type;
 
+	std::cout <<"Append\n";
+	ScopedLayoutLock lock(this);
+
 	//If this child already exists, update its attachment data
 	Children res;
 	if (children.find(&sizable, res)) {
 		res.horiz = horizontal;
 		res.vert = vertical;
-		setGeometry(state.lastKnownSize);
+		setGeometry(state.lastKnownSize); //This might be better as "synchronize"
 		return;
 	}
 	//Else, add a new item
@@ -83,6 +87,9 @@ void AnchorLayout::append(phoenix::Sizable &sizable, const Axis& horizontal, con
 
 void AnchorLayout::remove(Sizable& sizable)
 {
+	//TEMP: Just a bit of a hack to handle deletion
+	setSkipGeomUpdates(true);
+
 	//Rmove this item if it exists.
 	Children res;
 	if (children.find(&sizable, res)) {
@@ -103,6 +110,9 @@ void AnchorLayout::synchHack(Sizable* sizable)
 }
 void AnchorLayout::synchronize()
 {
+	std::cout <<"Synchronize\n";
+	ScopedLayoutLock lock(this);
+
 	//Ensure all sizables have been appended to the layout.
 	children.for_each([this](Sizable* key, Children& child) {
 		synchHack(key);
@@ -161,14 +171,17 @@ Geometry AnchorLayout::minimumGeometry()
 
 void AnchorLayout::setGeometry(const Geometry& containerGeometry)
 {
+	//Save containerGeometry
+	state.lastKnownSize = containerGeometry;
+
 	//When closing the app (or if the user tells us to) we don't need to redo any internal geometry
 	// calculations. Be careful not to leave this flag on before going back to the message loop.
 	if (state.skipGeomUpdate) {
+		state.skippedAnUpdate = true;
 		return;
 	}
 
-	//Save containerGeometry
-	state.lastKnownSize = containerGeometry;
+	std::cout <<"setGeometry()\n";
 
 	//First, reset all children.
 	//foreach(child, children) {

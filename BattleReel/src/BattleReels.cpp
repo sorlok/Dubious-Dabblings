@@ -71,6 +71,7 @@ struct Application : Window {
 		lbl.setText("Sorry, not a chance.");
 		ok.setText("Ok");
 
+		//ScopedLayoutLock lock(&layout);
 		layout.setMargin(5);
 		layout.append(lbl, {Centered, {0.5}}, {Centered, {0.5, -10}});
 		layout.append(ok, {Centered, {0.5}}, {{lbl, 5}});
@@ -175,6 +176,12 @@ struct Application : Window {
     }
 
     //Layout
+    {
+    //ScopedLayoutLock lock(&layout);
+    for (size_t i=0; i<numTestReels; i++) {
+    	//lock.append(&testReels[i].getLayout());
+    }
+
     layout.setMargin(10);
     layout.append(loadFile, {{fileName, 10}}, {{0.0}});
     layout.append(fileName, {{0.0}, {fileName, 150, Anchor::Left}}, {Centered, {loadFile, 1}});
@@ -182,7 +189,7 @@ struct Application : Window {
     layout.append(quitButton, {{}, {1.0}}, {{loadFile, 0, Anchor::Top}});
     Layout* lastLayout = nullptr;
     for (size_t i=0; i<numTestReels; i++) {
-    	Layout& reel = testReels[i].getLayout();
+    	AnchorLayout& reel = testReels[i].getLayout();
     	int suggWidth = testReels[i].getSuggestedMinimumSize().width;
     	int suggHeight = testReels[i].getSuggestedMinimumSize().height;
     	if (!lastLayout) {
@@ -207,7 +214,10 @@ struct Application : Window {
     }
 
     //Master layout
-    append(layout);
+    {
+    	ScopedLayoutLock lock(&layout);
+    	append(layout);
+    }
 
 
     pgDown.onTick = [&page, &numTestReels, this] {
@@ -252,14 +262,18 @@ struct Application : Window {
     };
 
     onClose = quitButton.onTick = [&testReels, &layout, &numTestReels] {
-    	layout.setSkipGeomUpdates(true);
+    	//ScopedLayoutLock lock(&layout);
+    	/*layout.setSkipGeomUpdates(true);
         for (size_t i=0; i<numTestReels; i++) {
         	testReels[i].getLayout().setSkipGeomUpdates(true);
-        }
+        }*/
     	OS::quit();
     };
+    } //End of layout lock
 
+    std::cout <<" Set visible\n";
     setVisible();
+    std::cout <<" Ready\n";
   }
 } application;
 
@@ -267,7 +281,7 @@ struct Application : Window {
 int main(int argc, char* argv[])
 {
   application.create();
-  return 0;
+  std::cout <<" Create done\n";
   OS::main();
   return 0;
 }

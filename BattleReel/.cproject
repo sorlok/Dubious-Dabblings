@@ -32,6 +32,7 @@
 </option>
 <option id="gnu.cpp.compiler.option.preprocessor.def.1224523284" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="PHOENIX_GTK"/>
+<listOptionValue builtIn="false" value="ANCHOR_LAYOUT_ERRORS_ON"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.920854636" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 </tool>
@@ -48,7 +49,7 @@
 <option id="gnu.cpp.link.option.libs.1513816810" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="phoenix_ext_gtk"/>
 </option>
-<option id="gnu.cpp.link.option.flags.1262072643" superClass="gnu.cpp.link.option.flags" value="`pkg-config --libs gtk+-2.0`" valueType="string"/>
+<option id="gnu.cpp.link.option.flags.1262072643" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="`pkg-config --libs gtk+-2.0`" valueType="string"/>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1444892632" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 <additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -509,6 +510,7 @@
 </option>
 <option id="gnu.cpp.compiler.option.preprocessor.def.613443002" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="PHOENIX_GTK"/>
+<listOptionValue builtIn="false" value="ANCHOR_LAYOUT_ERRORS_ON"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1586630985" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 </tool>
@@ -525,7 +527,7 @@
 <option id="gnu.cpp.link.option.libs.820806713" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="phoenix_ext_gtk"/>
 </option>
-<option id="gnu.cpp.link.option.flags.644470305" superClass="gnu.cpp.link.option.flags" value="`pkg-config --libs gtk+-2.0`" valueType="string"/>
+<option id="gnu.cpp.link.option.flags.644470305" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="`pkg-config --libs gtk+-2.0`" valueType="string"/>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1714323930" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 <additionalInput kind="additionalinput" paths="$(LIBS)"/>
