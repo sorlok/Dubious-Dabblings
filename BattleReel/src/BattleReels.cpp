@@ -267,6 +267,7 @@ struct Application : Window {
 int main(int argc, char* argv[])
 {
   application.create();
+  //return 0;
   OS::main();
   return 0;
 }

@@ -175,7 +175,9 @@ public:
 	}
 
 	void for_each(nall::function<void (const Key& key, Data& data)> action) {
-		traverse(root, action);
+		if (root) {
+			traverse(root, action);
+		}
 	}
 
 	size_t size() {
