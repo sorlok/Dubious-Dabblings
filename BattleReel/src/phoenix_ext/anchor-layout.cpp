@@ -29,7 +29,7 @@ bool FloatEquals(float f1, float f2)  {
 }*/
 
 
-AnchorLayout::AnchorLayout()
+AnchorLayout::AnchorLayout() : children(0.65)
 {
 	//Defaults
 	state.enabled = true;
