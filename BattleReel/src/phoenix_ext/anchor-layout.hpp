@@ -4,6 +4,7 @@
 #pragma once
 
 #include <phoenix.hpp>
+#include "scapegoat.hpp"
 
 class AnchorPoint {
 private:
@@ -130,6 +131,9 @@ public:
 	void remove(phoenix::Sizable& sizable);
 	void synchronize();
 
+	//Workaround
+	void synchHack(Sizable* sizable);
+
 	//Required functionality: Sizable
 	virtual void setEnabled(bool enabled = true);
 	virtual void setVisible(bool visible = true);
@@ -152,7 +156,7 @@ private:
 		Axis horiz;
 		Axis vert;
 	};
-	nall::linear_vector<Children> children;
+	lightweight_map<phoenix::Sizable*, Children> children;
 
 	//Global layout data doesn't change based on each component.
 	struct LayoutData {
@@ -160,10 +164,8 @@ private:
 		unsigned int containerMax;
 		size_t containerMargin;
 		bool isHoriz;
-		nall::linear_vector<Children>& children;
+		lightweight_map<phoenix::Sizable*, Children>& children;
 	};
-
-	static Children* FindChild(nall::linear_vector<Children>& children, const Sizable& find);
 
 	static void ComputeComponent(Axis& axis, int& resOrigin, unsigned int& resMagnitude, LayoutData args, phoenix::Sizable& comp);
 	static int Get(Axis& axis, LayoutData& args, bool ltr, phoenix::Sizable& comp);

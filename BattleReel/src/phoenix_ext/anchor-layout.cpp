@@ -44,24 +44,16 @@ AnchorLayout::~AnchorLayout()
 	//Remove all children on exit
 	setSkipGeomUpdates(true);
 	while(children.size()>0) {
-		remove(*children[0].sizable);
+		remove(*children.rootKey());
+		//remove(*children[0].sizable);
 	}
 }
 
-
-AnchorLayout::Children* AnchorLayout::FindChild(nall::linear_vector<Children>& children, const Sizable& find)
-{
-	foreach(child, children) {
-		if(child.sizable == &find) {
-			return &child;
-		}
-	}
-	return nullptr;
-}
 
 
 void AnchorLayout::append(Sizable &sizable) {
-	if (FindChild(children, sizable)) {
+	Children res;
+	if (children.find(&sizable, res)) {
 		return;
 	}
 	Layout::append(sizable);
@@ -76,15 +68,15 @@ void AnchorLayout::append(phoenix::Sizable &sizable, const Axis& horizontal, con
 	typedef AnchorPoint::Type Type;
 
 	//If this child already exists, update its attachment data
-	Children* res = FindChild(children, sizable);
-	if (res) {
-		res->horiz = horizontal;
-		res->vert = vertical;
+	Children res;
+	if (children.find(&sizable, res)) {
+		res.horiz = horizontal;
+		res.vert = vertical;
 		setGeometry(state.lastKnownSize);
 		return;
 	}
 	//Else, add a new item
-	children.append({ &sizable, horizontal, vertical });
+	children.insert(&sizable, { &sizable, horizontal, vertical });
 	synchronize();
 }
 
@@ -92,39 +84,53 @@ void AnchorLayout::append(phoenix::Sizable &sizable, const Axis& horizontal, con
 void AnchorLayout::remove(Sizable& sizable)
 {
 	//Rmove this item if it exists.
-	for(unsigned n=0; n<children.size(); n++) {
-		if(children[n].sizable == &sizable) {
-			children.remove(n);
+	Children res;
+	if (children.find(&sizable, res)) {
+	//for(unsigned n=0; n<children.size(); n++) {
+	//	if(children[n].sizable == &sizable) {
+			children.remove(&sizable);
 			Layout::remove(sizable);
-			break;
-		}
+	//		break;
+	//	}
 	}
 }
 
 
+void AnchorLayout::synchHack(Sizable* sizable)
+{
+	//This is required due to a bug in const-casting.
+	Layout::append(*sizable);
+}
 void AnchorLayout::synchronize()
 {
 	//Ensure all sizables have been appended to the layout.
-	foreach(child, children) {
+	children.for_each([this](Sizable* key, Children& child) {
+		synchHack(key);
+	});
+	/*foreach(child, children) {
 		Layout::append(*child.sizable);
-	}
+	}*/
 }
 
 
 void AnchorLayout::setEnabled(bool enabled)
 {
 	state.enabled = enabled;
-	foreach(child, children) {
+	children.for_each([this](Sizable* key, Children& child) {
+		child.sizable->setEnabled(dynamic_cast<Widget*>(child.sizable) ? child.sizable->enabled() : state.enabled);
+	});
+/*	foreach(child, children) {
 		child.sizable->setEnabled(dynamic_cast<Widget*>(child.sizable) ? child.sizable->enabled() : enabled);
-	}
+	}*/
 }
 
 void AnchorLayout::setVisible(bool visible)
 {
 	state.visible = visible;
-	foreach(child, children) {
-		child.sizable->setVisible(dynamic_cast<Widget*>(child.sizable) ? child.sizable->visible() : visible);
-	}
+	children.for_each([this](Sizable* key, Children& child) {
+	//foreach(child, children) {
+		child.sizable->setVisible(dynamic_cast<Widget*>(child.sizable) ? child.sizable->visible() : state.visible);
+	});
 }
 
 bool AnchorLayout::enabled()
@@ -165,19 +171,21 @@ void AnchorLayout::setGeometry(const Geometry& containerGeometry)
 	state.lastKnownSize = containerGeometry;
 
 	//First, reset all children.
-	foreach(child, children) {
+	//foreach(child, children) {
+	children.for_each([this](Sizable* key, Children& child) {
 		child.horiz.reset();
 		child.vert.reset();
-	}
+	});
 
 	//Apply alyout rules for each child  individually.
-	foreach(child, children) {
+	children.for_each([this, &containerGeometry](Sizable* key, Children& child) {
+	//foreach(child, children) {
 		//We compute each component in pairs..
 		Geometry res;
 		AnchorLayout::ComputeComponent(child.horiz, res.x, res.width, {containerGeometry.x, containerGeometry.width, state.margin, true, children}, *child.sizable);
 		AnchorLayout::ComputeComponent(child.vert, res.y, res.height, {containerGeometry.y, containerGeometry.height, state.margin, false, children}, *child.sizable);
 		child.sizable->setGeometry(res);
-	}
+	});
 
 }
 
@@ -311,10 +319,12 @@ int AnchorLayout::GetAttached(Axis& axis, LayoutData& args, bool ltr, phoenix::S
 
 	//First, retrieve the components
 	AnchorPoint& item = ltr ? axis.least_ : axis.greatest_;
-	Children* other = AnchorLayout::FindChild(args.children, *item.refItem);
+
+	//Children* other = AnchorLayout::FindChild(args.children, *item.refItem);
 
 	//Did we retrieve anything? (this should also check for a null item.refItem)
-	if (!other) {
+	Children other;
+	if (!args.children.find(item.refItem, other)) {
 		//TODO: We _could_ probably allow attaching to components in a fixed/horizontal/vertical layout
 		//      manager. But I think the complexity won't gain us much, and I'd rather get this working first.
 #ifdef ANCHOR_LAYOUT_ERRORS_ON
@@ -334,19 +344,19 @@ int AnchorLayout::GetAttached(Axis& axis, LayoutData& args, bool ltr, phoenix::S
 	}
 
 	//Compute the result, based on either the first or second point, or both.
-	Axis & otherAxis = args.isHoriz ? other->horiz : other->vert;
+	Axis & otherAxis = args.isHoriz ? other.horiz : other.vert;
 	if (anch==Anchor::Center) {
 		//The center layout requires both points to be calculatable. Otherwise, it't not very different.
-		int baseVal = AnchorLayout::Get(otherAxis, args, true, *other->sizable);
-		baseVal = (AnchorLayout::Get(otherAxis, args, false, *other->sizable)-baseVal)/2 + baseVal;
+		int baseVal = AnchorLayout::Get(otherAxis, args, true, *other.sizable);
+		baseVal = (AnchorLayout::Get(otherAxis, args, false, *other.sizable)-baseVal)/2 + baseVal;
 		return baseVal + item.offset;
 	} else {
 		//For left/right layouts, there's only one point to check.
 		int baseVal = 0;
 		if (anch==Anchor::Left) {
-			baseVal = AnchorLayout::Get(otherAxis, args, true, *other->sizable);
+			baseVal = AnchorLayout::Get(otherAxis, args, true, *other.sizable);
 		} else if (anch==Anchor::Right) {
-			baseVal = AnchorLayout::Get(otherAxis, args, false, *other->sizable);
+			baseVal = AnchorLayout::Get(otherAxis, args, false, *other.sizable);
 		} else {
 			//Shouldn't fail, but just to be safe...
 #ifdef ANCHOR_LAYOUT_ERRORS_ON
