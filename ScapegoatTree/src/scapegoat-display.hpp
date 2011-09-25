@@ -1,12 +1,13 @@
 #pragma once
 
 //Do not include this file directly.
-
+//Instead, define SCAPEGOAT_TREE_ALLOW_OUTPUT and include scapegoat.hpp
+//This function pulls in standard library functions and provides output capability.
+//It is possible to do this using nall's output routines, but I prefer to use cout and
+//  just make this functionality optional.
 #include <fstream>
 #include <string>
 #include <vector>
-
-//#include "scapegoat.hpp"
 
 
 //NOTE: All internal functions broken.

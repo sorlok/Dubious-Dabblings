@@ -1,9 +1,9 @@
+#include "scapegoat.hpp"
+
 #include <iostream>
 #include <fstream>
 #include <list>
 
-#include "scapegoat.hpp"
-//#include "scapegoat-display.hpp"
 #include "fastlog.hpp"
 
 #include <cstdio>

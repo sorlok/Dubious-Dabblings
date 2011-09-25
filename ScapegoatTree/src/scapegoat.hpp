@@ -1,26 +1,14 @@
 #pragma once
 
-//Needed for log2, log10
-//cmath links by default, so I don't think this is an onerous dependency.
-//#include <cmath>
-
+//Required functionality from the "nall" library.
+#include <nall/platform.hpp>
 #include <nall/vector.hpp>
-
-//Needed for "traverse"; will probably replace with nall/function later.
-#include <functional>
+#include <nall/function.hpp>
 
 //Faster logarithms. Avoids floating-point math altogether if the
 //  base is an integer; otherwise, simplifies the log calculation down to
 //  "floor" and "ceiling".
 #include "fastlog.hpp"
-
-
-
-//
-//TODO LIST:
-//           3. Check Rivest's "fast" tree sort to see if we introduced a rounding error. Re-enable it if it'll work.
-//
-
 
 
 #ifdef SCAPEGOAT_TREE_ALLOW_OUTPUT
@@ -100,8 +88,6 @@ public:
 	//Typical alpha values between 0.55 and 0.65 exhibit good performance. We choose 0.55 as
 	// the default alpha value on the assumption that the user will typically perform more searches
 	// than modifications.
-	//NOTE: This must be done in the constructor now for "fastlog" to work.
-	//TODO: We can simply clear the "fastlog" array; it's not a disaster. Re-enable this later.
 	void setAlpha(double value) {
 		//Reset log lookup
 		logA.setBase(1.0/value);
@@ -188,7 +174,7 @@ public:
 		remove_r(key, nullptr, root);
 	}
 
-	void for_each(std::function<void (const Key& key, Data& data)> action) {
+	void for_each(nall::function<void (const Key& key, Data& data)> action) {
 		traverse(root, action);
 	}
 
@@ -197,7 +183,7 @@ public:
 	}
 
 private:
-	void traverse(node* curr, std::function<void (const Key& key, Data& data)> action) {
+	void traverse(node* curr, nall::function<void (const Key& key, Data& data)> action) {
 		//Perform for the current node
 		action(curr->key, curr->data);
 
@@ -266,8 +252,6 @@ private:
 			foundScapegoat = (curr==root);
 			if (!foundScapegoat) {
 				foundScapegoat = (ancestorID > logA.log(nodeSize));
-			} else {
-				//std::cout <<"root reached; testing: " <<(ancestorID > logA.log(nodeSize)) <<"\n";
 			}
 
 			//Step 3: Rebalance if this is the scapegoat
@@ -438,10 +422,6 @@ private:
 		node temp(0);
 		node* flatRoot = flatten(from, &temp);
 		buildTree(nodeSize, flatRoot);
-
-		//The only thing left to do is update the parent.
-		//node*& sectionStart = !parent?root:parent->left==from?parent->left:parent->right;
-		//sectionStart = temp.left;
 		return temp.left;
 	}
 
@@ -467,236 +447,6 @@ private:
 		s->left = r;
 		return s;
 	}
-
-
-
-	//////////////////////////////////////////////////////
-	//"Fast" tree rebalancer and related functions
-	//////////////////////////////////////////////////////
-
-	//What type of node are we inserting?
-	/*enum class InsertType { Left, Right, NonLeaf };
-
-	//Helper class for representing fractions
-	struct Fraction {
-		unsigned int numerator;
-		unsigned int denominator;
-		Fraction (unsigned int num=1, unsigned int denom=1) : numerator(num), denominator(denom)  {}
-
-		bool lessThan(const Fraction& f) {
-			bool res = numerator*f.denominator < denominator*f.numerator;
-			//std::cout <<"Comparing: " <<numerator <<"/" <<denominator <<" < " <<f.numerator <<"/" <<f.denominator <<" => " <<res <<"\n";
-			return res;
-		}
-	};
-
-	//Lightweight class for stacks of a fixed size.
-	// Builds on nall::linear_array, but adds bounds checking to help us catch flaws in our algorithm.
-	template <class T>
-	struct simple_stack {
-		simple_stack(size_t size) : maxsz(size) {
-			entries.reserve(size);
-		}
-		~simple_stack() {
-			if (entries.size()>0) {
-				std::cout <<"ERROR: Stack deleted with extra entries\n"; //TEMP
-			}
-		}
-
-		void push(const T& val) {
-			if (entries.size()==maxsz) {
-				std::cout <<"ERROR: Stack overflow\n";  //TEMP
-				throw 1;
-			}
-			entries.append(val);
-		}
-
-		T pop() {
-			T res = top();
-			entries.resize(entries.size()-1);
-			return res;
-		}
-
-		T& top() {
-			if (entries.size()==0) {
-				std::cout <<"ERROR: Stack is empty\n"; //TEMP
-				throw 1;
-			}
-			return entries[entries.size()-1];
-		}
-
-		T& second() {
-			if (entries.size()<2) {
-				std::cout <<"ERROR: Second called; stack has " <<entries.size() <<" element(s)\n"; //TEMP
-				throw 1;
-			}
-			return entries[entries.size()-2];
-		}
-
-	private:
-		nall::linear_vector<T> entries;
-		size_t maxsz;
-	};
-
-	struct builditem {
-		node* currNode;
-		size_t height;
-		bool lacksRightSon;
-		bool lacksFather;
-	};
-
-	//"Global" variables for use in this algorithm
-	InsertType iType;
-	int slotsInLastLevel;
-	int nodesForLastLevel;
-	Fraction ratio;
-	simple_stack<node*>* runningStack;
-	simple_stack<builditem>* buildingStack;
-
-
-	node* tree_rebalance_fast(node* from, size_t nodeSize) {
-		std::cout <<"\nRebalancing at node: " <<from->key <<" with size: " <<nodeSize <<"\n";
-
-		//Simple parameters.
-		iType = InsertType::Left;
-		slotsInLastLevel = power(2, log2.log(nodeSize));
-		nodesForLastLevel = nodeSize - slotsInLastLevel + 1;
-		ratio = Fraction(nodesForLastLevel, slotsInLastLevel);
-
-		//We use pointers to statically-allocated objects to test their destructors.
-		simple_stack<node*> runningStack_I(logA.log(nodeSize)+2);
-		simple_stack<builditem> buildingStack_I(log2.log(nodeSize)+1);
-		runningStack = &runningStack_I;
-		buildingStack = &buildingStack_I;
-
-		//Begin!
-		runningStack->push(from);
-		while (nodeSize-- > 0) {
-			iType = addNewNode(getNextNode(), iType);
-		}
-
-		//The only thing left to do is update the parent.
-		//node*& sectionStart = !parent?root:parent->left==from?parent->left:parent->right;
-		//sectionStart = buildingStack->pop().currNode;
-		node* res = buildingStack->pop().currNode;
-
-		//Shouldn't matter.
-		runningStack = nullptr;
-		buildingStack = nullptr;
-
-		return res;
-	}
-
-	node* getNextNode() {
-		//Pick the next node to calculate (in-order). Determine its parent.
-		node* nextNode = runningStack->top();
-		node* fatherNode = nullptr;
-		while (nextNode->left) {
-			fatherNode = nextNode;
-			nextNode = nextNode->left;
-		}
-
-		//Slice this node from its parent node, unless it's at the top of the stack (then pop it)
-		if (nextNode == runningStack->top()) {
-			runningStack->pop();
-		} else {
-			fatherNode->left = nullptr;
-		}
-
-		//If there are right children, they will need to be processed later.
-		if (nextNode->right) {
-			runningStack->push(nextNode->right);
-		}
-
-		return nextNode;
-	}
-
-
-	InsertType addNewNode(node* nextNode, InsertType iType) {
-		std::cout <<"Add new node\n";
-		if (iType != InsertType::NonLeaf) {
-			//Inserting a leaf node
-			slotsInLastLevel--;
-			Fraction newRatio(nodesForLastLevel, slotsInLastLevel);
-			if (newRatio.lessThan(ratio)) {
-				return skipALeaf(nextNode, iType);
-			} else {
-				nodesForLastLevel--;
-				return addALeaf(nextNode, iType);
-			}
-		} else {
-			return addNonLeaf(nextNode);
-		}
-	}
-
-	InsertType skipALeaf(node* nextNode, InsertType iType) {
-		std::cout <<"  Skip a leaf\n";
-		if (iType == InsertType::Left) {
-			//Skipping a left leaf
-			nextNode->left = nullptr;
-			if (buildingStack->top().height==2) {
-				buildingStack->top().currNode->right = nextNode;
-				if (!buildingStack->top().lacksFather) {
-					buildingStack->pop();
-				} else {
-					buildingStack->top().lacksRightSon = false;
-				}
-				buildingStack->push({nextNode, 1, true, false});
-			} else {
-				buildingStack->push({nextNode, 1, true, true});
-			}
-			return InsertType::Right;
-		} else {
-			//Skipping a right leaf
-			buildingStack->top().currNode->right = nullptr;
-			if (!buildingStack->top().lacksFather) {
-				buildingStack->pop();
-			} else {
-				buildingStack->top().lacksRightSon = false;
-			}
-			return addNonLeaf(nextNode);
-		}
-	}
-
-	InsertType addALeaf(node* nextNode, InsertType iType) {
-		std::cout <<"  Add a leaf\n";
-		nextNode->right = nullptr;
-		nextNode->left = nullptr;
-		if (iType==InsertType::Left) {
-			buildingStack->push({nextNode, 0, false, true});
-		} else {
-			buildingStack->top().currNode->right = nextNode;
-			if (buildingStack->top().lacksFather) {
-				buildingStack->top().lacksRightSon = false;
-			} else {
-				buildingStack->pop();
-			}
-		}
-		return InsertType::NonLeaf;
-	}
-
-	InsertType addNonLeaf(node* nextNode) {
-		std::cout <<"  Add non-leaf\n";
-		nextNode->left = buildingStack->top().currNode;
-		unsigned int nextNodeHeight = buildingStack->top().height + 1;
-		buildingStack->pop();
-		if (buildingStack->second().height == nextNodeHeight+1) {
-			buildingStack->top().currNode->right = nextNode;
-			if (!buildingStack->top().lacksFather) {
-				buildingStack->pop();
-			} else {
-				buildingStack->top().lacksRightSon = false;
-			}
-			buildingStack->push({nextNode, nextNodeHeight, true, false});
-		} else {
-			buildingStack->push({nextNode, nextNodeHeight, true, true});
-		}
-		if (buildingStack->top().height > 1) {
-			return InsertType::Left;
-		} else {
-			return InsertType::Right;
-		}
-	}*/
 
 };
 
