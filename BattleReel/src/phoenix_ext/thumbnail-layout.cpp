@@ -93,7 +93,7 @@ void ThumbnailLayout::synchronize()
 	//Ensure all sizables have been appended to the layout.
 	state.skipGeomUpdate = true;
 	size_t i = 0;
-	children.traverse([&i, this](Sizable* key, Children& child){
+	children.for_each([&i, this](Sizable* key, Children& child){
 		if (i+1==children.size()) {
 			state.skipGeomUpdate = false;
 		}
@@ -106,7 +106,7 @@ void ThumbnailLayout::synchronize()
 void ThumbnailLayout::setEnabled(bool enabled)
 {
 	state.enabled = enabled;
-	children.traverse([&enabled](const Sizable* key, Children& child){
+	children.for_each([&enabled](const Sizable* key, Children& child){
 		child.sizable->setEnabled(dynamic_cast<Widget*>(child.sizable) ? child.sizable->enabled() : enabled);
 	});
 }
@@ -114,7 +114,7 @@ void ThumbnailLayout::setEnabled(bool enabled)
 void ThumbnailLayout::setVisible(bool visible)
 {
 	state.visible = visible;
-	children.traverse([&visible](const Sizable* key, Children& child){
+	children.for_each([&visible](const Sizable* key, Children& child){
 		child.sizable->setVisible(dynamic_cast<Widget*>(child.sizable) ? child.sizable->visible() : visible);
 	});
 }
@@ -158,7 +158,7 @@ void ThumbnailLayout::setGeometry(const Geometry& containerGeometry)
 
 	//First, save each child's minimum width, and get the maximum width/height of all children
 	Geometry referenceGeom = {0, 0, 0, 0};
-	children.traverse([&referenceGeom](const Sizable* key, Children& child){
+	children.for_each([&referenceGeom](const Sizable* key, Children& child){
 		child.width = child.sizable->minimumGeometry().width;
 		child.height = child.sizable->minimumGeometry().height;
 
@@ -171,7 +171,7 @@ void ThumbnailLayout::setGeometry(const Geometry& containerGeometry)
 	});
 
 	//Apply layout rules for each child  individually.
-	children.traverse([&referenceGeom, &containerGeometry](const Sizable* key, Children& child){
+	children.for_each([&referenceGeom, &containerGeometry](const Sizable* key, Children& child){
 		//Reset?
 		if (referenceGeom.x+referenceGeom.width > containerGeometry.width) {
 			referenceGeom.x = 0;
