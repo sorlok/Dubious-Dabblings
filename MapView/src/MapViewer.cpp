@@ -33,11 +33,51 @@ typedef AnchorPoint::Anchor Anchor;
 const AnchorPoint Centered = Axis::Centered();
 
 
+//Test class for use with Parrot
+class TestBase {
+public:
+	virtual int getValue() {
+		return 0;
+	}
+};
+
+
 struct Application : Window {
+  struct MsgBox : Window {
+	AnchorLayout layout;
+	Label lbl;
+	Button ok;
+
+	void create() {
+		setTitle("");
+		setGeometry({200, 200, 250, 75});
+
+		lbl.setText("");
+		ok.setText("Ok");
+
+		layout.setMargin(10);
+		layout.append(lbl, {Centered, {0.5}}, {Centered, {0.5, -10}});
+		layout.append(ok, {Centered, {0.5}}, {{lbl, 5}});
+
+		ok.onTick = [this] {
+			setVisible(false);
+		};
+
+		append(layout);
+	}
+
+	void show(const nall::string& title, const nall::string& text) {
+		setTitle(title);
+		lbl.setText(text);
+		setVisible(true);
+	}
+  } MsgBox;
+
   AnchorLayout layout;
 
   Label helloLabel;
-  Button okButton;
+  Button loadMapBtn;
+  Button testParrotBtn;
   Button quitButton;
   GameMap myMap;
 
@@ -74,11 +114,18 @@ struct Application : Window {
 	  myCanvas.update();
   }
 
+  void parrotTest() {
+	  TestBase t;
+	  int value = t.getValue();
+	  MsgBox.show("Test", {"Base(0), Override(1) returned: " , value});
+  }
+
 
   void initComponents() {
     ScopedLayoutLock lock(&layout);
     helloLabel.setText("Map Viewer");
-    okButton.setText("Load Map");
+    loadMapBtn.setText("Load Map");
+    testParrotBtn.setText("Test Parrot VM");
     quitButton.setText("Quit");
     hScroll.setEnabled(false);
     vScroll.setEnabled(false);
@@ -86,11 +133,12 @@ struct Application : Window {
     //Button layouts
     layout.setMargin(5);
     layout.append(helloLabel, {{0.0}}, {0.0});
-    layout.append(okButton, {{0.0}, {okButton, 100, Anchor::Left}}, {{helloLabel, 10}, {okButton, 30, Anchor::Top}});
-    layout.append(quitButton, {{okButton, 5}, {quitButton, 100, Anchor::Left}}, {{okButton, 0, Anchor::Top}, {quitButton, 30, Anchor::Top}});
+    layout.append(loadMapBtn, {{0.0}, {loadMapBtn, 100, Anchor::Left}}, {{helloLabel, 10}, {loadMapBtn, 30, Anchor::Top}});
+    layout.append(testParrotBtn, {{loadMapBtn, 5}, {testParrotBtn, 100, Anchor::Left}}, {{loadMapBtn, 0, Anchor::Top}, {testParrotBtn, 30, Anchor::Top}});
+    layout.append(quitButton, {{testParrotBtn, 5}, {quitButton, 100, Anchor::Left}}, {{loadMapBtn, 0, Anchor::Top}, {quitButton, 30, Anchor::Top}});
 
     //Canvas and scroll bars
-    layout.append(myCanvas, {{0.0}, {vScroll, -5}}, {{okButton, 5}, {hScroll, -5}});
+    layout.append(myCanvas, {{0.0}, {vScroll, -5}}, {{loadMapBtn, 5}, {hScroll, -5}});
     layout.append(hScroll, {{myCanvas, 0, Anchor::Left}, {myCanvas, 0, Anchor::Right}}, {{}, {1.0}});
     layout.append(vScroll, {{}, {1.0}}, {{myCanvas, 0, Anchor::Top}, {myCanvas, 0, Anchor::Bottom}});
 
@@ -123,7 +171,7 @@ struct Application : Window {
     	updateScrollbar(false);
     };
 
-    okButton.onTick = [this]() {
+    loadMapBtn.onTick = [this]() {
     	if (!loadedMapOnce) {
     		PremultImage& bkgrd = myCanvas.getBufferedImage();
     		GameMap::InitTMXMap(myMap, "map_test.tmx");
@@ -139,6 +187,8 @@ struct Application : Window {
     		myCanvas.update();
     	}
     };
+
+    testParrotBtn.onTick = { &Application::parrotTest, this };
 
     onSize = [this]() {
     	//Has the buffer actually been destroyed?
@@ -185,6 +235,9 @@ struct Application : Window {
   }
 
   void create() {
+    //Create our message box window
+    MsgBox.create();
+
     //Do window tasks
     setTitle("Test Application");
     setGeometry({ 130, 130, 650, 490 });
