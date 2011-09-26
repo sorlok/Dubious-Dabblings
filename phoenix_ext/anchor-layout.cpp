@@ -43,7 +43,7 @@ AnchorLayout::AnchorLayout() : children(0.65)
 AnchorLayout::~AnchorLayout()
 {
 	//Remove all children on exit
-	setSkipGeomUpdates(true);
+	ScopedLayoutLock lock(this);
 	while(children.size()>0) {
 		remove(*children.rootKey());
 		//remove(*children[0].sizable);

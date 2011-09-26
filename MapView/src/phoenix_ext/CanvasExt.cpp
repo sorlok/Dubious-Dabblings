@@ -5,7 +5,7 @@
 using namespace phoenix;
 
 
-CanvasExt::CanvasExt() : Canvas(), image_(), offset_({0,0,0,0})
+CanvasExt::CanvasExt() : Canvas(), image_(), offset_({0,0,0,0}), lastW(0), lastH(0)
 {
 }
 
@@ -16,6 +16,10 @@ PremultImage& CanvasExt::getBufferedImage()
 	return image_;
 }
 
+bool CanvasExt::needsResize()
+{
+	return lastW==0 || lastH==0 || lastW!=geometry().width || lastH!=geometry().height;
+}
 
 void CanvasExt::setImageOffset(const phoenix::Geometry& offset)
 {
@@ -72,6 +76,8 @@ void CanvasExt::updateCanvasBuffer()
 
 	uint32_t* buffer_ = buffer();
 	const Geometry& geom = geometry();
+	lastW = geom.width;
+	lastH = geom.height;
 
 	//Source and destination pointers
 	const uint32_t* src = image_.getPixels();

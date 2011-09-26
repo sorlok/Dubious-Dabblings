@@ -156,9 +156,11 @@ public:
 	AnchorLayout();
 	virtual ~AnchorLayout();
 
+	//Currently needs to be public until we get a better "overall" phoenix solution.
+	void setSkipGeomUpdates(bool val) { state.skipGeomUpdate = val; }
+
 private:
 	//For "geometry locking"
-	void setSkipGeomUpdates(bool val) { state.skipGeomUpdate = val; }
 	friend class ScopedLayoutLock;
 
 	struct Children {

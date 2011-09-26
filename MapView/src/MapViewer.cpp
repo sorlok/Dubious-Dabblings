@@ -1,11 +1,12 @@
-//Turn on debugging info
+//Turn on debugging info  --note: This won't actually matter later when
+//          using the library, since all output code is in the CPP file.
 #define ANCHOR_LAYOUT_ERRORS_ON
 
 //Minimal test for Phoenix layout error
 //#include "Sample.hpp"
 
 //Tests for new AttachLayout
-#include "LayoutTest.hpp"
+//#include "LayoutTest.hpp"
 
 //Various examples
 //#include "VariousExamples.hpp"
@@ -17,21 +18,23 @@
 //#include "BsnesMockup.hpp"
 
 //Main code (comment out if using one of the header-style tests, above.
-/*#include <iostream>
+#include <iostream>
 
 #include <phoenix/phoenix.hpp>
 #include <nall/png.hpp>
 
+#include "phoenix_ext/anchor-layout.hpp"
 #include "phoenix_ext/CanvasExt.hpp"
 #include "gamedata/GameMap.hpp"
 
 using namespace nall;
 using namespace phoenix;
+typedef AnchorPoint::Anchor Anchor;
+const AnchorPoint Centered = Axis::Centered();
 
 
 struct Application : Window {
-  VerticalLayout layoutVert;
-  HorizontalLayout layoutHoriz;
+  AnchorLayout layout;
 
   Label helloLabel;
   Button okButton;
@@ -43,39 +46,24 @@ struct Application : Window {
   bool loadedMapOnce;
   Geometry scrollOffset;
 
-  void create() {
-    //Do window tasks
-    setTitle("Test Application");
-    setGeometry({ 130, 130, 650, 490 });
-
+  void initComponents() {
+    ScopedLayoutLock lock(&layout);
     helloLabel.setText("Map Viewer");
     okButton.setText("Load Map");
     quitButton.setText("Quit");
 
-    //Skip
-    //layoutHoriz.skipUpdate = true;
-    //layoutVert.skipUpdate = true;
-
     //Horizontal layout
-    layoutHoriz.append(okButton, 100, 30, 5);
-    layoutHoriz.append(quitButton, 100, 30, 5);
+    layout.setMargin(5);
+    layout.append(helloLabel, {{0.0}}, {0.0});
+    layout.append(okButton, {{0.0}, {okButton, 100, Anchor::Left}}, {{helloLabel, 10}, {okButton, 30, Anchor::Top}});
+    layout.append(quitButton, {{okButton, 5}, {quitButton, 100, Anchor::Left}}, {{okButton, 0, Anchor::Top}, {quitButton, 30, Anchor::Top}});
+    layout.append(myCanvas, {{0.0}, {1.0}}, {{okButton, 5}, {1.0}});
 
-    //Vertical layout
-    layoutVert.setMargin(5);
-    layoutVert.append(helloLabel, 0, 0, 5);
-    layoutVert.append(layoutHoriz, 0, 0, 10);
-    layoutVert.append(myCanvas, ~0, ~0, 5);
-
-    //Unskip
-    //layoutHoriz.skipUpdate = false;
-    //layoutVert.skipUpdate = false;
-
-    append(layoutVert);
+    //Done
+    append(layout);
 
     //Get a reference to the canvas's buffer:
     PremultImage& bkgrd = myCanvas.getBufferedImage();
-    unsigned int lastW = 0;  //For some reason, capturing as a geometry crashes.
-    unsigned int lastH = 0;
 
     //Draw something simple onto the background
     loadedMapOnce = false;
@@ -91,10 +79,9 @@ struct Application : Window {
     bkgrd.fillRect({0, 0, w/2, h/2}, {0xFF, 0x00, 0x00});
     bkgrd.fillRect({w/4, h/4, w/2, h/2}, {0x80, 0x00, 0x00, 0xFF});
 
-    onClose = quitButton.onTick = [&layoutHoriz, &layoutVert] {
-        //layoutHoriz.skipUpdate = true;
-        //layoutVert.skipUpdate = true;
-    	OS::quit();
+    onClose = quitButton.onTick = [&layout] {
+      layout.setSkipGeomUpdates(true);
+   	  OS::quit();
     };
 
     okButton.onTick = [this, &bkgrd, &scrollOffset]() {
@@ -110,15 +97,11 @@ struct Application : Window {
     	}
     };
 
-    onSize = [this, &bkgrd, &scrollOffset, &lastW, &lastH]() {
+    onSize = [this, &bkgrd, &scrollOffset]() {
     	//Has the buffer actually been destroyed?
-    	if (myCanvas.geometry().width==lastW && myCanvas.geometry().height==lastH) {
+    	if (!myCanvas.needsResize()) {
     		return;
     	}
-
-    	//Save new geometry
-    	lastW = myCanvas.geometry().width;
-    	lastH = myCanvas.geometry().height;
 
     	//Update offset
     	if (loadedMapOnce) {
@@ -181,11 +164,13 @@ struct Application : Window {
     		myCanvas.update();
     	}
     };
+  }
 
-    //setGeometry({ 130, 130, 650, 490 });
-
-    std::cout <<"========================================\n";
-
+  void create() {
+    //Do window tasks
+    setTitle("Test Application");
+    setGeometry({ 130, 130, 650, 490 });
+    initComponents();
     setVisible();
   }
 } application;
@@ -196,4 +181,3 @@ int main(int argc, char* argv[])
   OS::main();
   return 0;
 }
-*/
