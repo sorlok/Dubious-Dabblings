@@ -26,7 +26,7 @@ void CanvasExt::setImageOffset(const phoenix::Geometry& offset)
 	offset_ = offset;
 }
 
-void CanvasExt::loadArrowMarkings(const std::string& filename)
+/*void CanvasExt::loadArrowMarkings(const std::string& filename)
 {
 	//Right, Left
 	arrows[0].initFromImage(filename);
@@ -40,10 +40,10 @@ void CanvasExt::loadArrowMarkings(const std::string& filename)
 	for (size_t i=0; i<4; i++) {
 		arrows[i].createUndoBuffer();
 	}
-}
+}*/
 
 
-void CanvasExt::paintArrows()
+/*void CanvasExt::paintArrows()
 {
 	//Calculate coordinates of the rectangles to center each arrow in.
 	size_t w = geometry().width;
@@ -67,7 +67,7 @@ void CanvasExt::paintArrows()
 		//Paint
 		image_.paintImage(arrow, rect);
 	}
-}
+}*/
 
 
 void CanvasExt::updateCanvasBuffer()

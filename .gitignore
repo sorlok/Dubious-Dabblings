@@ -1,6 +1,7 @@
 #Ignore built items
 Debug/
 Release/
+phoenix_ext/build
 
 #Ignore object files
 *.o

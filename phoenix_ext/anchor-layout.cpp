@@ -67,8 +67,6 @@ void AnchorLayout::append(Sizable &sizable) {
 void AnchorLayout::append(phoenix::Sizable &sizable, const Axis& horizontal, const Axis& vertical)
 {
 	typedef AnchorPoint::Type Type;
-
-	std::cout <<"Append\n";
 	ScopedLayoutLock lock(this);
 
 	//If this child already exists, update its attachment data
@@ -110,16 +108,12 @@ void AnchorLayout::synchHack(Sizable* sizable)
 }
 void AnchorLayout::synchronize()
 {
-	std::cout <<"Synchronize\n";
 	ScopedLayoutLock lock(this);
 
 	//Ensure all sizables have been appended to the layout.
 	children.for_each([this](Sizable* key, Children& child) {
 		synchHack(key);
 	});
-	/*foreach(child, children) {
-		Layout::append(*child.sizable);
-	}*/
 }
 
 
@@ -180,8 +174,6 @@ void AnchorLayout::setGeometry(const Geometry& containerGeometry)
 		state.skippedAnUpdate = true;
 		return;
 	}
-
-	std::cout <<"setGeometry()\n";
 
 	//First, reset all children.
 	//foreach(child, children) {

@@ -7,12 +7,6 @@
 #include "scapegoat.hpp"
 
 
-//TEMP: Remove this later.
-#ifdef ANCHOR_LAYOUT_ERRORS_ON
-#include <iostream>
-#endif
-
-
 class AnchorPoint {
 private:
 	//Type of AnchorPoint
@@ -210,8 +204,6 @@ public:
 
 	~ScopedLayoutLock() {
 		foreach(layout, layouts) {
-			std::cout <<"LAYOUT HAS BEEN UNLOCKED\n";
-
 			layout->setSkipGeomUpdates(false);
 			if (layout->state.skippedAnUpdate) {
 				layout->setGeometry(layout->state.lastKnownSize);
@@ -227,8 +219,6 @@ public:
 		layout->state.skippedAnUpdate = false;
 		layout->setSkipGeomUpdates(true);
 		layouts.append(layout);
-
-		std::cout <<"LAYOUT IS LOCKED\n";
 	}
 
 private:

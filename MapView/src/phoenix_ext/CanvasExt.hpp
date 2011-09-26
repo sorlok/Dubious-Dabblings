@@ -30,8 +30,8 @@ struct CanvasExt : public phoenix::Canvas {
 
 	bool needsResize();
 
-	void loadArrowMarkings(const std::string& filename);
-	void paintArrows();
+	//void loadArrowMarkings(const std::string& filename);
+	//void paintArrows();
 
 	//Update!
 	virtual void update();
@@ -43,7 +43,7 @@ private:
 	PremultImage image_;
 	phoenix::Geometry offset_;
 
-	PremultImage arrows[4];
+	//PremultImage arrows[4];
 
     unsigned int lastW;
     unsigned int lastH;

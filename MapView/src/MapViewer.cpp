@@ -39,25 +39,60 @@ struct Application : Window {
   Label helloLabel;
   Button okButton;
   Button quitButton;
-  CanvasExt myCanvas;
   GameMap myMap;
+
+  CanvasExt myCanvas;
+  HorizontalScrollBar hScroll;
+  VerticalScrollBar vScroll;
 
   //Kinda messy, I know
   bool loadedMapOnce;
   Geometry scrollOffset;
+
+  void recalcScrollBars() {
+	  PremultImage& bkgrd = myCanvas.getBufferedImage();
+	  int widthDiff = static_cast<int>(bkgrd.getSize().width) - myCanvas.geometry().width;
+	  int heightDiff = static_cast<int>(bkgrd.getSize().height) - myCanvas.geometry().height;
+
+	  //Enabled
+	  hScroll.setEnabled(widthDiff>0);
+	  vScroll.setEnabled(heightDiff>0);
+
+	  //Length
+	  hScroll.setLength(widthDiff>0?widthDiff:100);
+	  vScroll.setLength(heightDiff>0?heightDiff:100);
+
+	  //Position
+	  hScroll.setPosition(0);
+	  vScroll.setPosition(0);
+  }
+
+
+  void updateScrollbar(bool isHoriz) {
+	  //NOTE: This won't work quite right because hScroll or vScroll might be 0 (if the component is too small).
+	  myCanvas.setImageOffset({-hScroll.position(), -vScroll.position(), 0, 0});
+	  myCanvas.update();
+  }
+
 
   void initComponents() {
     ScopedLayoutLock lock(&layout);
     helloLabel.setText("Map Viewer");
     okButton.setText("Load Map");
     quitButton.setText("Quit");
+    hScroll.setEnabled(false);
+    vScroll.setEnabled(false);
 
-    //Horizontal layout
+    //Button layouts
     layout.setMargin(5);
     layout.append(helloLabel, {{0.0}}, {0.0});
     layout.append(okButton, {{0.0}, {okButton, 100, Anchor::Left}}, {{helloLabel, 10}, {okButton, 30, Anchor::Top}});
     layout.append(quitButton, {{okButton, 5}, {quitButton, 100, Anchor::Left}}, {{okButton, 0, Anchor::Top}, {quitButton, 30, Anchor::Top}});
-    layout.append(myCanvas, {{0.0}, {1.0}}, {{okButton, 5}, {1.0}});
+
+    //Canvas and scroll bars
+    layout.append(myCanvas, {{0.0}, {vScroll, -5}}, {{okButton, 5}, {hScroll, -5}});
+    layout.append(hScroll, {{myCanvas, 0, Anchor::Left}, {myCanvas, 0, Anchor::Right}}, {{}, {1.0}});
+    layout.append(vScroll, {{}, {1.0}}, {{myCanvas, 0, Anchor::Top}, {myCanvas, 0, Anchor::Bottom}});
 
     //Done
     append(layout);
@@ -70,9 +105,6 @@ struct Application : Window {
     scrollOffset = {0,0,0,0};
     bkgrd.resetSize({0, 0, 900, 600});
 
-    //Prepare arrows
-    myCanvas.loadArrowMarkings("arrow.png");
-
     unsigned int w = bkgrd.getSize().width;
     unsigned int h = bkgrd.getSize().height;
 
@@ -84,20 +116,31 @@ struct Application : Window {
    	  OS::quit();
     };
 
-    okButton.onTick = [this, &bkgrd, &scrollOffset]() {
+    hScroll.onChange = [this]() {
+    	updateScrollbar(true);
+    };
+    vScroll.onChange = [this]() {
+    	updateScrollbar(false);
+    };
+
+    okButton.onTick = [this]() {
     	if (!loadedMapOnce) {
+    		PremultImage& bkgrd = myCanvas.getBufferedImage();
     		GameMap::InitTMXMap(myMap, "map_test.tmx");
     		loadedMapOnce = true;
     		myMap.PaintImage(bkgrd);
-    		myCanvas.paintArrows();
     		scrollOffset.x = 0;//myCanvas.bufferSize().width/2 - bkgrd.getSize().width/2;
     		scrollOffset.y = 0;//myCanvas.bufferSize().height/2 - bkgrd.getSize().height/2;
+
+    		//Scroll bars
+    		recalcScrollBars();
+
     		myCanvas.setImageOffset(scrollOffset);
     		myCanvas.update();
     	}
     };
 
-    onSize = [this, &bkgrd, &scrollOffset]() {
+    onSize = [this]() {
     	//Has the buffer actually been destroyed?
     	if (!myCanvas.needsResize()) {
     		return;
@@ -105,6 +148,9 @@ struct Application : Window {
 
     	//Update offset
     	if (loadedMapOnce) {
+    		PremultImage& bkgrd = myCanvas.getBufferedImage();
+    		recalcScrollBars();
+
     		if (bkgrd.getSize().width < myCanvas.geometry().width) {
     			scrollOffset.x = myCanvas.geometry().width/2 - bkgrd.getSize().width/2;
     		}
@@ -120,39 +166,11 @@ struct Application : Window {
     	myCanvas.update();
     };
 
-    myCanvas.onMotion = [this, &bkgrd](unsigned int localX, unsigned int localY, MOVE_FLAG flag) {
+    myCanvas.onMotion = [this](unsigned int localX, unsigned int localY, MOVE_FLAG flag) {
     	if (flag==MOVE_FLAG::MOVE) {
-    		if (loadedMapOnce) {
-    			//If the mouse is near the edges of the screen, increase the offset
-    			Geometry oldOffset = scrollOffset;
-    			if (bkgrd.getSize().width >= myCanvas.geometry().width) {
-    				if (localX < 32) {
-    					scrollOffset.x += myMap.tileSize/4;
-    				} else if (localX >= myCanvas.geometry().width - 32) {
-    					scrollOffset.x -= myMap.tileSize/4;
-    				}
-
-    				//Bound
-    				scrollOffset.x = nall::max(nall::min(0, scrollOffset.x), (int)myCanvas.geometry().width-(int)bkgrd.getSize().width);
-    			}
-    			if (bkgrd.getSize().height >= myCanvas.geometry().height) {
-    				if (localY < 32) {
-    					scrollOffset.y += myMap.tileSize/4;
-    				} else if (localY >= myCanvas.geometry().height - 32) {
-    					scrollOffset.y -= myMap.tileSize/4;
-    				}
-
-    				//Bound
-    				scrollOffset.y = nall::max(nall::min(0, scrollOffset.y), (int)myCanvas.geometry().height-(int)bkgrd.getSize().height);
-    			}
-
-    			if (oldOffset.x!=scrollOffset.x || oldOffset.y!=scrollOffset.y) {
-    				//Update
-    				myCanvas.setImageOffset(scrollOffset);
-    				myCanvas.update();
-    			}
-    		} else {
-    			//Just track the mouse
+    		if (!loadedMapOnce) {
+    			//Just track the mouse; simple feedback.
+    			PremultImage& bkgrd = myCanvas.getBufferedImage();
     			int x = ((int)localX) - bkgrd.getSize().width/2;
     			int y = ((int)localY) - bkgrd.getSize().height/2;
 
