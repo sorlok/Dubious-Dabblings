@@ -25,6 +25,7 @@
 <option id="gnu.cpp.compiler.exe.debug.option.optimization.level.1398033213" name="Optimization Level" superClass="gnu.cpp.compiler.exe.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.exe.debug.option.debugging.level.387534158" name="Debug Level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.option.include.paths.1346307745" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="/usr/local/include/parrot/3.8.0-devel"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../phoenix&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/..&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/src&quot;"/>
@@ -511,6 +512,7 @@
 <option id="gnu.cpp.compiler.exe.release.option.debugging.level.733454602" name="Debug Level" superClass="gnu.cpp.compiler.exe.release.option.debugging.level" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.option.other.other.1030570728" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -std=c++0x `pkg-config --cflags gtk+-2.0`" valueType="string"/>
 <option id="gnu.cpp.compiler.option.include.paths.1652727870" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="/usr/local/include/parrot/3.8.0-devel"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../phoenix&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/..&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/src&quot;"/>

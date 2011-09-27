@@ -27,6 +27,10 @@
 #include "phoenix_ext/CanvasExt.hpp"
 #include "gamedata/GameMap.hpp"
 
+//Parrot
+#include "parrot/api.h"
+
+
 using namespace nall;
 using namespace phoenix;
 typedef AnchorPoint::Anchor Anchor;
