@@ -67,14 +67,14 @@ void initParrot()
 	}
 
 	//Load the string array to pass to the bytecode as "args"
-	int argc = 1;
+	/*int argc = 1;
 	const char* argv[] = {"Something"};
 	if (!Parrot_api_pmc_wrap_string_array(interpreter, argc, argv, &args)) {
 		throw_last_parrot_error("Can't generate args PMC", interpreter);
-	}
+	}*/
 
 	//Run the bytecode
-	if (!Parrot_api_run_bytecode(interpreter, pf, nullptr, args)) { //what's sysargs vs. programargs?
+	if (!Parrot_api_run_bytecode(interpreter, pf, nullptr, nullptr)) { //what's sysargs vs. programargs?
 		throw_last_parrot_error("Error running bytecode", interpreter);
 	}
 
