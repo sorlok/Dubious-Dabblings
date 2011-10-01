@@ -30,6 +30,8 @@
 //Parrot
 #include "parrot/api.h"
 
+#include "parrot/basic_functions.hpp"
+
 
 using namespace nall;
 using namespace phoenix;
@@ -45,164 +47,16 @@ public:
 	}
 };
 
-//Parrot objects
-PMC* interpreter;
-PMC* pf;
-PMC* args;
-PMC* mainObject;
-PMC* myMethod;
-PMC* callSig;
 
-void throw_last_parrot_error(const std::string& msg, PMC* interp);
-std::string get_parrot_string(PMC* interp, Parrot_String str);
-void initParrot()
+
+void testParrotVM()
 {
-	//Create the interpreter
-	if (!Parrot_api_make_interpreter(nullptr, 0, nullptr, &interpreter)) {
-		throw std::runtime_error("Can't create Parrot interpreter");
-	}
+	PMC* interp = initParrot("test.pbc");
+	std::string res = runSpecificFunction(interp, "MyClass", "getlhs", "And now we say: ", "ignored");
+	shutdownParrot(interp);
 
-	//Load bytecode
-	Parrot_String filename;
-	Parrot_api_string_import_ascii(interpreter, "test.pbc", &filename);
-	if (!Parrot_api_load_bytecode_file(interpreter, filename, &pf)) {
-		throw_last_parrot_error("Can't load bytecode file", interpreter);
-	}
-
-	//Run the bytecode
-	if (!Parrot_api_run_bytecode(interpreter, pf, nullptr, nullptr)) { //what's sysargs vs. programargs?
-		throw_last_parrot_error("Error running bytecode", interpreter);
-	}
-
-	//Test: Load the "main" object
-	Parrot_String mainClassStr;
-	PMC* mainClassKey;
-	PMC* mainClass;
-	Parrot_api_string_import_ascii(interpreter, "MyClass", &mainClassStr);
-	Parrot_api_pmc_box_string(interpreter, mainClassStr, &mainClassKey);
-	if (!Parrot_api_pmc_get_class(interpreter, mainClassKey, &mainClass)) {
-		throw_last_parrot_error("Can't find MyClass class key", interpreter);
-	}
-    if (!Parrot_api_pmc_new_from_class(interpreter, mainClass, nullptr, &mainObject)) {
-    	throw_last_parrot_error("Can't generate MyClass object", interpreter);
-    }
-
-	//Test: Retrieve a function by name
-	Parrot_String methodname;
-	Parrot_api_string_import_ascii(interpreter, "getlhs", &methodname);
-	if (!Parrot_api_pmc_find_method(interpreter, mainObject, methodname, &myMethod)) {
-		throw_last_parrot_error("Can't find method", interpreter);
-	}
-
-	//Get the "call context" PMC
-	PMC* contextClassName;
-	PMC* contextClassHandle;
-	Parrot_String callctxt;
-	Parrot_api_string_import_ascii(interpreter, "CallContext", &callctxt);
-	Parrot_api_pmc_box_string(interpreter, callctxt, &contextClassName);
-	if (!Parrot_api_pmc_get_class(interpreter, contextClassName, &contextClassHandle)) {
-		throw_last_parrot_error("Couldn't get callcontext PMC", interpreter);
-	}
-
-	//Test: Prepare args
-	if (!Parrot_api_pmc_new_from_class(interpreter, contextClassHandle, nullptr, &callSig)) {
-		throw_last_parrot_error("Can't create call signature", interpreter);
-	}
-
-	//Test: Set args
-	Parrot_String str1;
-	PMC* str1PMC;
-	Parrot_api_string_import_ascii(interpreter, "And now we say: ", &str1);
-	Parrot_api_pmc_box_string(interpreter, str1, &str1PMC);
-	Parrot_String str2;
-	PMC* str2PMC;
-	Parrot_api_string_import_ascii(interpreter, "ignored", &str2);
-	Parrot_api_pmc_box_string(interpreter, str2, &str2PMC);
-
-	Parrot_String sigString;
-	Parrot_api_string_import_ascii(interpreter, "PiSS->S", &sigString);
-
-	Parrot_String resStr;
-	PMC* resStrPMC;
-	Parrot_api_pmc_box_string(interpreter, resStr, &resStrPMC); //Needed?
-
-	if (
-			!Parrot_api_pmc_set_string(interpreter, callSig, sigString)
-		|| !Parrot_api_pmc_set_keyed_int(interpreter, callSig, 0, mainObject)
-		//|| !Parrot_api_pmc_set_string(interpreter, callSig, str1)
-		|| !Parrot_api_pmc_set_keyed_int(interpreter, callSig, 1, str1PMC)
-		//|| !Parrot_api_pmc_set_string(interpreter, callSig, str2)
-		|| !Parrot_api_pmc_set_keyed_int(interpreter, callSig, 2, str2PMC)
-	) {
-
-		throw_last_parrot_error("Couldn't set call signature properly", interpreter);
-	}
-
-	//Test: Invoke myMethod
-	Parrot_String outStr;
-	PMC* outStrPMC;
-	if (!Parrot_api_pmc_invoke(interpreter, myMethod, callSig)) {
-		throw_last_parrot_error("Couldn't call method", interpreter);
-	}
-	if (!Parrot_api_pmc_get_keyed_int(interpreter, callSig, 0, &outStrPMC)) {
-		throw_last_parrot_error("Couldn't get result", interpreter);
-	}
-	if (!Parrot_api_pmc_get_string(interpreter, outStrPMC, &outStr)) {
-		throw_last_parrot_error("Couldn't shuffle result into String", interpreter);
-	}
-
-	//Test: Print results
-	char* cStringOut = nullptr;
-    Parrot_api_string_export_ascii(interpreter, outStr, &cStringOut);
-    std::cout <<cStringOut <<std::endl;
-    Parrot_api_string_free_exported_ascii(interpreter, cStringOut);
-
-	//Done
-	Parrot_api_destroy_interpreter(interpreter);
+	std::cout <<res <<std::endl;
 }
-
-
-void throw_last_parrot_error(const std::string& baseMsg, PMC* interp)
-{
-	//Args
-	//ASSERT_ARGS(throw_last_parrot_error)
-	Parrot_String error_msg, backtrace;
-	Parrot_Int exit_code, is_error;
-	Parrot_PMC except;
-
-	//Attempt to retrieve all variables
-	if (!Parrot_api_get_result(interp, &is_error, &except, &exit_code, &error_msg)) {
-		throw std::runtime_error(std::string(baseMsg + "\n" + "Critical error; can't retrieve error message").c_str());
-	}
-	if (!is_error) {
-		throw std::runtime_error(std::string(baseMsg + "\n" + "Not an error!").c_str());
-	}
-	if (!Parrot_api_get_exception_backtrace(interp, except, &backtrace)) {
-		throw std::runtime_error(std::string(baseMsg + "\n" + "Critical error; no exception backtrace").c_str());
-	}
-
-	//Throw an informative exception
-	std::string msg = get_parrot_string(interp, error_msg);
-	std::string bt = get_parrot_string(interp, backtrace);
-	throw std::runtime_error(baseMsg + "\n" + msg + "\n" + bt);
-}
-
-
-std::string get_parrot_string(PMC* interp, Parrot_String str)
-{
-	//ASSERT_ARGS(get_parrot_string)
-	std::string res;
-	char* raw_str;
-	if (str) {
-		Parrot_api_string_export_ascii(interp, str, &raw_str);
-		if (raw_str) {
-			res = std::string(raw_str);
-			Parrot_api_string_free_exported_ascii(interp, raw_str);
-		}
-	}
-	return res;
-}
-
 
 
 struct Application : Window {
@@ -402,7 +256,7 @@ struct Application : Window {
     MsgBox.create();
 
     //Parrot stuff
-    initParrot();
+    testParrotVM();
 
     //Do window tasks
     setTitle("Test Application");
