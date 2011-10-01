@@ -69,13 +69,6 @@ void initParrot()
 		throw_last_parrot_error("Can't load bytecode file", interpreter);
 	}
 
-	//Load the string array to pass to the bytecode as "args"
-	/*int argc = 1;
-	const char* argv[] = {"Something"};
-	if (!Parrot_api_pmc_wrap_string_array(interpreter, argc, argv, &args)) {
-		throw_last_parrot_error("Can't generate args PMC", interpreter);
-	}*/
-
 	//Run the bytecode
 	if (!Parrot_api_run_bytecode(interpreter, pf, nullptr, nullptr)) { //what's sysargs vs. programargs?
 		throw_last_parrot_error("Error running bytecode", interpreter);
@@ -85,13 +78,13 @@ void initParrot()
 	Parrot_String mainClassStr;
 	PMC* mainClassKey;
 	PMC* mainClass;
-	Parrot_api_string_import_ascii(interpreter, "Main", &mainClassStr);
+	Parrot_api_string_import_ascii(interpreter, "MyClass", &mainClassStr);
 	Parrot_api_pmc_box_string(interpreter, mainClassStr, &mainClassKey);
 	if (!Parrot_api_pmc_get_class(interpreter, mainClassKey, &mainClass)) {
-		throw_last_parrot_error("Can't find main class key", interpreter);
+		throw_last_parrot_error("Can't find MyClass class key", interpreter);
 	}
     if (!Parrot_api_pmc_new_from_class(interpreter, mainClass, nullptr, &mainObject)) {
-    	throw_last_parrot_error("Can't generate main object", interpreter);
+    	throw_last_parrot_error("Can't generate MyClass object", interpreter);
     }
 
 	//Test: Retrieve a function by name
@@ -118,20 +111,51 @@ void initParrot()
 
 	//Test: Set args
 	Parrot_String str1;
+	PMC* str1PMC;
 	Parrot_api_string_import_ascii(interpreter, "And now we say: ", &str1);
+	Parrot_api_pmc_box_string(interpreter, str1, &str1PMC);
 	Parrot_String str2;
+	PMC* str2PMC;
 	Parrot_api_string_import_ascii(interpreter, "ignored", &str2);
-	if (!Parrot_api_pmc_set_string(interpreter, callSig, str1) || !Parrot_api_pmc_set_string(interpreter, callSig, str2)) {
+	Parrot_api_pmc_box_string(interpreter, str2, &str2PMC);
+
+	Parrot_String sigString;
+	Parrot_api_string_import_ascii(interpreter, "PiSS->S", &sigString);
+
+	Parrot_String resStr;
+	PMC* resStrPMC;
+	Parrot_api_pmc_box_string(interpreter, resStr, &resStrPMC); //Needed?
+
+	if (
+			!Parrot_api_pmc_set_string(interpreter, callSig, sigString)
+		|| !Parrot_api_pmc_set_keyed_int(interpreter, callSig, 0, mainObject)
+		//|| !Parrot_api_pmc_set_string(interpreter, callSig, str1)
+		|| !Parrot_api_pmc_set_keyed_int(interpreter, callSig, 1, str1PMC)
+		//|| !Parrot_api_pmc_set_string(interpreter, callSig, str2)
+		|| !Parrot_api_pmc_set_keyed_int(interpreter, callSig, 2, str2PMC)
+	) {
+
 		throw_last_parrot_error("Couldn't set call signature properly", interpreter);
 	}
 
-
 	//Test: Invoke myMethod
+	Parrot_String outStr;
+	PMC* outStrPMC;
 	if (!Parrot_api_pmc_invoke(interpreter, myMethod, callSig)) {
 		throw_last_parrot_error("Couldn't call method", interpreter);
 	}
+	if (!Parrot_api_pmc_get_keyed_int(interpreter, callSig, 0, &outStrPMC)) {
+		throw_last_parrot_error("Couldn't get result", interpreter);
+	}
+	if (!Parrot_api_pmc_get_string(interpreter, outStrPMC, &outStr)) {
+		throw_last_parrot_error("Couldn't shuffle result into String", interpreter);
+	}
 
-
+	//Test: Print results
+	char* cStringOut = nullptr;
+    Parrot_api_string_export_ascii(interpreter, outStr, &cStringOut);
+    std::cout <<cStringOut <<std::endl;
+    Parrot_api_string_free_exported_ascii(interpreter, cStringOut);
 
 	//Done
 	Parrot_api_destroy_interpreter(interpreter);
