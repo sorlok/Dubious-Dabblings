@@ -49,6 +49,9 @@ public:
 PMC* interpreter;
 PMC* pf;
 PMC* args;
+PMC* mainObject;
+PMC* myMethod;
+PMC* callSig;
 
 void throw_last_parrot_error(const std::string& msg, PMC* interp);
 std::string get_parrot_string(PMC* interp, Parrot_String str);
@@ -77,6 +80,58 @@ void initParrot()
 	if (!Parrot_api_run_bytecode(interpreter, pf, nullptr, nullptr)) { //what's sysargs vs. programargs?
 		throw_last_parrot_error("Error running bytecode", interpreter);
 	}
+
+	//Test: Load the "main" object
+	Parrot_String mainClassStr;
+	PMC* mainClassKey;
+	PMC* mainClass;
+	Parrot_api_string_import_ascii(interpreter, "Main", &mainClassStr);
+	Parrot_api_pmc_box_string(interpreter, mainClassStr, &mainClassKey);
+	if (!Parrot_api_pmc_get_class(interpreter, mainClassKey, &mainClass)) {
+		throw_last_parrot_error("Can't find main class key", interpreter);
+	}
+    if (!Parrot_api_pmc_new_from_class(interpreter, mainClass, nullptr, &mainObject)) {
+    	throw_last_parrot_error("Can't generate main object", interpreter);
+    }
+
+	//Test: Retrieve a function by name
+	Parrot_String methodname;
+	Parrot_api_string_import_ascii(interpreter, "getlhs", &methodname);
+	if (!Parrot_api_pmc_find_method(interpreter, mainObject, methodname, &myMethod)) {
+		throw_last_parrot_error("Can't find method", interpreter);
+	}
+
+	//Get the "call context" PMC
+	PMC* contextClassName;
+	PMC* contextClassHandle;
+	Parrot_String callctxt;
+	Parrot_api_string_import_ascii(interpreter, "CallContext", &callctxt);
+	Parrot_api_pmc_box_string(interpreter, callctxt, &contextClassName);
+	if (!Parrot_api_pmc_get_class(interpreter, contextClassName, &contextClassHandle)) {
+		throw_last_parrot_error("Couldn't get callcontext PMC", interpreter);
+	}
+
+	//Test: Prepare args
+	if (!Parrot_api_pmc_new_from_class(interpreter, contextClassHandle, nullptr, &callSig)) {
+		throw_last_parrot_error("Can't create call signature", interpreter);
+	}
+
+	//Test: Set args
+	Parrot_String str1;
+	Parrot_api_string_import_ascii(interpreter, "And now we say: ", &str1);
+	Parrot_String str2;
+	Parrot_api_string_import_ascii(interpreter, "ignored", &str2);
+	if (!Parrot_api_pmc_set_string(interpreter, callSig, str1) || !Parrot_api_pmc_set_string(interpreter, callSig, str2)) {
+		throw_last_parrot_error("Couldn't set call signature properly", interpreter);
+	}
+
+
+	//Test: Invoke myMethod
+	if (!Parrot_api_pmc_invoke(interpreter, myMethod, callSig)) {
+		throw_last_parrot_error("Couldn't call method", interpreter);
+	}
+
+
 
 	//Done
 	Parrot_api_destroy_interpreter(interpreter);
