@@ -48,7 +48,7 @@
   #Load the DLL
   .local pmc lib, func
 
-  lib = loadlib "libsfml_engine"
+  lib = loadlib "/home/sethhetu/dubious/MapView/libsfml_engine.so"
   dlfunc func, lib, "init_sfml", "iv"
 
   $S0 = typeof lib
