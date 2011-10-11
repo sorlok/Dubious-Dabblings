@@ -23,11 +23,14 @@ extern "C" {
 #endif
 
 
-DLLEXPORT bool init_sfml();
-DLLEXPORT void sfml_handle_events();
+DLLEXPORT int init_sfml();
+DLLEXPORT int sfml_handle_events();
 DLLEXPORT void my_basic_update();
 DLLEXPORT void sfml_display();
 DLLEXPORT void close_sfml();
+
+//Temp
+DLLEXPORT void main_loop_hack();
 
 
 #ifdef __cplusplus
@@ -38,7 +41,6 @@ DLLEXPORT void close_sfml();
 
 //+1 global variables!
 sf::RenderWindow myWindow;
-bool appRunning;
 float polyScale;
 bool polyScaleDec;
 
@@ -70,11 +72,12 @@ private:
 
 
 
-void handleEvent(const sf::Event& event, bool& keepAppRunning)
+//Return true if the app should exit reasonably soon after this event.
+bool handleEvent(const sf::Event& event)
 {
 	switch (event.Type) {
 		case sf::Event::Closed:
-			keepAppRunning = false;
+			return true;
 			break;
 
 
@@ -85,6 +88,7 @@ void handleEvent(const sf::Event& event, bool& keepAppRunning)
 	}
 
 
+	return false;
 }
 
 
@@ -110,7 +114,7 @@ void flipPoly(int id1, int id2)
 
 
 
-bool init_sfml()
+int init_sfml()
 {
 	myWindow.Create(sf::VideoMode(800, 600, 32), "Here is a test window.");
 	//myWindow.UseVerticalSync(true); //Restrict to 50fps
@@ -118,13 +122,13 @@ bool init_sfml()
 	//Check
 	if (!sf::PostFX::CanUsePostFX()) {
 		std::cout <<"Your graphics card doesn't support post-effects.\n";
-		return false;
+		return 0;
 	}
 
 	//Init resources
 	if (!img.LoadFromFile("person.png")) {
 		std::cout <<"Error loading image!\n";
-		return false;
+		return 0;
 	}
 	spr1.SetImage(img);
 	spr1.SetPosition(800/3, 600/2);
@@ -146,28 +150,27 @@ bool init_sfml()
 
 	if (!pEffect.LoadFromFile("colorize.sfx")) {
 	    std::cout <<"Couldn't find post-effect file.\n";
-	    return false;
+	    return 0;
 	}
 
 	pEffect.SetTexture("framebuffer", NULL); //"NULL" means use the screen.
 	pEffect.SetParameter("color", 1.f, 1.f, 1.f);
 
-	appRunning = true;
 	polyScale = 1.0;
 	polyScaleDec = true;
 
-	appRunning = true;
-
-	return true;
+	return 1;
 }
 
 
-void sfml_handle_events()
+int sfml_handle_events()
 {
+	bool doExit = false;
 	sf::Event event;
 	while (myWindow.GetEvent(event)) {
-		handleEvent(event, appRunning);
+		doExit = handleEvent(event) || doExit;
 	}
+	return doExit ? 1 : 0;
 }
 
 void my_basic_update()
@@ -246,24 +249,35 @@ void close_sfml()
 }
 
 
-#ifndef IS_BUILDING_LIBRARY
-
-int main(int argc, char** argv)
+void main_loop_hack()
 {
-	if (!init_sfml()) {
-		return 1;
+	if (init_sfml()==0) {
+		return /*1*/;
 	}
 
-	while(appRunning) {
-		sfml_handle_events();
+	for(;;) {
+		bool doExit = sfml_handle_events();
 
 		my_basic_update();
 
 		sfml_display();
+
+		if (doExit) {
+			break;
+		}
 	}
 
 	close_sfml();
 
+	return /*0*/;
+}
+
+
+#ifndef IS_BUILDING_LIBRARY
+
+int main(int argc, char** argv)
+{
+	main_loop_hack();
 	return 0;
 }
 

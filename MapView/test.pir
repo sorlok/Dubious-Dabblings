@@ -47,30 +47,37 @@
 
   #Load the DLL
   .local pmc lib, func
-
   lib = loadlib "libsfml_engine"
-  dlfunc func, lib, "init_sfml", "iv"
 
-  $S0 = typeof lib
-  say $S0
-  $S0 = typeof func
-  say $S0
-
+  #Call init
+  dlfunc func, lib, "init_sfml", "i"
   $I0 = func()
-  say $I0
+  if $I0==0 goto done
+  say "Starting main loop"
 
+  #Main Loop
+  main_loop:
+    #Have our game handle expected events
+    dlfunc func, lib, "sfml_handle_events", "i"
+    $I0 = func()
 
+    #Now update within the game loop
+    dlfunc func, lib, "my_basic_update", "v"
+    func()
 
+    #Display what we've just rendered
+    dlfunc func, lib, "sfml_display", "v"
+    func()
 
+    #Continue to update
+    if $I0==0 goto main_loop
 
+  #When we're done, clean up
+  dlfunc func, lib, "close_sfml", "v"
+  func()
 
-
-
-
-
-
-
-
+  done:
 
 .end
+
 
