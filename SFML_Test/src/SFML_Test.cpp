@@ -17,14 +17,24 @@ extern "C" {
 
 
 //Just run the main code in its own loop. Will create a window, etc.
-void run_main_loop();
-
+bool init_sfml();
+void sfml_handle_events();
+void my_basic_update();
+void sfml_display();
+void close_sfml();
 
 
 #ifdef __cplusplus
 }
 #endif
 
+
+
+//+1 global variables!
+sf::RenderWindow myWindow;
+bool appRunning;
+float polyScale;
+bool polyScaleDec;
 
 
 
@@ -94,22 +104,21 @@ void flipPoly(int id1, int id2)
 
 
 
-void run_main_loop()
+bool init_sfml()
 {
-	sf::RenderWindow myWindow;
 	myWindow.Create(sf::VideoMode(800, 600, 32), "Here is a test window.");
 	//myWindow.UseVerticalSync(true); //Restrict to 50fps
 
 	//Check
 	if (!sf::PostFX::CanUsePostFX()) {
 		std::cout <<"Your graphics card doesn't support post-effects.\n";
-		return;
+		return false;
 	}
 
 	//Init resources
 	if (!img.LoadFromFile("person.png")) {
 		std::cout <<"Error loading image!\n";
-		return;
+		return false;
 	}
 	spr1.SetImage(img);
 	spr1.SetPosition(800/3, 600/2);
@@ -131,85 +140,103 @@ void run_main_loop()
 
 	if (!pEffect.LoadFromFile("colorize.sfx")) {
 	    std::cout <<"Couldn't find post-effect file.\n";
-	    return;
+	    return false;
 	}
 
 	pEffect.SetTexture("framebuffer", NULL); //"NULL" means use the screen.
 	pEffect.SetParameter("color", 1.f, 1.f, 1.f);
 
-	//Bind to input
+	appRunning = true;
+	polyScale = 1.0;
+	polyScaleDec = true;
+
+	appRunning = true;
+
+	return true;
+}
+
+
+void sfml_handle_events()
+{
+	sf::Event event;
+	while (myWindow.GetEvent(event)) {
+		handleEvent(event, appRunning);
+	}
+}
+
+void my_basic_update()
+{
+	spr1.SetRotation(spr1.GetRotation()+50*myWindow.GetFrameTime());
+	spr2.SetRotation(spr2.GetRotation()-80*myWindow.GetFrameTime());
+
+	sf::Color newColor = spr1.GetColor();
+	newColor.b = (unsigned int) ((1.0-polyScale)*255);
+	spr1.SetColor(newColor);
+
+	newColor = spr2.GetColor();
+	newColor.a = (unsigned int) (polyScale*255);
+	spr2.SetColor(newColor);
+
+	polyScale += (polyScaleDec?-1:1)*myWindow.GetFrameTime();
+	if (polyScale<0.0) {
+		polyScale = 0.0;
+		polyScaleDec = false;
+		flipPoly(1, 5);
+		flipPoly(2, 4);
+	} else if (polyScale>1.0) {
+		polyScale = 1.0;
+		polyScaleDec = true;
+	}
+	poly.SetScaleX(polyScale);
+
+
+	float rPerc = polyScale;
+	float gPerc = spr1.GetRotation()/360.0;
+	float bPerc = spr2.GetRotation()/360.0;
+	pEffect.SetParameter("color", rPerc, gPerc, bPerc);
+
+	//Grab a handle on the input struct
 	const sf::Input& myInput = myWindow.GetInput();
 
-	float polyScale = 1.0;
-	bool polyScaleDec = true;
-
-	bool appRunning = true;
-	while(appRunning) {
-		sf::Event event;
-		while (myWindow.GetEvent(event)) {
-			handleEvent(event, appRunning);
-		}
-		spr1.SetRotation(spr1.GetRotation()+50*myWindow.GetFrameTime());
-		spr2.SetRotation(spr2.GetRotation()-80*myWindow.GetFrameTime());
-
-		sf::Color newColor = spr1.GetColor();
-		newColor.b = (unsigned int) ((1.0-polyScale)*255);
-		spr1.SetColor(newColor);
-
-		newColor = spr2.GetColor();
-		newColor.a = (unsigned int) (polyScale*255);
-		spr2.SetColor(newColor);
-
-		polyScale += (polyScaleDec?-1:1)*myWindow.GetFrameTime();
-		if (polyScale<0.0) {
-			polyScale = 0.0;
-			polyScaleDec = false;
-			flipPoly(1, 5);
-			flipPoly(2, 4);
-		} else if (polyScale>1.0) {
-			polyScale = 1.0;
-			polyScaleDec = true;
-		}
-		poly.SetScaleX(polyScale);
+	//Sample (erroneous) functionality to be replaced in Parrot
+	poly.SetPosition(myInput.GetMouseY(), myInput.GetMouseX());
 
 
-		float rPerc = polyScale;
-		float gPerc = spr1.GetRotation()/360.0;
-		float bPerc = spr2.GetRotation()/360.0;
-		pEffect.SetParameter("color", rPerc, gPerc, bPerc);
+	myWindow.Clear(sf::Color(0x33, 0x33, 0x33));
 
+	//myWindow.SetView(view);
 
-		//Sample (erroneous) functionality to be replaced in Parrot
-		poly.SetPosition(myInput.GetMouseY(), myInput.GetMouseX());
+	myWindow.Draw(spr1);
+	myWindow.Draw(spr2);
+	myWindow.Draw(poly);
 
-
-		myWindow.Clear(sf::Color(0x33, 0x33, 0x33));
-
-		//myWindow.SetView(view);
-
-		myWindow.Draw(spr1);
-		myWindow.Draw(spr2);
-		myWindow.Draw(poly);
-
-		if (myWindow.GetFrameTime()>0.0) {
-			framerate.addSample(1.0/myWindow.GetFrameTime());
-		}
-
-		if (frClock.GetElapsedTime()>0.5) {
-			frClock.Reset();
-			std::stringstream fpsStr;
-			fpsStr <<framerate.getAverage() <<" fps";
-			fps.SetText(fpsStr.str());
-		}
-
-		myWindow.Draw(pEffect);
-
-		myWindow.Draw(fps);
-
-		myWindow.Display();
+	if (myWindow.GetFrameTime()>0.0) {
+		framerate.addSample(1.0/myWindow.GetFrameTime());
 	}
 
-	myWindow.Close(); //Not strictly needed; myWindow will go out of scope.
+	if (frClock.GetElapsedTime()>0.5) {
+		frClock.Reset();
+		std::stringstream fpsStr;
+		fpsStr <<framerate.getAverage() <<" fps";
+		fps.SetText(fpsStr.str());
+	}
+
+	myWindow.Draw(pEffect);
+
+	myWindow.Draw(fps);
+
+}
+
+void sfml_display()
+{
+	myWindow.Display();
+}
+
+
+void close_sfml()
+{
+	myWindow.Close();
+
 }
 
 
@@ -217,7 +244,20 @@ void run_main_loop()
 
 int main(int argc, char** argv)
 {
-	run_main_loop();
+	if (!init_sfml()) {
+		return 1;
+	}
+
+	while(appRunning) {
+		sfml_handle_events();
+
+		my_basic_update();
+
+		sfml_display();
+	}
+
+	close_sfml();
+
 	return 0;
 }
 

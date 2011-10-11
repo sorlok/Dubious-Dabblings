@@ -239,7 +239,7 @@ struct Application : Window {
 		  return;
 	  }
 
-	  //STep 3: Call it
+	  //Step 3: Call it
 	  sym();
 
 
