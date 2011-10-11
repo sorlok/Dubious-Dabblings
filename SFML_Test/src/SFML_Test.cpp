@@ -10,6 +10,24 @@
 using namespace std;
 
 
+//Prototype shared library functions
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+//Just run the main code in its own loop. Will create a window, etc.
+void run_main_loop();
+
+
+
+#ifdef __cplusplus
+}
+#endif
+
+
+
+
 class RollingAverage {
 public:
 	RollingAverage(unsigned int sampleSize) : sampleSize(sampleSize), runningTotal(0) {}
