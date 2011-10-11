@@ -9,6 +9,13 @@
 
 using namespace std;
 
+//Windows export stuff
+#ifdef __WIN32
+#define DLLEXPORT __declspec(dllexport)
+#else
+#define DLLEXPORT
+#endif
+
 
 //Prototype shared library functions
 #ifdef __cplusplus
@@ -16,12 +23,11 @@ extern "C" {
 #endif
 
 
-//Just run the main code in its own loop. Will create a window, etc.
-bool init_sfml();
-void sfml_handle_events();
-void my_basic_update();
-void sfml_display();
-void close_sfml();
+DLLEXPORT bool init_sfml();
+DLLEXPORT void sfml_handle_events();
+DLLEXPORT void my_basic_update();
+DLLEXPORT void sfml_display();
+DLLEXPORT void close_sfml();
 
 
 #ifdef __cplusplus
