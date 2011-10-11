@@ -19,6 +19,9 @@
 
 //Main code (comment out if using one of the header-style tests, above.
 #include <iostream>
+#include <sstream>
+
+#include <dlfcn.h>
 
 #include <phoenix/phoenix.hpp>
 #include <nall/png.hpp>
@@ -35,6 +38,23 @@ using namespace nall;
 using namespace phoenix;
 typedef AnchorPoint::Anchor Anchor;
 const AnchorPoint Centered = Axis::Centered();
+
+
+//Helper directory loader:
+//This is undefined; we can play with Windows compatibility later.
+/*#ifdef WINDOWS
+    #include <direct.h>
+    #define GetCurrentDir _getcwd
+#else
+    #include <unistd.h>
+    #define GetCurrentDir getcwd
+ #endif*/
+std::string GetCurrentDir() {
+	char* res = get_current_dir_name();
+	std::string resStr(res);
+	free(res);
+	return resStr;
+}
 
 
 //Test class for use with Parrot
@@ -199,6 +219,24 @@ struct Application : Window {
   }
 
   void parrotTest() {
+	  //Test our SFML app.
+	  //Step 1: Open the shared object.
+	  std::stringstream fileName;
+	  fileName <<GetCurrentDir() <<"/" <<"libSFML_Test.so";
+	  void* soItem = dlopen(fileName.str().c_str(), RTLD_NOW);
+	  if (!soItem) {
+		  std::cout <<"Can't load shared library file:\n"
+					<<dlerror() <<"\n"
+				    <<"...on file: " <<fileName.str() <<"\n";
+		  return;
+	  }
+
+	  //Step 2: List symbols
+
+
+
+
+
 	  TestBase t;
 	  int value = t.getValue();
 	  MsgBox.show("Test", {"Base(0), Override(1) returned: " , value});
