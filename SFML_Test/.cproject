@@ -324,7 +324,7 @@
 </option>
 <option defaultValue="true" id="gnu.cpp.link.option.shared.1865436958" name="Shared (-shared)" superClass="gnu.cpp.link.option.shared" valueType="boolean"/>
 <option id="gnu.cpp.link.option.soname.400147923" name="Shared object name (-Wl,-soname=)" superClass="gnu.cpp.link.option.soname" value="libsfml_engine.so" valueType="string"/>
-<option id="gnu.cpp.link.option.flags.1020892260" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="-fPIC -static" valueType="string"/>
+<option id="gnu.cpp.link.option.flags.1020892260" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="-fPIC" valueType="string"/>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1236773413" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 <additionalInput kind="additionalinput" paths="$(LIBS)"/>
