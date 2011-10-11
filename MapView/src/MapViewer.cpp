@@ -223,18 +223,24 @@ struct Application : Window {
 	  //Step 1: Open the shared object.
 	  std::stringstream fileName;
 	  fileName <<GetCurrentDir() <<"/" <<"libSFML_Test.so";
-	  void* soItem = dlopen(fileName.str().c_str(), RTLD_NOW);
-	  if (!soItem) {
+	  void* soHandle = dlopen(fileName.str().c_str(), RTLD_NOW);
+	  if (!soHandle) {
 		  std::cout <<"Can't load shared library file:\n"
 					<<dlerror() <<"\n"
 				    <<"...on file: " <<fileName.str() <<"\n";
 		  return;
 	  }
 
-	  //Step 2: List symbols
+	  //Step 2: Find our main symbol.
+	  void(*sym)(void) = (void(*)(void))dlsym(soHandle, "run_main_loop");
+	  if (!sym) {
+		  std::cout <<"Can't load main function:\n"
+				    <<dlerror() <<"\n";
+		  return;
+	  }
 
-
-
+	  //STep 3: Call it
+	  sym();
 
 
 	  TestBase t;
