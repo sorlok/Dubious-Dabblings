@@ -231,6 +231,17 @@ struct Application : Window {
 		  return;
 	  }
 
+	  //Basic SFML_Test app looks like this:
+	  //init_sfml();         //Returns true/false
+	  //CALL PARROT CODE TO CREATE GAME OBJECTS
+	  //while(appRunning) {  //Parrot will have to hook appRunning somehow.
+	      //sfml_handle_events();  //Could probably return "false" to mean "exit"
+	      //my_basic_update();     //Do engine-specific stuff. (Currently does lots more.
+	      //CALL PARROT CODE TO FIX THAT WEIRD POSITIONAL BUG
+	      //sfml_display();        //Flushes the drawing buffer.
+	  //}
+	  //close_sfml();  //Closing the DLL also works, but let's be thorough.
+
 	  //Step 2: Find our main symbol.
 	  void(*sym)(void) = (void(*)(void))dlsym(soHandle, "run_main_loop");
 	  if (!sym) {
