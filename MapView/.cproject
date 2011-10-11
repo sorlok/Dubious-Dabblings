@@ -25,12 +25,11 @@
 <option id="gnu.cpp.compiler.exe.debug.option.optimization.level.1398033213" name="Optimization Level" superClass="gnu.cpp.compiler.exe.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.exe.debug.option.debugging.level.387534158" name="Debug Level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.option.include.paths.1346307745" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-<listOptionValue builtIn="false" value="/usr/local/include/parrot/3.8.0-devel"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../phoenix&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/..&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/src&quot;"/>
 </option>
-<option id="gnu.cpp.compiler.option.other.other.925707600" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -std=c++0x `pkg-config --cflags gtk+-2.0`" valueType="string"/>
+<option id="gnu.cpp.compiler.option.other.other.925707600" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -std=c++0x `pkg-config --cflags gtk+-2.0` `parrot_config embed-cflags`" valueType="string"/>
 <option id="gnu.cpp.compiler.option.preprocessor.def.806232055" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="PHOENIX_GTK"/>
 </option>
@@ -48,14 +47,13 @@
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../phoenix_ext/build&quot;"/>
 </option>
 <option id="gnu.cpp.link.option.libs.1256686605" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
-<listOptionValue builtIn="false" value="parrot"/>
 <listOptionValue builtIn="false" value="X11"/>
 <listOptionValue builtIn="false" value="phoenix_ext"/>
 <listOptionValue builtIn="false" value="phoenix_ext_gtk"/>
 <listOptionValue builtIn="false" value="tinyxml"/>
 <listOptionValue builtIn="false" value="z"/>
 </option>
-<option id="gnu.cpp.link.option.flags.1395252659" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="`pkg-config --libs gtk+-2.0`" valueType="string"/>
+<option id="gnu.cpp.link.option.flags.1395252659" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="`pkg-config --libs gtk+-2.0` `parrot_config embed-ldflags`" valueType="string"/>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1827283840" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 <additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -511,9 +509,8 @@
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1498839644" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release">
 <option id="gnu.cpp.compiler.exe.release.option.optimization.level.1410313572" name="Optimization Level" superClass="gnu.cpp.compiler.exe.release.option.optimization.level" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.exe.release.option.debugging.level.733454602" name="Debug Level" superClass="gnu.cpp.compiler.exe.release.option.debugging.level" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
-<option id="gnu.cpp.compiler.option.other.other.1030570728" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -std=c++0x `pkg-config --cflags gtk+-2.0`" valueType="string"/>
+<option id="gnu.cpp.compiler.option.other.other.1030570728" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -std=c++0x `pkg-config --cflags gtk+-2.0` `parrot_config embed-cflags`" valueType="string"/>
 <option id="gnu.cpp.compiler.option.include.paths.1652727870" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-<listOptionValue builtIn="false" value="/usr/local/include/parrot/3.8.0-devel"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../phoenix&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/..&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/src&quot;"/>
@@ -530,9 +527,8 @@
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.linker.exe.release.1328123885" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.release"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.1802674260" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release">
-<option id="gnu.cpp.link.option.flags.1299864759" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="`pkg-config --libs gtk+-2.0`" valueType="string"/>
+<option id="gnu.cpp.link.option.flags.1299864759" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="`pkg-config --libs gtk+-2.0` `parrot_config embed-ldflags`" valueType="string"/>
 <option id="gnu.cpp.link.option.libs.2133152669" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
-<listOptionValue builtIn="false" value="parrot"/>
 <listOptionValue builtIn="false" value="X11"/>
 <listOptionValue builtIn="false" value="phoenix_ext"/>
 <listOptionValue builtIn="false" value="phoenix_ext_gtk"/>

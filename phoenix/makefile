@@ -14,10 +14,10 @@ phoenix_gtk.o: phoenix.cpp core/core.hpp core/core.cpp
 	g++ -std=gnu++0x -I. -O3 -fomit-frame-pointer -o phoenix_gtk.o -c phoenix.cpp -DPHOENIX_GTK `pkg-config --cflags gtk+-2.0`
 
 phoenix_win.o: phoenix.cpp core/core.hpp core/core.cpp phoenix-winres.o
-	i586-mingw32msvc-g++ -std=gnu++0x -I. -I/usr/i586-mingw32msvc/include -O3 -fomit-frame-pointer -DPHOENIX_WINDOWS  -o phoenix_win.o -c phoenix.cpp
+	g++ -std=gnu++0x -I. -I/usr/i586-mingw32msvc/include -O3 -fomit-frame-pointer -DPHOENIX_WINDOWS  -o phoenix_win.o -c phoenix.cpp
 
 phoenix-winres.o: windows/phoenix.rc
-	i586-mingw32msvc-windres windows/phoenix.rc phoenix-winres.o
+	windres windows/phoenix.rc phoenix-winres.o
 
 phoenix_qt.o: phoenix.cpp core/core.hpp core/core.cpp phoenix-qt-moc
 	g++ -std=gnu++0x -I. -O3 -fomit-frame-pointer -o phoenix_qt.o -c phoenix.cpp -DPHOENIX_QT `pkg-config --cflags QtCore QtGui`

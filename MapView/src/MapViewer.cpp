@@ -33,6 +33,8 @@
 //Parrot
 #include "parrot/api.h"
 
+#include "parrot/basic_functions.hpp"
+
 
 using namespace nall;
 using namespace phoenix;
@@ -65,78 +67,15 @@ public:
 	}
 };*/
 
-//Parrot objects
-PMC* interpreter;
-PMC* pf;
-PMC* args;
 
-void throw_last_parrot_error(const std::string& msg, PMC* interp);
-std::string get_parrot_string(PMC* interp, Parrot_String str);
-void initParrot()
+void testParrotVM()
 {
-	//Create the interpreter
-	if (!Parrot_api_make_interpreter(nullptr, 0, nullptr, &interpreter)) {
-		throw std::runtime_error("Can't create Parrot interpreter");
-	}
+	PMC* interp = initParrot("test.pbc");
+	std::string res = runSpecificFunction(interp, "MyClass", "getlhs", "And now we say: ", "ignored");
+	shutdownParrot(interp);
 
-	//Load bytecode
-	Parrot_String filename;
-	Parrot_api_string_import_ascii(interpreter, "test.pbc", &filename);
-	if (!Parrot_api_load_bytecode_file(interpreter, filename, &pf)) {
-		throw_last_parrot_error("Can't load bytecode file", interpreter);
-	}
-
-	//Run the bytecode
-	if (!Parrot_api_run_bytecode(interpreter, pf, nullptr, nullptr)) {
-		throw_last_parrot_error("Error running bytecode", interpreter);
-	}
-
-	//Done
-	Parrot_api_destroy_interpreter(interpreter);
+	std::cout <<res <<std::endl;
 }
-
-
-void throw_last_parrot_error(const std::string& baseMsg, PMC* interp)
-{
-	//Args
-	//ASSERT_ARGS(throw_last_parrot_error)
-	Parrot_String error_msg, backtrace;
-	Parrot_Int exit_code, is_error;
-	Parrot_PMC except;
-
-	//Attempt to retrieve all variables
-	if (!Parrot_api_get_result(interp, &is_error, &except, &exit_code, &error_msg)) {
-		throw std::runtime_error(std::string(baseMsg + "\n" + "Critical error; can't retrieve error message").c_str());
-	}
-	if (!is_error) {
-		throw std::runtime_error(std::string(baseMsg + "\n" + "Not an error!").c_str());
-	}
-	if (!Parrot_api_get_exception_backtrace(interp, except, &backtrace)) {
-		throw std::runtime_error(std::string(baseMsg + "\n" + "Critical error; no exception backtrace").c_str());
-	}
-
-	//Throw an informative exception
-	std::string msg = get_parrot_string(interp, error_msg);
-	std::string bt = get_parrot_string(interp, backtrace);
-	throw std::runtime_error(baseMsg + "\n" + msg + "\n" + bt);
-}
-
-
-std::string get_parrot_string(PMC* interp, Parrot_String str)
-{
-	//ASSERT_ARGS(get_parrot_string)
-	std::string res;
-	char* raw_str;
-	if (str) {
-		Parrot_api_string_export_ascii(interp, str, &raw_str);
-		if (raw_str) {
-			res = std::string(raw_str);
-			Parrot_api_string_free_exported_ascii(interp, raw_str);
-		}
-	}
-	return res;
-}
-
 
 
 struct Application : Window {
@@ -246,7 +185,7 @@ struct Application : Window {
 	  //Step 3: Call it
 	  sym();*/
 
-	  initParrot();
+	  testParrotVM();
 
 
 	  /*TestBase t;
@@ -373,7 +312,7 @@ struct Application : Window {
     MsgBox.create();
 
     //Parrot stuff
-    initParrot();
+    //testParrotVM();
 
     //Do window tasks
     setTitle("Test Application");
