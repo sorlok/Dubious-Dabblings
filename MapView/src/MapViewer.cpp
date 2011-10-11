@@ -58,12 +58,12 @@ std::string GetCurrentDir() {
 
 
 //Test class for use with Parrot
-class TestBase {
+/*class TestBase {
 public:
 	virtual int getValue() {
 		return 0;
 	}
-};
+};*/
 
 //Parrot objects
 PMC* interpreter;
@@ -86,15 +86,8 @@ void initParrot()
 		throw_last_parrot_error("Can't load bytecode file", interpreter);
 	}
 
-	//Load the string array to pass to the bytecode as "args"
-	/*int argc = 1;
-	const char* argv[] = {"Something"};
-	if (!Parrot_api_pmc_wrap_string_array(interpreter, argc, argv, &args)) {
-		throw_last_parrot_error("Can't generate args PMC", interpreter);
-	}*/
-
 	//Run the bytecode
-	if (!Parrot_api_run_bytecode(interpreter, pf, nullptr, nullptr)) { //what's sysargs vs. programargs?
+	if (!Parrot_api_run_bytecode(interpreter, pf, nullptr, nullptr)) {
 		throw_last_parrot_error("Error running bytecode", interpreter);
 	}
 
@@ -221,7 +214,7 @@ struct Application : Window {
   void parrotTest() {
 	  //Test our SFML app.
 	  //Step 1: Open the shared object.
-	  std::stringstream fileName;
+	  /*std::stringstream fileName;
 	  fileName <<GetCurrentDir() <<"/" <<"libSFML_Test.so";
 	  void* soHandle = dlopen(fileName.str().c_str(), RTLD_NOW);
 	  if (!soHandle) {
@@ -229,21 +222,21 @@ struct Application : Window {
 					<<dlerror() <<"\n"
 				    <<"...on file: " <<fileName.str() <<"\n";
 		  return;
-	  }
+	  }*/
 
 	  //Basic SFML_Test app looks like this:
-	  //init_sfml();         //Returns true/false
-	  //CALL PARROT CODE TO CREATE GAME OBJECTS
-	  //while(appRunning) {  //Parrot will have to hook appRunning somehow.
-	      //sfml_handle_events();  //Could probably return "false" to mean "exit"
-	      //my_basic_update();     //Do engine-specific stuff. (Currently does lots more.
-	      //CALL PARROT CODE TO FIX THAT WEIRD POSITIONAL BUG
-	      //sfml_display();        //Flushes the drawing buffer.
-	  //}
-	  //close_sfml();  //Closing the DLL also works, but let's be thorough.
+	  //1) init_sfml();         //Returns true/false
+	  //2) CALL PARROT CODE TO CREATE GAME OBJECTS
+	  //3) while(appRunning) {  //Parrot will have to hook appRunning somehow.
+	  //4)   sfml_handle_events();  //Could probably return "false" to mean "exit"
+	  //5)   my_basic_update();     //Do engine-specific stuff. (Currently does lots more.
+	  //6)   CALL PARROT CODE TO FIX THAT WEIRD POSITIONAL BUG
+	  //7)   sfml_display();        //Flushes the drawing buffer.
+	  //8) }
+	  //9) close_sfml();  //Closing the DLL also works, but let's be thorough.
 
 	  //Step 2: Find our main symbol.
-	  void(*sym)(void) = (void(*)(void))dlsym(soHandle, "run_main_loop");
+	  /*void(*sym)(void) = (void(*)(void))dlsym(soHandle, "run_main_loop");
 	  if (!sym) {
 		  std::cout <<"Can't load main function:\n"
 				    <<dlerror() <<"\n";
@@ -251,12 +244,14 @@ struct Application : Window {
 	  }
 
 	  //Step 3: Call it
-	  sym();
+	  sym();*/
+
+	  initParrot();
 
 
-	  TestBase t;
+	  /*TestBase t;
 	  int value = t.getValue();
-	  MsgBox.show("Test", {"Base(0), Override(1) returned: " , value});
+	  MsgBox.show("Test", {"Base(0), Override(1) returned: " , value});*/
   }
 
 
