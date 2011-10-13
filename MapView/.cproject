@@ -48,6 +48,7 @@
 </option>
 <option id="gnu.cpp.link.option.libs.1256686605" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="X11"/>
+<listOptionValue builtIn="false" value="sfml-system"/>
 <listOptionValue builtIn="false" value="phoenix_ext"/>
 <listOptionValue builtIn="false" value="phoenix_ext_gtk"/>
 <listOptionValue builtIn="false" value="tinyxml"/>
@@ -530,6 +531,7 @@
 <option id="gnu.cpp.link.option.flags.1299864759" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="`pkg-config --libs gtk+-2.0` `parrot_config embed-ldflags`" valueType="string"/>
 <option id="gnu.cpp.link.option.libs.2133152669" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="X11"/>
+<listOptionValue builtIn="false" value="sfml-system"/>
 <listOptionValue builtIn="false" value="phoenix_ext"/>
 <listOptionValue builtIn="false" value="phoenix_ext_gtk"/>
 <listOptionValue builtIn="false" value="tinyxml"/>

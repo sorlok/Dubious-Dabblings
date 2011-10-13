@@ -1,36 +1,23 @@
-#.namespace ['MyClass']
-#.sub 'init' :vtable
-#    $P0 = box 'goodbye'
-#    setattribute self, 'response', $P0
-#.end
+.namespace ['TestGameObject']
+.sub 'init' :vtable
+.end
 
-#.sub 'getlhs' :method
-#    .param string a
-#    .param string b
+.sub 'update' :method
+  .param pmc lib 
+  .local pmc func
 
-#    $P0 = getattribute self, 'response'
-#    .local string myattr
-#    myattr = $P0
+  #Retrieve mouse x,y
+  dlfunc func, lib, "game_get_mouse_x", "i"
+  $I0 = func()
+  dlfunc func, lib, "game_get_mouse_y", "i"
+  $I1 = func()
 
-#    .local string tmp
-#    tmp = a . myattr
-#    .return (tmp)
-#.end
+  #Set polygon's position correctly (proves that Parrot is driving the game)
+  dlfunc func, lib, "game_set_poly_pos", "vii"
+  func($I0 ,$I1)
 
+.end
 
-
-.namespace[]
-.sub 'main' :main
-#    $P0 = newclass 'MyClass'
-#    addattribute $P0, 'response'
-#    $P1 = new ['MyClass']
-#    .local string in1
-#    in1 = "You know, " 
-#    .local string in2
-#    in2 = "ignored" 
-#    .local string out1 
-#    out1= $P1.'getlhs'(in1, in2)
-#    say out1
 
 
 #Basic game order:
@@ -44,15 +31,24 @@
 #}
 #close_sfml();  //Closing the DLL also works, but let's be thorough.
 
-
+.namespace[]
+.sub 'main' :main
   #Load the DLL
   .local pmc lib, func
-  lib = loadlib "libsfml_engine"
+  #lib = loadlib "libsfml_engine"  #NOTE: Parrot doesn't use the CWD, so running it from Eclipse without an absolute path will crash.
+  lib = loadlib "/home/sethhetu/dubious/MapView/libsfml_engine.so"
+  print "Library: "
+  say lib
 
   #Call init
-  dlfunc func, lib, "init_sfml", "i"
+  func = dlfunc lib, "init_sfml", "i"
   $I0 = func()
   if $I0==0 goto done
+
+  #Create a sample game object
+  $P0 = newclass 'TestGameObject'
+  $P1 = new ['TestGameObject']
+
   say "Starting main loop"
 
   #Main Loop
@@ -64,6 +60,9 @@
     #Now update within the game loop
     dlfunc func, lib, "my_basic_update", "v"
     func()
+
+    #Call our sample game object's update method
+    $P1.'update'(lib)
 
     #Display what we've just rendered
     dlfunc func, lib, "sfml_display", "v"
@@ -77,7 +76,7 @@
   func()
 
   done:
-
+    say "Done"
 .end
 
 

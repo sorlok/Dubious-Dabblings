@@ -22,12 +22,18 @@ using namespace std;
 extern "C" {
 #endif
 
-
+//Core functionality
 DLLEXPORT int init_sfml();
 DLLEXPORT int sfml_handle_events();
 DLLEXPORT void my_basic_update();
 DLLEXPORT void sfml_display();
 DLLEXPORT void close_sfml();
+
+//Game functionality
+DLLEXPORT int game_get_mouse_x();
+DLLEXPORT int game_get_mouse_y();
+DLLEXPORT void game_set_poly_pos(int x, int y);
+
 
 //Temp
 DLLEXPORT void main_loop_hack();
@@ -209,8 +215,10 @@ void my_basic_update()
 
 	//Sample (erroneous) functionality to be replaced in Parrot
 	poly.SetPosition(myInput.GetMouseY(), myInput.GetMouseX());
+}
 
-
+void sfml_display()
+{
 	myWindow.Clear(sf::Color(0x33, 0x33, 0x33));
 
 	//myWindow.SetView(view);
@@ -234,10 +242,6 @@ void my_basic_update()
 
 	myWindow.Draw(fps);
 
-}
-
-void sfml_display()
-{
 	myWindow.Display();
 }
 
@@ -246,6 +250,22 @@ void close_sfml()
 {
 	myWindow.Close();
 
+}
+
+
+int game_get_mouse_x()
+{
+	return myWindow.GetInput().GetMouseX();
+}
+
+int game_get_mouse_y()
+{
+	return myWindow.GetInput().GetMouseY();
+}
+
+void game_set_poly_pos(int x, int y)
+{
+	poly.SetPosition(x, y);
 }
 
 

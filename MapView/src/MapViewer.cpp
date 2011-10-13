@@ -30,6 +30,9 @@
 #include "phoenix_ext/CanvasExt.hpp"
 #include "gamedata/GameMap.hpp"
 
+//Let's borrow SFML's threading for now
+#include <SFML/System.hpp>
+
 //Parrot
 #include "parrot/api.h"
 
@@ -40,6 +43,13 @@ using namespace nall;
 using namespace phoenix;
 typedef AnchorPoint::Anchor Anchor;
 const AnchorPoint Centered = Axis::Centered();
+
+nall::string testParrotTxts[] = {"Test Parrot VM", "Shutdown VM"};
+bool testIsRunning = false;
+void ParrotThread(void* userData);
+sf::Thread runningThread(&ParrotThread);
+sf::Mutex runningMutex;
+PMC* interp = nullptr;
 
 
 //Helper directory loader:
@@ -68,13 +78,38 @@ public:
 };*/
 
 
+bool threadIsLooping;
+void ParrotThread(void* userData)
+{
+	interp = initParrot("test.pbc");
+	//std::string res = runSpecificFunction(interp, "MyClass", "getlhs", "And now we say: ", "ignored");
+
+	//We're done when this function returns.
+	sf::Lock LOCK(runningMutex);
+	shutdownParrot(interp);
+	threadIsLooping = true;
+
+	//std::cout <<res <<std::endl;
+}
+
+
 void testParrotVM()
 {
-	PMC* interp = initParrot("test.pbc");
-	std::string res = runSpecificFunction(interp, "MyClass", "getlhs", "And now we say: ", "ignored");
-	shutdownParrot(interp);
+	threadIsLooping = true;
+	runningThread.Launch();
+}
 
-	std::cout <<res <<std::endl;
+
+void quitParrotVM()
+{
+	sf::Lock LOCK(runningMutex);
+	if (threadIsLooping) {
+		if (interp) {
+			shutdownParrot(interp);
+		}
+		runningThread.Terminate();
+		std::cout <<"Forced shutdown.\n";
+	}
 }
 
 
@@ -113,9 +148,10 @@ struct Application : Window {
 
   Label helloLabel;
   Button loadMapBtn;
-  Button testParrotBtn;
   Button quitButton;
   GameMap myMap;
+
+  Button testParrotBtn;
 
   CanvasExt myCanvas;
   HorizontalScrollBar hScroll;
@@ -151,6 +187,18 @@ struct Application : Window {
   }
 
   void parrotTest() {
+	  if (!testIsRunning) {
+		  //Start a new test.
+		  testParrotVM();
+	  } else {
+		  //Finish our test.
+		  quitParrotVM();
+	  }
+
+	  //Update flag, set text
+	  testIsRunning = !testIsRunning;
+	  testParrotBtn.setText(testParrotTxts[testIsRunning?1:0]);
+
 	  //Test our SFML app.
 	  //Step 1: Open the shared object.
 	  /*std::stringstream fileName;
@@ -185,7 +233,7 @@ struct Application : Window {
 	  //Step 3: Call it
 	  sym();*/
 
-	  testParrotVM();
+
 
 
 	  /*TestBase t;
@@ -198,7 +246,7 @@ struct Application : Window {
     ScopedLayoutLock lock(&layout);
     helloLabel.setText("Map Viewer");
     loadMapBtn.setText("Load Map");
-    testParrotBtn.setText("Test Parrot VM");
+    testParrotBtn.setText(testParrotTxts[0]);
     quitButton.setText("Quit");
     hScroll.setEnabled(false);
     vScroll.setEnabled(false);
