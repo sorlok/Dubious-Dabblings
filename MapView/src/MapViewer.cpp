@@ -69,15 +69,6 @@ std::string GetCurrentDir() {
 }
 
 
-//Test class for use with Parrot
-/*class TestBase {
-public:
-	virtual int getValue() {
-		return 0;
-	}
-};*/
-
-
 bool threadIsLooping;
 void ParrotThread(void* userData)
 {
@@ -197,48 +188,7 @@ struct Application : Window {
 
 	  //Update flag, set text
 	  testIsRunning = !testIsRunning;
-	  testParrotBtn.setText(testParrotTxts[testIsRunning?1:0]);
-
-	  //Test our SFML app.
-	  //Step 1: Open the shared object.
-	  /*std::stringstream fileName;
-	  fileName <<GetCurrentDir() <<"/" <<"libSFML_Test.so";
-	  void* soHandle = dlopen(fileName.str().c_str(), RTLD_NOW);
-	  if (!soHandle) {
-		  std::cout <<"Can't load shared library file:\n"
-					<<dlerror() <<"\n"
-				    <<"...on file: " <<fileName.str() <<"\n";
-		  return;
-	  }*/
-
-	  //Basic SFML_Test app looks like this:
-	  //1) init_sfml();         //Returns true/false
-	  //2) CALL PARROT CODE TO CREATE GAME OBJECTS
-	  //3) while(appRunning) {  //Parrot will have to hook appRunning somehow.
-	  //4)   sfml_handle_events();  //Could probably return "false" to mean "exit"
-	  //5)   my_basic_update();     //Do engine-specific stuff. (Currently does lots more.
-	  //6)   CALL PARROT CODE TO FIX THAT WEIRD POSITIONAL BUG
-	  //7)   sfml_display();        //Flushes the drawing buffer.
-	  //8) }
-	  //9) close_sfml();  //Closing the DLL also works, but let's be thorough.
-
-	  //Step 2: Find our main symbol.
-	  /*void(*sym)(void) = (void(*)(void))dlsym(soHandle, "run_main_loop");
-	  if (!sym) {
-		  std::cout <<"Can't load main function:\n"
-				    <<dlerror() <<"\n";
-		  return;
-	  }
-
-	  //Step 3: Call it
-	  sym();*/
-
-
-
-
-	  /*TestBase t;
-	  int value = t.getValue();
-	  MsgBox.show("Test", {"Base(0), Override(1) returned: " , value});*/
+	  testParrotBtn.setText(testParrotTxts[testIsRunning?1:0]); //Note: This is messing up the font; might want to cache it.
   }
 
 
@@ -358,9 +308,6 @@ struct Application : Window {
   void create() {
     //Create our message box window
     MsgBox.create();
-
-    //Parrot stuff
-    //testParrotVM();
 
     //Do window tasks
     setTitle("Test Application");
