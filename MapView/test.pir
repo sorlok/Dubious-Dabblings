@@ -7,13 +7,13 @@
   .local pmc func
 
   #Retrieve mouse x,y
-  dlfunc func, lib, "game_get_mouse_x", "i"
+  func = dlfunc lib, "game_get_mouse_x", "i"
   $I0 = func()
-  dlfunc func, lib, "game_get_mouse_y", "i"
+  func = dlfunc lib, "game_get_mouse_y", "i"
   $I1 = func()
 
   #Set polygon's position correctly (proves that Parrot is driving the game)
-  dlfunc func, lib, "game_set_poly_pos", "vii"
+  func = dlfunc lib, "game_set_poly_pos", "vii"
   func($I0 ,$I1)
 
 .end
@@ -39,44 +39,52 @@
   lib = loadlib "/home/sethhetu/dubious/MapView/libsfml_engine.so"
   print "Library: "
   say lib
+  if lib goto runloop
 
-  #Call init
-  func = dlfunc lib, "init_sfml", "i"
-  $I0 = func()
-  if $I0==0 goto done
+  #Something's wrong; our librar is undefined.
+  say "Library load error."
+#  $S0 = dlerror()  #Not called for some reason, even though the code seems to exist.
+#  say $S0
+  goto done
 
-  #Create a sample game object
-  $P0 = newclass 'TestGameObject'
-  $P1 = new ['TestGameObject']
-
-  say "Starting main loop"
-
-  #Main Loop
-  main_loop:
-    #Have our game handle expected events
-    dlfunc func, lib, "sfml_handle_events", "i"
+  runloop:
+    #Call init
+    func = dlfunc lib, "init_sfml", "i"
     $I0 = func()
+    if $I0==0 goto done
 
-    #Now update within the game loop
-    dlfunc func, lib, "my_basic_update", "v"
+    #Create a sample game object
+    $P0 = newclass 'TestGameObject'
+    $P1 = new ['TestGameObject']
+
+    say "Starting main loop"
+
+    #Main Loop
+    main_loop:
+      #Have our game handle expected events
+      func = dlfunc lib, "sfml_handle_events", "i"
+      $I0 = func()
+
+      #Now update within the game loop
+      func = dlfunc lib, "my_basic_update", "v"
+      func()
+
+      #Call our sample game object's update method
+      $P1.'update'(lib)
+
+      #Display what we've just rendered
+      func = dlfunc lib, "sfml_display", "v"
+      func()
+
+      #Continue to update
+      if $I0==0 goto main_loop
+
+    #When we're done, clean up
+    func = dlfunc lib, "close_sfml", "v"
     func()
 
-    #Call our sample game object's update method
-    $P1.'update'(lib)
-
-    #Display what we've just rendered
-    dlfunc func, lib, "sfml_display", "v"
-    func()
-
-    #Continue to update
-    if $I0==0 goto main_loop
-
-  #When we're done, clean up
-  dlfunc func, lib, "close_sfml", "v"
-  func()
-
-  done:
-    say "Done"
+    done:
+      say "Done"
 .end
 
 
