@@ -1,4 +1,4 @@
-.namespace ['TestGameObject']
+.namespace ['Rendition']
 .sub 'init' :vtable
 .end
 
@@ -142,8 +142,8 @@
     #if $I0==0 goto done
 
     #Create a sample game object
-    $P0 = newclass 'TestGameObject'
-    $P1 = new ['TestGameObject']
+    $P0 = newclass 'Rendition'
+    $P1 = new ['Rendition']
 
     say "Starting main loop"
 
