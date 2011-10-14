@@ -20,6 +20,20 @@
 
 .namespace ['DemoRendition']
 .sub 'init' :vtable
+  #Initialize our drawables array
+  $P0 = new 'ResizablePMCArray'
+  setattribute self, 'drawables', $P0
+
+  #Now, start assigning objects to that array.
+  $I0 = PFX_CanUse()
+  unless $I0 goto makeobjs
+
+  #Make the shader
+  $P1 = PFX_MakeNew('colorize.sfx')
+  
+  #Make the rest of our objects
+  makeobjs:
+
 .end
 
 .sub 'update' :method  
@@ -32,6 +46,8 @@
 .end
 
 .sub 'display' :method
+  #Draw all drawables
+  $P0 = getattribute self, 'drawables'
 .end
 
 
@@ -60,10 +76,13 @@
 
 #Initialize the engine. 
 .sub 'GAME_Init'
+  .param int width
+  .param int height
+  .param int depth
   .local pmc lib, func
   lib = INT_GetDLL()
-  func = dlfunc lib, "init_sfml", "i"
-  $I0 = func()
+  func = dlfunc lib, "init_sfml", "iiii"
+  $I0 = func(width, height, depth)
   .return($I0)
 .end
 
@@ -133,6 +152,32 @@
 .end
 
 
+#PostFX
+.sub 'PFX_CanUse'
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "can_use_postfx", "i"
+  $I0 = func()
+  .return($I0)
+.end
+
+
+.sub 'PFX_MakeNew'
+  .param string filename
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "new_postfx", "PP"
+  $P0 = func(filename)
+
+  say 'type of return value: '
+  $S0 = typeof $P0
+  say $S0
+
+  .return($P0)
+.end
+
+
+
 
 
 #####################################################################
@@ -141,13 +186,21 @@
 
 .namespace[]
 .sub 'main' :main
-    $I0 = GAME_Init()
-    if $I0==0 goto done
+    .local int res
+    .local pmc currRend
+    res = GAME_Init(800, 600, 32)
+    if res==0 goto done
 
-    #Create a sample game object
+    #Create Rendition and subclasses
     $P0 = newclass 'Rendition'
-    $P2 = subclass 'Rendition', 'DemoRendition'
-    $P1 = new ['DemoRendition']
+    $P2 = newclass 'DemoRendition'
+    addparent $P0, $P2
+
+    #Assign an attribute to the subclass
+    addattribute $P2, 'drawables'
+
+    #Create an object of the subclass.
+    currRend = new ['DemoRendition']
 
     say "Starting main loop"
 
@@ -160,14 +213,14 @@
       DEMO_SampleUpdate()
 
       #Call our sample game object's update method
-      $P1.'update'()
+      currRend.'update'()
 
       #Display what we've just rendered
       #TODO: This should still exist, but it should do a lot less.
       DEMO_SampleDisplay()
 
       #And here is where the real updating happens
-      $P1.'display'()
+      currRend.'display'()
 
       #Continue to update
       if $I0==0 goto main_loop

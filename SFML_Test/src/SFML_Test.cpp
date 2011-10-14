@@ -6,6 +6,7 @@
 #include <list>
 #include <iostream>
 #include <sstream>
+#include <string>
 
 using namespace std;
 
@@ -23,20 +24,25 @@ extern "C" {
 #endif
 
 //Core functionality
-DLLEXPORT int init_sfml();
+DLLEXPORT int init_sfml(int width, int height, int depth);
 DLLEXPORT int sfml_handle_events();
 DLLEXPORT void my_basic_update();
 DLLEXPORT void sfml_display();
 DLLEXPORT void close_sfml();
 
+//Post FX
+DLLEXPORT int can_use_postfx();
+DLLEXPORT sf::PostFX* new_postfx(std::string filename);
+DLLEXPORT void del_postfx(sf::PostFX* item);
+DLLEXPORT void demo_set_default_postfx(sf::PostFX* item);
+DLLEXPORT void demo_update_postfx_color(sf::PostFX* item);
+
 //Game functionality
 DLLEXPORT int game_get_mouse_x();
 DLLEXPORT int game_get_mouse_y();
 DLLEXPORT void game_set_poly_pos(int x, int y);
+DLLEXPORT void game_draw_item(sf::Drawable* item);
 
-
-//Temp
-DLLEXPORT void main_loop_hack();
 
 
 #ifdef __cplusplus
@@ -106,7 +112,6 @@ sf::Shape poly;
 
 sf::View view;
 
-sf::PostFX pEffect;
 
 RollingAverage framerate(1000);
 sf::Clock frClock;
@@ -120,16 +125,9 @@ void flipPoly(int id1, int id2)
 
 
 
-int init_sfml()
+int init_sfml(int width, int height, int depth)
 {
-	myWindow.Create(sf::VideoMode(800, 600, 32), "Here is a test window.");
-	//myWindow.UseVerticalSync(true); //Restrict to 50fps
-
-	//Check
-	if (!sf::PostFX::CanUsePostFX()) {
-		std::cout <<"Your graphics card doesn't support post-effects.\n";
-		return 0;
-	}
+	myWindow.Create(sf::VideoMode(width, height, depth), "Here is a test window.");
 
 	//Init resources
 	if (!img.LoadFromFile("person.png")) {
@@ -153,14 +151,6 @@ int init_sfml()
 
 	view.SetCenter(800/2, 600/2);
 	view.SetHalfSize(800*75/100, 600*75/100);
-
-	if (!pEffect.LoadFromFile("colorize.sfx")) {
-	    std::cout <<"Couldn't find post-effect file.\n";
-	    return 0;
-	}
-
-	pEffect.SetTexture("framebuffer", NULL); //"NULL" means use the screen.
-	pEffect.SetParameter("color", 1.f, 1.f, 1.f);
 
 	polyScale = 1.0;
 	polyScaleDec = true;
@@ -205,11 +195,6 @@ void my_basic_update()
 	poly.SetScaleX(polyScale);
 
 
-	float rPerc = polyScale;
-	float gPerc = spr1.GetRotation()/360.0;
-	float bPerc = spr2.GetRotation()/360.0;
-	pEffect.SetParameter("color", rPerc, gPerc, bPerc);
-
 	//Grab a handle on the input struct
 	const sf::Input& myInput = myWindow.GetInput();
 
@@ -238,8 +223,6 @@ void sfml_display()
 		fps.SetText(fpsStr.str());
 	}
 
-	myWindow.Draw(pEffect);
-
 	myWindow.Draw(fps);
 
 	myWindow.Display();
@@ -250,6 +233,54 @@ void close_sfml()
 {
 	myWindow.Close();
 
+}
+
+
+int can_use_postfx()
+{
+	return sf::PostFX::CanUsePostFX()?1:0;
+}
+
+
+sf::PostFX* new_postfx(std::string filename)
+{
+	sf::PostFX* item = new sf::PostFX();
+	if (item->LoadFromFile(filename)) {
+		std::cout <<"New pointer: " <<item <<"\n";
+		return item;
+	}
+
+	//Else, cleanup and return null;
+	delete item;
+	return NULL;
+}
+
+void del_postfx(sf::PostFX* item)
+{
+	delete item;
+}
+
+
+void demo_set_default_postfx(sf::PostFX* item)
+{
+	item->SetTexture("framebuffer", NULL); //"NULL" means use the screen.
+	item->SetParameter("color", 1.f, 1.f, 1.f);
+}
+
+
+void demo_update_postfx_color(sf::PostFX* item)
+{
+	float rPerc = polyScale;
+	float gPerc = spr1.GetRotation()/360.0;
+	float bPerc = spr2.GetRotation()/360.0;
+	item->SetParameter("color", rPerc, gPerc, bPerc);
+}
+
+
+
+void game_draw_item(sf::Drawable* item)
+{
+	myWindow.Draw(*item);
 }
 
 
@@ -271,7 +302,7 @@ void game_set_poly_pos(int x, int y)
 
 void main_loop_hack()
 {
-	if (init_sfml()==0) {
+	if (init_sfml(800, 600, 32)==0) {
 		return /*1*/;
 	}
 
