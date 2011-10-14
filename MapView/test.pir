@@ -1,15 +1,37 @@
+#####################################################################
+# Base classes, to be subclassed by our library.
+#####################################################################
+
 .namespace ['Rendition']
 .sub 'init' :vtable
 .end
 
-.sub 'update' :method
+.sub 'update' :method  
+.end
+
+.sub 'display' :method
+.end
+
+
+
+#####################################################################
+# Sample rendition subclass that loads our existing demo and displays it.
+#####################################################################
+
+.namespace ['DemoRendition']
+.sub 'init' :vtable
+.end
+
+.sub 'update' :method  
   #Retrieve mouse x,y
   $I0 = INPUT_GetMouseX()
   $I1 = INPUT_GetMouseY()
 
   #Set polygon's position correctly (proves that Parrot is driving the game)
   DEMO_SetPolyPos($I0 ,$I1)
+.end
 
+.sub 'display' :method
 .end
 
 
@@ -119,31 +141,13 @@
 
 .namespace[]
 .sub 'main' :main
-  
-
-  #Load the DLL
-  #.local pmc lib, func
-  #lib = loadlib "libsfml_engine"  #NOTE: Parrot doesn't use the CWD, so running it from Eclipse without an absolute path will crash.
-  #lib = loadlib "/home/sethhetu/dubious/MapView/libsfml_engine.so"
-  #print "Library: "
-  #say lib
-  #if lib goto runloop
-
-  #Something's wrong; our librar is undefined.
-  #say "Library load error."
-#  $S0 = dlerror()  #Not called for some reason, even though the code seems to exist.
-#  say $S0
-  #goto done
-
-  #runloop:
-    #Call init
-    #func = dlfunc lib, "init_sfml", "i"
     $I0 = GAME_Init()
-    #if $I0==0 goto done
+    if $I0==0 goto done
 
     #Create a sample game object
     $P0 = newclass 'Rendition'
-    $P1 = new ['Rendition']
+    $P2 = subclass 'Rendition', 'DemoRendition'
+    $P1 = new ['DemoRendition']
 
     say "Starting main loop"
 
@@ -159,7 +163,11 @@
       $P1.'update'()
 
       #Display what we've just rendered
+      #TODO: This should still exist, but it should do a lot less.
       DEMO_SampleDisplay()
+
+      #And here is where the real updating happens
+      $P1.'display'()
 
       #Continue to update
       if $I0==0 goto main_loop
