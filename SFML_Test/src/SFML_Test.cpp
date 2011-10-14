@@ -27,13 +27,13 @@ extern "C" {
 DLLEXPORT int init_sfml(int width, int height, int depth);
 DLLEXPORT int sfml_handle_events();
 DLLEXPORT void my_basic_update();
+DLLEXPORT void demo_display();
 DLLEXPORT void sfml_display();
 DLLEXPORT void close_sfml();
 
 //Post FX
 DLLEXPORT int can_use_postfx();
-DLLEXPORT sf::PostFX* new_postfx(std::string filename);
-DLLEXPORT void del_postfx(sf::PostFX* item);
+DLLEXPORT sf::PostFX* new_postfx(const char* filename);
 DLLEXPORT void demo_set_default_postfx(sf::PostFX* item);
 DLLEXPORT void demo_update_postfx_color(sf::PostFX* item);
 
@@ -42,6 +42,7 @@ DLLEXPORT int game_get_mouse_x();
 DLLEXPORT int game_get_mouse_y();
 DLLEXPORT void game_set_poly_pos(int x, int y);
 DLLEXPORT void game_draw_item(sf::Drawable* item);
+DLLEXPORT void game_del_item(sf::Drawable* item);
 
 
 
@@ -202,7 +203,7 @@ void my_basic_update()
 	poly.SetPosition(myInput.GetMouseY(), myInput.GetMouseX());
 }
 
-void sfml_display()
+void demo_display()
 {
 	myWindow.Clear(sf::Color(0x33, 0x33, 0x33));
 
@@ -224,7 +225,11 @@ void sfml_display()
 	}
 
 	myWindow.Draw(fps);
+}
 
+
+void sfml_display()
+{
 	myWindow.Display();
 }
 
@@ -242,11 +247,10 @@ int can_use_postfx()
 }
 
 
-sf::PostFX* new_postfx(std::string filename)
+sf::PostFX* new_postfx(const char* filename)
 {
 	sf::PostFX* item = new sf::PostFX();
 	if (item->LoadFromFile(filename)) {
-		std::cout <<"New pointer: " <<item <<"\n";
 		return item;
 	}
 
@@ -255,7 +259,7 @@ sf::PostFX* new_postfx(std::string filename)
 	return NULL;
 }
 
-void del_postfx(sf::PostFX* item)
+void game_del_item(sf::Drawable* item)
 {
 	delete item;
 }

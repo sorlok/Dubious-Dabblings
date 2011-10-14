@@ -6,7 +6,7 @@
 .sub 'init' :vtable
 .end
 
-.sub 'update' :method  
+.sub 'update' :method 
 .end
 
 .sub 'display' :method
@@ -28,27 +28,64 @@
   $I0 = PFX_CanUse()
   unless $I0 goto makeobjs
 
-  #Make the shader
+  #Load the shader
   $P1 = PFX_MakeNew('colorize.sfx')
+  if null $P1 goto makeobjs
+
+  #Set its properties (for now just use the defaults)
+  DEMO_SetDefaultPFX($P1)
+
+  #Save it in our array of objects
+  $P0.'push'($P1)
   
   #Make the rest of our objects
   makeobjs:
 
 .end
 
-.sub 'update' :method  
+.sub 'update' :method 
+  .local pmc drawables 
+  .local int index, size
+
   #Retrieve mouse x,y
   $I0 = INPUT_GetMouseX()
   $I1 = INPUT_GetMouseY()
 
   #Set polygon's position correctly (proves that Parrot is driving the game)
   DEMO_SetPolyPos($I0 ,$I1)
+
+  #Now, update any objects in our 'drawables' 
+  drawables = getattribute self, 'drawables'
+  index = 0
+  size = drawables
+
+  at_item:
+    if index >= size goto done
+    $P0 = drawables[index]
+    DEMO_UpdatePFXColor($P0)
+    index += 1
+    goto at_item
+  done:
 .end
 
 .sub 'display' :method
-  #Draw all drawables
-  $P0 = getattribute self, 'drawables'
+  .local pmc drawables 
+  .local int index, size
+
+  #Now, update any objects in our 'drawables' 
+  drawables = getattribute self, 'drawables'
+  index = 0
+  size = drawables
+
+  at_item:
+    if index >= size goto done
+    $P0 = drawables[index]
+    GAME_DrawItem($P0)
+    index += 1
+    goto at_item
+  done:
 .end
+
 
 
 
@@ -136,9 +173,19 @@
 .sub 'DEMO_SampleDisplay'
   .local pmc lib, func
   lib = INT_GetDLL()
+  func = dlfunc lib, "demo_display", "v"
+  func()
+.end
+
+
+#Push all updates to the screen
+.sub 'GAME_Display'
+  .local pmc lib, func
+  lib = INT_GetDLL()
   func = dlfunc lib, "sfml_display", "v"
   func()
 .end
+
 
 
 #Update our "poly" position with the given x/y
@@ -164,17 +211,65 @@
 
 .sub 'PFX_MakeNew'
   .param string filename
-  .local pmc lib, func
-  lib = INT_GetDLL()
-  func = dlfunc lib, "new_postfx", "PP"
-  $P0 = func(filename)
+  .local pmc lib, func, bb
 
-  say 'type of return value: '
-  $S0 = typeof $P0
-  say $S0
+  #Convert the string to a byte buffer
+  bb = new ['ByteBuffer']
+  bb = filename
+  push bb, 0
+
+  lib = INT_GetDLL()
+  func = dlfunc lib, "new_postfx", "pp"
+  $P0 = func(bb)
+
+#  say 'type of return value: '
+#  $S0 = typeof $P0
+#  say $S0
+
+#  say 'as pointer: '
+#  $I0 = $P0.'pointer'()
+#  say $I0
+
 
   .return($P0)
 .end
+
+
+.sub 'DEMO_SetDefaultPFX'
+  .param pmc item
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "demo_set_default_postfx", "vp"
+  func(item)
+.end
+
+.sub 'DEMO_UpdatePFXColor'
+  .param pmc item
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "demo_update_postfx_color", "vp"
+  func(item)
+.end
+
+
+.sub 'GAME_DrawItem'
+  .param pmc item
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "game_draw_item", "vp"
+  func(item)
+.end
+
+
+.sub 'GAME_DeleteItem'
+  .param pmc item
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "game_del_item", "vp"
+  func(item)
+.end
+
+
 
 
 
@@ -216,11 +311,13 @@
       currRend.'update'()
 
       #Display what we've just rendered
-      #TODO: This should still exist, but it should do a lot less.
       DEMO_SampleDisplay()
 
       #And here is where the real updating happens
       currRend.'display'()
+
+      #Here we go
+      GAME_Display()
 
       #Continue to update
       if $I0==0 goto main_loop
