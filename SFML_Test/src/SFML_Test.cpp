@@ -1,4 +1,26 @@
-#include <SFML/System.hpp>
+//Helper classes
+class SomeClass {
+public:
+	float value;
+};
+
+//Our functions
+extern "C" {
+  SomeClass* make_new_class() {
+	  SomeClass* res = new SomeClass();
+	  res->value = 10.0;
+	  return res;
+  }
+
+  float get_class_value(SomeClass* item) {
+	  return item->value;
+  }
+
+}
+
+
+
+/*#include <SFML/System.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 
@@ -145,16 +167,6 @@ int init_sfml(int width, int height, int depth)
 	myWindow.Create(sf::VideoMode(width, height, depth), "Here is a test window.");
 
 	//Init resources
-	/*if (!img.LoadFromFile("person.png")) {
-		std::cout <<"Error loading image!\n";
-		return 0;
-	}*/
-	/*spr1.SetImage(img);
-	spr1.SetPosition(800/3, 600/2);
-	spr1.SetCenter(img.GetWidth()/2, img.GetHeight()/2);
-	spr2.SetImage(img);
-	spr2.SetPosition(2*800/3, 600/2);
-	spr2.SetCenter(img.GetWidth()/2, img.GetHeight()/2);*/
 	fps.SetPosition(10, 10);
 	poly.AddPoint(0, -50,  sf::Color(0xFF, 0, 0));
 	poly.AddPoint(50, 0,   sf::Color(0, 0xFF, 0));
@@ -187,16 +199,16 @@ int sfml_handle_events()
 void my_basic_update()
 {
 	//TODO
-	/*spr1.SetRotation(spr1.GetRotation()+50*myWindow.GetFrameTime());
-	spr2.SetRotation(spr2.GetRotation()-80*myWindow.GetFrameTime());
+	//spr1.SetRotation(spr1.GetRotation()+50*myWindow.GetFrameTime());
+	//spr2.SetRotation(spr2.GetRotation()-80*myWindow.GetFrameTime());
 
-	sf::Color newColor = spr1.GetColor();
-	newColor.b = (unsigned int) ((1.0-polyScale)*255);
-	spr1.SetColor(newColor);
+	//sf::Color newColor = spr1.GetColor();
+	//newColor.b = (unsigned int) ((1.0-polyScale)*255);
+	//spr1.SetColor(newColor);
 
-	newColor = spr2.GetColor();
-	newColor.a = (unsigned int) (polyScale*255);
-	spr2.SetColor(newColor);*/
+	//newColor = spr2.GetColor();
+	//newColor.a = (unsigned int) (polyScale*255);
+	//spr2.SetColor(newColor);
 
 	polyScale += (polyScaleDec?-1:1)*myWindow.GetFrameTime();
 	if (polyScale<0.0) {
@@ -387,7 +399,7 @@ float game_get_frame_time_s()
 void main_loop_hack()
 {
 	if (init_sfml(800, 600, 32)==0) {
-		return /*1*/;
+		return;
 	}
 
 	for(;;) {
@@ -404,7 +416,7 @@ void main_loop_hack()
 
 	close_sfml();
 
-	return /*0*/;
+	return;
 }
 
 
@@ -419,3 +431,4 @@ int main(int argc, char** argv)
 #endif //IS_BUILDING_LIBRARY
 
 
+*/

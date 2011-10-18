@@ -392,10 +392,11 @@
 .sub 'SPR_GetRotation'
   .param pmc item
   .local pmc lib, func
+  .local num retVal
   lib = INT_GetDLL()
   func = dlfunc lib, "sprite_get_rotation", "fp"
-  $N0 = func(item)
-  .return($N0)
+  retVal = func(item)
+  .return(retVal)
 .end
 
 
