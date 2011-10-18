@@ -12,6 +12,10 @@ extern "C" {
 	  return res;
   }
 
+  float get_nonclass_value() {
+	  return 5.0;
+  }
+
   float get_class_value(SomeClass* item) {
 	  return item->value;
   }
