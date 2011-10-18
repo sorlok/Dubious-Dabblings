@@ -64,26 +64,26 @@
   h /= 2
 
   #Make sprite 1, set its properties, save it.
-  $P1 = SPR_MakeNew()
-  SPR_SetImage($P1, personImg)
+  $P3 = SPR_MakeNew()
+  SPR_SetImage($P3, personImg)
   $I0 = 800/3
   $I1 = 600/2
-  SPR_SetPosition($P1, $I0, $I1)
-  SPR_SetCenter($P1, w, h)
-  $P0.'push'($P1)
-  setattribute self, 'spr1', $P1
+  SPR_SetPosition($P3, $I0, $I1)
+  SPR_SetCenter($P3, w, h)
+  $P0.'push'($P3)
+  setattribute self, 'spr1', $P3
 
 
   #Make sprite 2, set its properties, save it.
-  $P1 = SPR_MakeNew()
-  SPR_SetImage($P1, personImg)
+  $P2 = SPR_MakeNew()
+  SPR_SetImage($P2, personImg)
   $I0 = 2*800
   $I0 /= 3
   $I1 = 600/2
-  SPR_SetPosition($P1, $I0, $I1)
-  SPR_SetCenter($P1, w, h)
-  $P0.'push'($P1)
-  setattribute self, 'spr2', $P1
+  SPR_SetPosition($P2, $I0, $I1)
+  SPR_SetCenter($P2, w, h)
+  $P0.'push'($P2)
+  setattribute self, 'spr2', $P2
 
 .end
 
