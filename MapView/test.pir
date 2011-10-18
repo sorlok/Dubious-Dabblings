@@ -107,21 +107,21 @@
   DEMO_UpdatePFXColor($P0)
 
   #Update sprite 1's rotation
-  $P0 = getattribute self, 'spr1'
+  $P1 = getattribute self, 'spr1'
   $N0 = 50 * frameTimeS
-  $N1 = SPR_GetRotation($P0)
+  $N1 = SPR_GetRotation($P1)
   $N0 += $N1
-  SPR_SetRotation($P0, $N0)
+  SPR_SetRotation($P1, $N0)
 
   #Update sprite 1's colorization
 
 
   #Update sprite 2's rotation
-  $P0 = getattribute self, 'spr2'
+  $P2 = getattribute self, 'spr2'
   $N0 = 80 * frameTimeS
-  $N1 = SPR_GetRotation($P0)
+  $N1 = SPR_GetRotation($P2)
   $N0 = $N1 - $N0
-  SPR_SetRotation($P0, $N0)
+  SPR_SetRotation($P2, $N0)
 
   #Update sprite 2's colorization
   
@@ -397,6 +397,7 @@
   $N0 = func(item)
   .return($N0)
 .end
+
 
 .sub 'SPR_SetRotation'
   .param pmc item
