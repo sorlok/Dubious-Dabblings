@@ -47,6 +47,8 @@ DLLEXPORT sf::Sprite* new_sprite();
 DLLEXPORT void sprite_set_image(sf::Sprite* item, const sf::Image* img);
 DLLEXPORT void sprite_set_position(sf::Sprite* item, int x, int y);
 DLLEXPORT void sprite_set_center(sf::Sprite* item, int x, int y);
+DLLEXPORT float sprite_get_rotation(sf::Sprite* item);
+DLLEXPORT void sprite_set_rotation(sf::Sprite* item, float angle);
 
 //Game functionality
 DLLEXPORT int game_get_mouse_x();
@@ -317,6 +319,16 @@ void sprite_set_position(sf::Sprite* item, int x, int y)
 void sprite_set_center(sf::Sprite* item, int x, int y)
 {
 	item->SetCenter(x, y);
+}
+
+float sprite_get_rotation(sf::Sprite* item)
+{
+	return item->GetRotation();
+}
+
+void sprite_set_rotation(sf::Sprite* item, float angle)
+{
+	item->SetRotation(angle);
 }
 
 

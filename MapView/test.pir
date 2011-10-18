@@ -90,6 +90,10 @@
 .sub 'update' :method 
   .local pmc drawables 
   .local int index, size
+  .local num frameTimeS
+
+  #Retrieve game timer
+  frameTimeS = GAME_GetFrameTimeInS()
 
   #Retrieve mouse x,y
   $I0 = INPUT_GetMouseX()
@@ -99,8 +103,28 @@
   DEMO_SetPolyPos($I0 ,$I1)
 
   #Update our post-effect shader
-  $P0 = getattribute self, 'pfxShader'
+  $P0 = getattribute self, 'pfxShader'   #Note: This _could_ be null...
   DEMO_UpdatePFXColor($P0)
+
+  #Update sprite 1's rotation
+  $P0 = getattribute self, 'spr1'
+  $N0 = 50 * frameTimeS
+  $N1 = SPR_GetRotation($P0)
+  $N0 += $N1
+  SPR_SetRotation($P0, $N0)
+
+  #Update sprite 1's colorization
+
+
+  #Update sprite 2's rotation
+  $P0 = getattribute self, 'spr2'
+  $N0 = 80 * frameTimeS
+  $N1 = SPR_GetRotation($P0)
+  $N0 = $N1 - $N0
+  SPR_SetRotation($P0, $N0)
+
+  #Update sprite 2's colorization
+  
 .end
 
 .sub 'display' :method
@@ -192,6 +216,15 @@
   func = dlfunc lib, "game_get_mouse_y", "i"
   $I0 = func()
   .return($I0)
+.end
+
+
+.sub 'GAME_GetFrameTimeInS'
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "game_get_frame_time_s", "f"
+  $N0 = func()
+  .return($N0)
 .end
 
 
@@ -353,6 +386,25 @@
   lib = INT_GetDLL()
   func = dlfunc lib, "sprite_set_center", "vpii"
   func(item, x, y)
+.end
+
+
+.sub 'SPR_GetRotation'
+  .param pmc item
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "sprite_get_rotation", "fp"
+  $N0 = func(item)
+  .return($N0)
+.end
+
+.sub 'SPR_SetRotation'
+  .param pmc item
+  .param num angle
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "sprite_set_rotation", "vpf"
+  func(item, angle)
 .end
 
 
