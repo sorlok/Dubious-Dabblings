@@ -20,6 +20,9 @@
 
 .namespace ['DemoRendition']
 .sub 'init' :vtable
+  .local pmc personImg
+  .local int w, h
+
   #Initialize our drawables array
   $P0 = new 'ResizablePMCArray'
   setattribute self, 'drawables', $P0
@@ -37,9 +40,50 @@
 
   #Save it in our array of objects
   $P0.'push'($P1)
+  setattribute self, 'pfxShader', $P1
   
   #Make the rest of our objects
   makeobjs:
+
+  #Images
+  personImg = IMG_MakeNew('person.png')
+  unless null personImg goto makeobjs2
+
+  #Error
+  say "Can't load image: person.png"
+  $P1 = new 'Exception'
+  throw $P1
+
+  #Make more objects
+  makeobjs2:
+
+  #Retrieve the image's width/height, for later
+  w = IMG_GetWidth(personImg)
+  w /= 2
+  h = IMG_GetHeight(personImg)
+  h /= 2
+
+  #Make sprite 1, set its properties, save it.
+  $P1 = SPR_MakeNew()
+  SPR_SetImage($P1, personImg)
+  $I0 = 800/3
+  $I1 = 600/2
+  SPR_SetPosition($P1, $I0, $I1)
+  SPR_SetCenter($P1, w, h)
+  $P0.'push'($P1)
+  setattribute self, 'spr1', $P1
+
+
+  #Make sprite 2, set its properties, save it.
+  $P1 = SPR_MakeNew()
+  SPR_SetImage($P1, personImg)
+  $I0 = 2*800
+  $I0 /= 3
+  $I1 = 600/2
+  SPR_SetPosition($P1, $I0, $I1)
+  SPR_SetCenter($P1, w, h)
+  $P0.'push'($P1)
+  setattribute self, 'spr2', $P1
 
 .end
 
@@ -54,18 +98,9 @@
   #Set polygon's position correctly (proves that Parrot is driving the game)
   DEMO_SetPolyPos($I0 ,$I1)
 
-  #Now, update any objects in our 'drawables' 
-  drawables = getattribute self, 'drawables'
-  index = 0
-  size = drawables
-
-  at_item:
-    if index >= size goto done
-    $P0 = drawables[index]
-    DEMO_UpdatePFXColor($P0)
-    index += 1
-    goto at_item
-  done:
+  #Update our post-effect shader
+  $P0 = getattribute self, 'pfxShader'
+  DEMO_UpdatePFXColor($P0)
 .end
 
 .sub 'display' :method
@@ -222,15 +257,6 @@
   func = dlfunc lib, "new_postfx", "pp"
   $P0 = func(bb)
 
-#  say 'type of return value: '
-#  $S0 = typeof $P0
-#  say $S0
-
-#  say 'as pointer: '
-#  $I0 = $P0.'pointer'()
-#  say $I0
-
-
   .return($P0)
 .end
 
@@ -252,6 +278,86 @@
 .end
 
 
+
+#Image
+.sub 'IMG_MakeNew'
+  .param string filename
+  .local pmc lib, func, bb
+
+  #Convert the string to a byte buffer
+  bb = new ['ByteBuffer']
+  bb = filename
+  push bb, 0
+
+  lib = INT_GetDLL()
+  func = dlfunc lib, "new_image", "pp"
+  $P0 = func(bb)
+
+  .return($P0)
+.end
+
+.sub 'IMG_GetWidth'
+  .param pmc item
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "image_get_width", "ip"
+  $I0 = func(item)
+  .return($I0)
+.end
+
+.sub 'IMG_GetHeight'
+  .param pmc item
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "image_get_height", "ip"
+  $I0 = func(item)
+  .return($I0)
+.end
+
+
+#Sprite
+.sub 'SPR_MakeNew'
+  .local pmc lib, func
+
+  lib = INT_GetDLL()
+  func = dlfunc lib, "new_sprite", "p"
+  $P0 = func()
+
+  .return($P0)
+.end
+
+.sub 'SPR_SetImage'
+  .param pmc item
+  .param pmc img
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "sprite_set_image", "vpp"
+  func(item, img)
+.end
+
+.sub 'SPR_SetPosition'
+  .param pmc item
+  .param int x
+  .param int y
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "sprite_set_position", "vpii"
+  func(item, x, y)
+.end
+
+.sub 'SPR_SetCenter'
+  .param pmc item
+  .param int x
+  .param int y
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "sprite_set_center", "vpii"
+  func(item, x, y)
+.end
+
+
+
+#Generic delete/draw stuff
 .sub 'GAME_DrawItem'
   .param pmc item
   .local pmc lib, func
@@ -291,8 +397,11 @@
     $P2 = newclass 'DemoRendition'
     addparent $P0, $P2
 
-    #Assign an attribute to the subclass
+    #Assign some attributes
     addattribute $P2, 'drawables'
+    addattribute $P2, 'pfxShader'
+    addattribute $P2, 'spr1'
+    addattribute $P2, 'spr2'
 
     #Create an object of the subclass.
     currRend = new ['DemoRendition']

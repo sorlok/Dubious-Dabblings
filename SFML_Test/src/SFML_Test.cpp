@@ -37,9 +37,21 @@ DLLEXPORT sf::PostFX* new_postfx(const char* filename);
 DLLEXPORT void demo_set_default_postfx(sf::PostFX* item);
 DLLEXPORT void demo_update_postfx_color(sf::PostFX* item);
 
+//Image
+DLLEXPORT sf::Image* new_image(const char* filename);
+DLLEXPORT int image_get_width(const sf::Image* item);
+DLLEXPORT int image_get_height(const sf::Image* item);
+
+//Sprite
+DLLEXPORT sf::Sprite* new_sprite();
+DLLEXPORT void sprite_set_image(sf::Sprite* item, const sf::Image* img);
+DLLEXPORT void sprite_set_position(sf::Sprite* item, int x, int y);
+DLLEXPORT void sprite_set_center(sf::Sprite* item, int x, int y);
+
 //Game functionality
 DLLEXPORT int game_get_mouse_x();
 DLLEXPORT int game_get_mouse_y();
+DLLEXPORT float game_get_frame_time_s();
 DLLEXPORT void game_set_poly_pos(int x, int y);
 DLLEXPORT void game_draw_item(sf::Drawable* item);
 DLLEXPORT void game_del_item(sf::Drawable* item);
@@ -105,9 +117,9 @@ bool handleEvent(const sf::Event& event)
 }
 
 
-sf::Image img;
-sf::Sprite spr1;
-sf::Sprite spr2;
+//sf::Image img;
+//sf::Sprite spr1;
+//sf::Sprite spr2;
 sf::String fps;
 sf::Shape poly;
 
@@ -131,16 +143,16 @@ int init_sfml(int width, int height, int depth)
 	myWindow.Create(sf::VideoMode(width, height, depth), "Here is a test window.");
 
 	//Init resources
-	if (!img.LoadFromFile("person.png")) {
+	/*if (!img.LoadFromFile("person.png")) {
 		std::cout <<"Error loading image!\n";
 		return 0;
-	}
-	spr1.SetImage(img);
+	}*/
+	/*spr1.SetImage(img);
 	spr1.SetPosition(800/3, 600/2);
 	spr1.SetCenter(img.GetWidth()/2, img.GetHeight()/2);
 	spr2.SetImage(img);
 	spr2.SetPosition(2*800/3, 600/2);
-	spr2.SetCenter(img.GetWidth()/2, img.GetHeight()/2);
+	spr2.SetCenter(img.GetWidth()/2, img.GetHeight()/2);*/
 	fps.SetPosition(10, 10);
 	poly.AddPoint(0, -50,  sf::Color(0xFF, 0, 0));
 	poly.AddPoint(50, 0,   sf::Color(0, 0xFF, 0));
@@ -172,7 +184,8 @@ int sfml_handle_events()
 
 void my_basic_update()
 {
-	spr1.SetRotation(spr1.GetRotation()+50*myWindow.GetFrameTime());
+	//TODO
+	/*spr1.SetRotation(spr1.GetRotation()+50*myWindow.GetFrameTime());
 	spr2.SetRotation(spr2.GetRotation()-80*myWindow.GetFrameTime());
 
 	sf::Color newColor = spr1.GetColor();
@@ -181,7 +194,7 @@ void my_basic_update()
 
 	newColor = spr2.GetColor();
 	newColor.a = (unsigned int) (polyScale*255);
-	spr2.SetColor(newColor);
+	spr2.SetColor(newColor);*/
 
 	polyScale += (polyScaleDec?-1:1)*myWindow.GetFrameTime();
 	if (polyScale<0.0) {
@@ -209,8 +222,8 @@ void demo_display()
 
 	//myWindow.SetView(view);
 
-	myWindow.Draw(spr1);
-	myWindow.Draw(spr2);
+	//myWindow.Draw(spr1);
+	//myWindow.Draw(spr2);
 	myWindow.Draw(poly);
 
 	if (myWindow.GetFrameTime()>0.0) {
@@ -259,6 +272,55 @@ sf::PostFX* new_postfx(const char* filename)
 	return NULL;
 }
 
+
+
+sf::Image* new_image(const char* filename)
+{
+	sf::Image* item = new sf::Image();
+	if (item->LoadFromFile(filename)) {
+		return item;
+	}
+
+	//Else, cleanup and return null;
+	delete item;
+	return NULL;
+}
+
+int image_get_width(const sf::Image* item)
+{
+	return item->GetWidth();
+}
+
+
+int image_get_height(const sf::Image* item)
+{
+	return item->GetHeight();
+}
+
+
+sf::Sprite* new_sprite()
+{
+	sf::Sprite* item = new sf::Sprite();
+	return item;
+}
+
+void sprite_set_image(sf::Sprite* item, const sf::Image* img)
+{
+	item->SetImage(*img);
+}
+
+void sprite_set_position(sf::Sprite* item, int x, int y)
+{
+	item->SetPosition(x, y);
+}
+
+void sprite_set_center(sf::Sprite* item, int x, int y)
+{
+	item->SetCenter(x, y);
+}
+
+
+
 void game_del_item(sf::Drawable* item)
 {
 	delete item;
@@ -274,9 +336,10 @@ void demo_set_default_postfx(sf::PostFX* item)
 
 void demo_update_postfx_color(sf::PostFX* item)
 {
+	float framePerc = myWindow.GetFrameTime() - static_cast<int>(myWindow.GetFrameTime());
 	float rPerc = polyScale;
-	float gPerc = spr1.GetRotation()/360.0;
-	float bPerc = spr2.GetRotation()/360.0;
+	float gPerc = framePerc;
+	float bPerc = 1.0 - framePerc;
 	item->SetParameter("color", rPerc, gPerc, bPerc);
 }
 
@@ -301,6 +364,11 @@ int game_get_mouse_y()
 void game_set_poly_pos(int x, int y)
 {
 	poly.SetPosition(x, y);
+}
+
+float game_get_frame_time_s()
+{
+	return myWindow.GetFrameTime();
 }
 
 
