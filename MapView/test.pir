@@ -29,6 +29,12 @@
   $P0 = $N0
   setattribute self, 'polyScale', $P0
 
+  #Initialize our polyScaleDec property
+  $P0 = new 'Integer'
+  $I0 = 1
+  $P0 = $I0
+  setattribute self, 'polyScaleDec', $P0
+
   #Initialize our drawables array
   $P0 = new 'ResizablePMCArray'
   setattribute self, 'drawables', $P0
@@ -95,13 +101,15 @@
 
 .sub 'update' :method 
   .local pmc drawables 
-  .local int index, size
+  .local int index, size, polyScaleDec
   .local num frameTimeS, polyScale
 
   #Retrieve game timer, current scale
   frameTimeS = GAME_GetFrameTimeInS()
   $P0 = getattribute self, 'polyScale'
   polyScale = $P0
+  $P0 = getattribute self, 'polyScaleDec'
+  polyScaleDec = $P0
 
   #Retrieve mouse x,y
   $I0 = INPUT_GetMouseX()
@@ -147,7 +155,39 @@
   GAME_DeleteColor($P0)
 
   #Update our polygon's scale factor
-  #polyScale += (polyScaleDec?-1:1)*myWindow.GetFrameTime();
+  $N0 = polyScaleDec
+  if polyScaleDec==1 goto polyscaleupdate
+  $N0 = -1
+
+polyscaleupdate:
+  $N0 *= frameTimeS
+  polyScale += $N0
+
+  #Boundary conditions
+  if polyScale < 0.0 goto ltzero
+  if polyScale > 1.0 goto gtone
+  goto savepoly
+
+ltzero:
+  polyScale = 0.0
+  polyScaleDec = 0
+  #flipPolyPoint(1, 5)
+  #flipPolyPoint(2, 4)
+  goto savepolydec
+
+gtone:
+  polyScale = 1.0
+  polyScaleDec = 1
+
+savepolydec:
+  $P0 = getattribute self, 'polyScaleDec'
+  $P0 = polyScaleDec
+  setattribute self, 'polyScaleDec', $P0
+
+savepoly:
+  $P0 = getattribute self, 'polyScale'
+  $P0 = polyScale
+  setattribute self, 'polyScale', $P0
   
 .end
 
@@ -545,6 +585,7 @@
     addattribute $P2, 'spr1'
     addattribute $P2, 'spr2'
     addattribute $P2, 'polyScale'
+    addattribute $P2, 'polyScaleDec'
 
     #Create an object of the subclass.
     currRend = new ['DemoRendition']

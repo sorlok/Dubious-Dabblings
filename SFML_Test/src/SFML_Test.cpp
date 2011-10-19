@@ -77,8 +77,8 @@ DLLEXPORT void game_del_color(sf::Color* color);
 
 //+1 global variables!
 sf::RenderWindow myWindow;
-float polyScale;
-bool polyScaleDec;
+//float polyScale;
+//bool polyScaleDec;
 
 
 
@@ -166,8 +166,8 @@ int init_sfml(int width, int height, int depth)
 	view.SetCenter(800/2, 600/2);
 	view.SetHalfSize(800*75/100, 600*75/100);
 
-	polyScale = 1.0;
-	polyScaleDec = true;
+	//polyScale = 1.0;
+	//polyScaleDec = true;
 
 	return 1;
 }
@@ -197,8 +197,8 @@ void my_basic_update()
 	//newColor.a = (unsigned int) (polyScale*255);
 	//spr2.SetColor(newColor);
 
-	polyScale += (polyScaleDec?-1:1)*myWindow.GetFrameTime();
-	if (polyScale<0.0) {
+	//polyScale += (polyScaleDec?-1:1)*myWindow.GetFrameTime();
+	/*if (polyScale<0.0) {
 		polyScale = 0.0;
 		polyScaleDec = false;
 		flipPoly(1, 5);
@@ -206,7 +206,7 @@ void my_basic_update()
 	} else if (polyScale>1.0) {
 		polyScale = 1.0;
 		polyScaleDec = true;
-	}
+	}*/
 	poly.SetScaleX(polyScale);
 
 
