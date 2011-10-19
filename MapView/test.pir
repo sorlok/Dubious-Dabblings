@@ -97,11 +97,31 @@
   $P0.'push'($P2)
   setattribute self, 'spr2', $P2
 
+  #Make our cursor sprite
+  $P1 = DEMO_InitPoly()
+  $P0.'push'($P1)
+  setattribute self, 'polygon', $P1
+
+
 .end
+
+.sub 'flip_poly_point' :method
+  .param int id1
+  .param int id2
+  .local pmc poly
+  poly = getattribute self, 'polygon'
+  $P0 = POLY_GetPointColor(poly, id1)
+  $P1 = POLY_GetPointColor(poly, id2)
+  POLY_SetPointColor(poly, id1, $P1)
+  POLY_SetPointColor(poly, id2, $P0)
+  GAME_DeleteColor($P0)
+  GAME_DeleteColor($P1)
+.end
+
 
 .sub 'update' :method 
   .local pmc drawables 
-  .local int index, size, polyScaleDec
+  .local int index, size, polyScaleDec, mouseX, mouseY
   .local num frameTimeS, polyScale
 
   #Retrieve game timer, current scale
@@ -112,11 +132,8 @@
   polyScaleDec = $P0
 
   #Retrieve mouse x,y
-  $I0 = INPUT_GetMouseX()
-  $I1 = INPUT_GetMouseY()
-
-  #Set polygon's position correctly (proves that Parrot is driving the game)
-  DEMO_SetPolyPos($I0 ,$I1)
+  mouseX = INPUT_GetMouseX()
+  mouseY = INPUT_GetMouseY()
 
   #Update our post-effect shader
   $P0 = getattribute self, 'pfxShader'   #Note: This _could_ be null...
@@ -155,8 +172,8 @@
   GAME_DeleteColor($P0)
 
   #Update our polygon's scale factor
-  $N0 = polyScaleDec
-  if polyScaleDec==1 goto polyscaleupdate
+  $N0 = 1
+  unless polyScaleDec==1 goto polyscaleupdate
   $N0 = -1
 
 polyscaleupdate:
@@ -171,8 +188,8 @@ polyscaleupdate:
 ltzero:
   polyScale = 0.0
   polyScaleDec = 0
-  #flipPolyPoint(1, 5)
-  #flipPolyPoint(2, 4)
+  self.'flip_poly_point'(1, 5)
+  self.'flip_poly_point'(2, 4)
   goto savepolydec
 
 gtone:
@@ -188,6 +205,16 @@ savepoly:
   $P0 = getattribute self, 'polyScale'
   $P0 = polyScale
   setattribute self, 'polyScale', $P0
+
+  #Set the polyline's x-scale
+  $P0 = getattribute self, 'polygon'
+  POLY_SetScaleX($P0, polyScale)
+
+  #Set the polyline's position
+  POLY_SetPosX($P0, mouseX)
+  POLY_SetPosY($P0, mouseY)
+  
+
   
 .end
 
@@ -291,14 +318,6 @@ savepoly:
 .end
 
 
-#Sample internal update function. To be removed.
-.sub 'DEMO_SampleUpdate'
-  .local pmc lib, func
-  lib = INT_GetDLL()
-  func = dlfunc lib, "my_basic_update", "v"
-  func()
-.end
-
 
 #Sample code to draw objects from SampleUpdate. To be removed.
 .sub 'DEMO_SampleDisplay'
@@ -306,6 +325,17 @@ savepoly:
   lib = INT_GetDLL()
   func = dlfunc lib, "demo_display", "v"
   func()
+.end
+
+#Create a polygon
+.sub 'DEMO_InitPoly'
+  .local pmc lib, func
+
+  lib = INT_GetDLL()
+  func = dlfunc lib, "demo_init_poly", "p"
+  $P0 = func()
+
+  .return($P0)
 .end
 
 
@@ -493,6 +523,63 @@ savepoly:
 .end
 
 
+.sub 'POLY_GetPointColor'
+  .param pmc item
+  .param int index
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "poly_get_point_color", "ppi"
+  $P0 = func(item, index)
+  .return($P0)
+.end
+
+.sub 'POLY_SetPointColor'
+  .param pmc item
+  .param int index
+  .param pmc color
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "poly_set_point_color", "vpip"
+  func(item, index, color)
+.end
+
+.sub 'POLY_SetScaleX'
+  .param pmc item
+  .param num scale
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "poly_set_scale_x", "vpf"
+  func(item, scale)
+.end
+
+.sub 'POLY_SetScaleY'
+  .param pmc item
+  .param num scale
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "poly_set_scale_y", "vpf"
+  func(item, scale)
+.end
+
+.sub 'POLY_SetPosX'
+  .param pmc item
+  .param int pos
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "poly_set_pos_x", "vpi"
+  func(item, pos)
+.end
+
+.sub 'POLY_SetPosY'
+  .param pmc item
+  .param int pos
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "poly_set_pos_y", "vpi"
+  func(item, pos)
+.end
+
+
 .sub 'CLR_SetRed'
   .param pmc item
   .param pmc red
@@ -586,6 +673,7 @@ savepoly:
     addattribute $P2, 'spr2'
     addattribute $P2, 'polyScale'
     addattribute $P2, 'polyScaleDec'
+    addattribute $P2, 'polygon'
 
     #Create an object of the subclass.
     currRend = new ['DemoRendition']
@@ -598,7 +686,7 @@ savepoly:
       $I0 = GAME_ProcessEvents()
 
       #Now update within the game loop
-      DEMO_SampleUpdate()
+      #DEMO_SampleUpdate()
 
       #Call our sample game object's update method
       currRend.'update'()

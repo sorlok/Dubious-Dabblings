@@ -26,7 +26,6 @@ extern "C" {
 //Core functionality
 DLLEXPORT int init_sfml(int width, int height, int depth);
 DLLEXPORT int sfml_handle_events();
-DLLEXPORT void my_basic_update();
 DLLEXPORT void demo_display();
 DLLEXPORT void sfml_display();
 DLLEXPORT void close_sfml();
@@ -36,6 +35,9 @@ DLLEXPORT int can_use_postfx();
 DLLEXPORT sf::PostFX* new_postfx(const char* filename);
 DLLEXPORT void demo_set_default_postfx(sf::PostFX* item);
 DLLEXPORT void demo_update_postfx_color(sf::PostFX* item);
+
+//Demo
+DLLEXPORT sf::Shape* demo_init_poly();
 
 //Image
 DLLEXPORT sf::Image* new_image(const char* filename);
@@ -52,6 +54,14 @@ DLLEXPORT void sprite_set_rotation(sf::Sprite* item, float angle);
 DLLEXPORT sf::Color* sprite_get_color(const sf::Sprite* item);
 DLLEXPORT void sprite_set_color(sf::Sprite* item, sf::Color* color);
 
+//Polygon
+DLLEXPORT sf::Color* poly_get_point_color(const sf::Shape* item, int pointID);
+DLLEXPORT void poly_set_point_color(sf::Shape* item, int pointID, const sf::Color* color);
+DLLEXPORT void poly_set_scale_x(sf::Shape* item, float scale);
+DLLEXPORT void poly_set_scale_y(sf::Shape* item, float scale);
+DLLEXPORT void poly_set_pos_x(sf::Shape* item, int pos);
+DLLEXPORT void poly_set_pos_y(sf::Shape* item, int pos);
+
 //Color
 DLLEXPORT void color_set_red(sf::Color* item, int red);
 DLLEXPORT void color_set_green(sf::Color* item, int green);
@@ -62,7 +72,6 @@ DLLEXPORT void color_set_alpha(sf::Color* item, int alpha);
 DLLEXPORT int game_get_mouse_x();
 DLLEXPORT int game_get_mouse_y();
 DLLEXPORT float game_get_frame_time_s();
-DLLEXPORT void game_set_poly_pos(int x, int y);
 DLLEXPORT void game_draw_item(sf::Drawable* item);
 DLLEXPORT void game_del_item(sf::Drawable* item);
 DLLEXPORT void game_del_color(sf::Color* color);
@@ -77,8 +86,6 @@ DLLEXPORT void game_del_color(sf::Color* color);
 
 //+1 global variables!
 sf::RenderWindow myWindow;
-//float polyScale;
-//bool polyScaleDec;
 
 
 
@@ -128,24 +135,12 @@ bool handleEvent(const sf::Event& event)
 }
 
 
-//sf::Image img;
-//sf::Sprite spr1;
-//sf::Sprite spr2;
+//We could even remove this too, but I don't see the need right now.
 sf::String fps;
-sf::Shape poly;
 
-sf::View view;
-
-
+//This should stay in the engine.
 RollingAverage framerate(1000);
 sf::Clock frClock;
-
-void flipPoly(int id1, int id2)
-{
-	sf::Color old = poly.GetPointColor(id2);
-	poly.SetPointColor(id2, poly.GetPointColor(id1));
-	poly.SetPointColor(id1, old);
-}
 
 
 
@@ -155,19 +150,6 @@ int init_sfml(int width, int height, int depth)
 
 	//Init resources
 	fps.SetPosition(10, 10);
-	poly.AddPoint(0, -50,  sf::Color(0xFF, 0, 0));
-	poly.AddPoint(50, 0,   sf::Color(0, 0xFF, 0));
-	poly.AddPoint(50, 50,  sf::Color(0, 0, 0xFF));
-	poly.AddPoint(0, 100,  sf::Color(0xFF, 0xFF, 0));
-	poly.AddPoint(-50, 50, sf::Color(0, 0xFF, 0xFF));
-	poly.AddPoint(-50, 0,  sf::Color(0xFF, 0, 0xFF));
-	poly.SetPosition(800/2, 600/3);
-
-	view.SetCenter(800/2, 600/2);
-	view.SetHalfSize(800*75/100, 600*75/100);
-
-	//polyScale = 1.0;
-	//polyScaleDec = true;
 
 	return 1;
 }
@@ -183,49 +165,11 @@ int sfml_handle_events()
 	return doExit ? 1 : 0;
 }
 
-void my_basic_update()
-{
-	//TODO
-	//spr1.SetRotation(spr1.GetRotation()+50*myWindow.GetFrameTime());
-	//spr2.SetRotation(spr2.GetRotation()-80*myWindow.GetFrameTime());
 
-	//sf::Color newColor = spr1.GetColor();
-	//newColor.b = (unsigned int) ((1.0-polyScale)*255);
-	//spr1.SetColor(newColor);
-
-	//newColor = spr2.GetColor();
-	//newColor.a = (unsigned int) (polyScale*255);
-	//spr2.SetColor(newColor);
-
-	//polyScale += (polyScaleDec?-1:1)*myWindow.GetFrameTime();
-	/*if (polyScale<0.0) {
-		polyScale = 0.0;
-		polyScaleDec = false;
-		flipPoly(1, 5);
-		flipPoly(2, 4);
-	} else if (polyScale>1.0) {
-		polyScale = 1.0;
-		polyScaleDec = true;
-	}*/
-	poly.SetScaleX(polyScale);
-
-
-	//Grab a handle on the input struct
-	const sf::Input& myInput = myWindow.GetInput();
-
-	//Sample (erroneous) functionality to be replaced in Parrot
-	poly.SetPosition(myInput.GetMouseY(), myInput.GetMouseX());
-}
 
 void demo_display()
 {
 	myWindow.Clear(sf::Color(0x33, 0x33, 0x33));
-
-	//myWindow.SetView(view);
-
-	//myWindow.Draw(spr1);
-	//myWindow.Draw(spr2);
-	myWindow.Draw(poly);
 
 	if (myWindow.GetFrameTime()>0.0) {
 		framerate.addSample(1.0/myWindow.GetFrameTime());
@@ -341,6 +285,37 @@ void sprite_set_color(sf::Sprite* item, sf::Color* color)
 	item->SetColor(*color);
 }
 
+sf::Color* poly_get_point_color(const sf::Shape* item, int pointID)
+{
+	sf::Color* res = new sf::Color(item->GetPointColor(pointID));
+	return res;
+}
+
+void poly_set_point_color(sf::Shape* item, int pointID, const sf::Color* color)
+{
+	item->SetPointColor(pointID, *color);
+}
+
+void poly_set_scale_x(sf::Shape* item, float scale)
+{
+	item->SetScaleX(scale);
+}
+
+void poly_set_scale_y(sf::Shape* item, float scale)
+{
+	item->SetScaleY(scale);
+}
+
+void poly_set_pos_x(sf::Shape* item, int pos)
+{
+	item->SetX(pos);
+}
+
+void poly_set_pos_y(sf::Shape* item, int pos)
+{
+	item->SetY(pos);
+}
+
 void color_set_red(sf::Color* item, int red)
 {
 	item->r = (red&0xFF);
@@ -383,7 +358,7 @@ void demo_set_default_postfx(sf::PostFX* item)
 void demo_update_postfx_color(sf::PostFX* item)
 {
 	float framePerc = myWindow.GetFrameTime() - static_cast<int>(myWindow.GetFrameTime());
-	float rPerc = polyScale;
+	float rPerc = framePerc;//polyScale;
 	float gPerc = framePerc;
 	float bPerc = 1.0 - framePerc;
 	item->SetParameter("color", rPerc, gPerc, bPerc);
@@ -407,9 +382,17 @@ int game_get_mouse_y()
 	return myWindow.GetInput().GetMouseY();
 }
 
-void game_set_poly_pos(int x, int y)
+sf::Shape* demo_init_poly()
 {
-	poly.SetPosition(x, y);
+	sf::Shape* poly = new sf::Shape();
+	poly->AddPoint(0, -50,  sf::Color(0xFF, 0, 0));
+	poly->AddPoint(50, 0,   sf::Color(0, 0xFF, 0));
+	poly->AddPoint(50, 50,  sf::Color(0, 0, 0xFF));
+	poly->AddPoint(0, 100,  sf::Color(0xFF, 0xFF, 0));
+	poly->AddPoint(-50, 50, sf::Color(0, 0xFF, 0xFF));
+	poly->AddPoint(-50, 0,  sf::Color(0xFF, 0, 0xFF));
+	poly->SetPosition(800/2, 600/3);
+	return poly;
 }
 
 float game_get_frame_time_s()
@@ -427,7 +410,7 @@ void main_loop_hack()
 	for(;;) {
 		bool doExit = sfml_handle_events();
 
-		my_basic_update();
+		//my_basic_update();
 
 		sfml_display();
 
