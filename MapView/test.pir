@@ -133,14 +133,13 @@
 
   #Now, update any objects in our 'drawables' 
   drawables = getattribute self, 'drawables'
-  index = 0
-  size = drawables
+  index = drawables
 
   at_item:
-    if index >= size goto done
+    index -= 1
+    if index < 0 goto done
     $P0 = drawables[index]
     GAME_DrawItem($P0)
-    index += 1
     goto at_item
   done:
 .end
