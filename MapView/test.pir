@@ -23,6 +23,12 @@
   .local pmc personImg
   .local int w, h
 
+  #Initialize our polyScale property
+  $P0 = new 'Float'
+  $N0 = 1.0
+  $P0 = $N0
+  setattribute self, 'polyScale', $P0
+
   #Initialize our drawables array
   $P0 = new 'ResizablePMCArray'
   setattribute self, 'drawables', $P0
@@ -90,10 +96,12 @@
 .sub 'update' :method 
   .local pmc drawables 
   .local int index, size
-  .local num frameTimeS
+  .local num frameTimeS, polyScale
 
-  #Retrieve game timer
+  #Retrieve game timer, current scale
   frameTimeS = GAME_GetFrameTimeInS()
+  $P0 = getattribute self, 'polyScale'
+  polyScale = $P0
 
   #Retrieve mouse x,y
   $I0 = INPUT_GetMouseX()
@@ -114,16 +122,32 @@
   SPR_SetRotation($P1, $N0)
 
   #Update sprite 1's colorization
-
+  $P0 = SPR_GetColor($P1)
+  $N0 = 1.0-polyScale
+  $N0 *= 255
+  $I0 = $N0
+  CLR_SetBlue($P0, $I0)
+  SPR_SetColor($P1, $P0)
+  GAME_DeleteColor($P0)
 
   #Update sprite 2's rotation
-  $P2 = getattribute self, 'spr2'
+  $P1 = getattribute self, 'spr2'
   $N0 = 80 * frameTimeS
-  $N1 = SPR_GetRotation($P2)
+  $N1 = SPR_GetRotation($P1)
   $N0 = $N1 - $N0
-  SPR_SetRotation($P2, $N0)
+  SPR_SetRotation($P1, $N0)
 
   #Update sprite 2's colorization
+  $P0 = SPR_GetColor($P1)
+  $N0 = polyScale
+  $N0 *= 255
+  $I0 = $N0
+  CLR_SetAlpha($P0, $I0)
+  SPR_SetColor($P1, $P0)
+  GAME_DeleteColor($P0)
+
+  #Update our polygon's scale factor
+  #polyScale += (polyScaleDec?-1:1)*myWindow.GetFrameTime();
   
 .end
 
@@ -409,6 +433,64 @@
 .end
 
 
+.sub 'SPR_GetColor'
+  .param pmc item
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "sprite_get_color", "pp"
+  $P0 = func(item)
+  .return($P0)
+.end
+
+
+.sub 'SPR_SetColor'
+  .param pmc item
+  .param pmc color
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "sprite_set_color", "vpp"
+  func(item, color)
+.end
+
+
+.sub 'CLR_SetRed'
+  .param pmc item
+  .param pmc red
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "color_set_red", "vpi"
+  func(item, red)
+.end
+
+
+.sub 'CLR_SetGreen'
+  .param pmc item
+  .param pmc green
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "color_set_green", "vpi"
+  func(item, green)
+.end
+
+.sub 'CLR_SetBlue'
+  .param pmc item
+  .param pmc blue
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "color_set_blue", "vpi"
+  func(item, blue)
+.end
+
+
+.sub 'CLR_SetAlpha'
+  .param pmc item
+  .param pmc alpha
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "color_set_alpha", "vpi"
+  func(item, alpha)
+.end
+
 
 #Generic delete/draw stuff
 .sub 'GAME_DrawItem'
@@ -428,6 +510,13 @@
   func(item)
 .end
 
+.sub 'GAME_DeleteColor'
+  .param pmc item
+  .local pmc lib, func
+  lib = INT_GetDLL()
+  func = dlfunc lib, "game_del_color", "vp"
+  func(item)
+.end
 
 
 
@@ -455,6 +544,7 @@
     addattribute $P2, 'pfxShader'
     addattribute $P2, 'spr1'
     addattribute $P2, 'spr2'
+    addattribute $P2, 'polyScale'
 
     #Create an object of the subclass.
     currRend = new ['DemoRendition']

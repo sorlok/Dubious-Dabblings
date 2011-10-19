@@ -49,6 +49,14 @@ DLLEXPORT void sprite_set_position(sf::Sprite* item, int x, int y);
 DLLEXPORT void sprite_set_center(sf::Sprite* item, int x, int y);
 DLLEXPORT float sprite_get_rotation(const sf::Sprite* item);
 DLLEXPORT void sprite_set_rotation(sf::Sprite* item, float angle);
+DLLEXPORT sf::Color* sprite_get_color(const sf::Sprite* item);
+DLLEXPORT void sprite_set_color(sf::Sprite* item, sf::Color* color);
+
+//Color
+DLLEXPORT void color_set_red(sf::Color* item, int red);
+DLLEXPORT void color_set_green(sf::Color* item, int green);
+DLLEXPORT void color_set_blue(sf::Color* item, int blue);
+DLLEXPORT void color_set_alpha(sf::Color* item, int alpha);
 
 //Game functionality
 DLLEXPORT int game_get_mouse_x();
@@ -57,6 +65,7 @@ DLLEXPORT float game_get_frame_time_s();
 DLLEXPORT void game_set_poly_pos(int x, int y);
 DLLEXPORT void game_draw_item(sf::Drawable* item);
 DLLEXPORT void game_del_item(sf::Drawable* item);
+DLLEXPORT void game_del_color(sf::Color* color);
 
 
 
@@ -321,11 +330,46 @@ void sprite_set_rotation(sf::Sprite* item, float angle)
 	item->SetRotation(angle);
 }
 
+sf::Color* sprite_get_color(const sf::Sprite* item)
+{
+	sf::Color* res = new sf::Color(item->GetColor());
+	return res;
+}
+
+void sprite_set_color(sf::Sprite* item, sf::Color* color)
+{
+	item->SetColor(*color);
+}
+
+void color_set_red(sf::Color* item, int red)
+{
+	item->r = (red&0xFF);
+}
+
+void color_set_green(sf::Color* item, int green)
+{
+	item->g = (green&0xFF);
+}
+
+void color_set_blue(sf::Color* item, int blue)
+{
+	item->b = (blue&0xFF);
+}
+
+void color_set_alpha(sf::Color* item, int alpha)
+{
+	item->a = (alpha&0xFF);
+}
 
 
 void game_del_item(sf::Drawable* item)
 {
 	delete item;
+}
+
+void game_del_color(sf::Color* color)
+{
+	delete color;
 }
 
 
