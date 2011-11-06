@@ -401,6 +401,14 @@ float game_get_frame_time_s()
 }
 
 
+
+void my_basic_update()
+{
+
+}
+
+
+
 void main_loop_hack()
 {
 	if (init_sfml(800, 600, 32)==0) {
@@ -410,7 +418,7 @@ void main_loop_hack()
 	for(;;) {
 		bool doExit = sfml_handle_events();
 
-		//my_basic_update();
+		my_basic_update();
 
 		sfml_display();
 
