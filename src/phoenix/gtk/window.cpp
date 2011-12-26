@@ -6,6 +6,7 @@ static gint Window_close(GtkWidget *widget, GdkEvent *event, Window *window) {
 }
 
 static gboolean Window_expose(GtkWidget *widget, GdkEvent *event, Window *window) {
+  if(window->state.backgroundColorOverride == false) return false;
   cairo_t *context = gdk_cairo_create(widget->window);
 
   Color color = window->backgroundColor();
@@ -31,16 +32,19 @@ static gboolean Window_configure(GtkWidget *widget, GdkEvent *event, Window *win
   if(gtk_widget_get_realized(window->p.widget) == false) return false;
   GdkWindow *gdkWindow = gtk_widget_get_window(widget);
 
-  //update geometry settings
   GdkRectangle border, client;
   gdk_window_get_frame_extents(gdkWindow, &border);
   gdk_window_get_geometry(gdkWindow, 0, 0, &client.width, &client.height, 0);
   gdk_window_get_origin(gdkWindow, &client.x, &client.y);
 
-  settings.frameGeometryX = client.x - border.x;
-  settings.frameGeometryY = client.y - border.y;
-  settings.frameGeometryWidth = border.width - client.width;
-  settings.frameGeometryHeight = border.height - client.height;
+  if(window->state.fullScreen == false) {
+    //update geometry settings
+    settings->frameGeometryX = client.x - border.x;
+    settings->frameGeometryY = client.y - border.y;
+    settings->frameGeometryWidth = border.width - client.width;
+    settings->frameGeometryHeight = border.height - client.height;
+    settings->save();
+  }
 
   //move
   if(event->configure.x != window->p.lastConfigure.x
@@ -62,7 +66,7 @@ static gboolean Window_configure(GtkWidget *widget, GdkEvent *event, Window *win
       window->state.geometry.height = client.height - window->p.menuHeight() - window->p.statusHeight();
     }
 
-    foreach(layout, window->state.layout) {
+    for(auto &layout : window->state.layout) {
       Geometry geometry = window->geometry();
       geometry.x = geometry.y = 0;
       layout.setGeometry(geometry);
@@ -89,6 +93,7 @@ void pWindow::append(Menu &menu) {
 }
 
 void pWindow::append(Widget &widget) {
+  ((Sizable&)widget).state.window = &window;
   gtk_fixed_put(GTK_FIXED(formContainer), widget.p.gtkWidget, 0, 0);
   if(widget.state.font != "") widget.p.setFont(widget.state.font);
   else if(window.state.widgetFont != "") widget.p.setFont(window.state.widgetFont);
@@ -105,10 +110,10 @@ Color pWindow::backgroundColor() {
 Geometry pWindow::frameMargin() {
   if(window.state.fullScreen) return { 0, menuHeight(), 0, menuHeight() + statusHeight() };
   return {
-    settings.frameGeometryX,
-    settings.frameGeometryY + menuHeight(),
-    settings.frameGeometryWidth,
-    settings.frameGeometryHeight + menuHeight() + statusHeight()
+    settings->frameGeometryX,
+    settings->frameGeometryY + menuHeight(),
+    settings->frameGeometryWidth,
+    settings->frameGeometryHeight + menuHeight() + statusHeight()
   };
 }
 
@@ -152,26 +157,34 @@ void pWindow::setFullScreen(bool fullScreen) {
     gtk_window_unfullscreen(GTK_WINDOW(widget));
     gtk_window_set_resizable(GTK_WINDOW(widget), window.state.resizable);
     gtk_window_set_decorated(GTK_WINDOW(widget), true);
-    for(unsigned n = 0; n < 4; n++) {
-      setGeometry(window.state.geometry);
-      gtk_widget_set_size_request(widget, -1, -1);
-      OS::processEvents();
-      usleep(2000);
-    }
+    gtk_widget_set_size_request(widget, -1, -1);
+    gdk_display_sync(gtk_widget_get_display(widget));
+    setGeometry(window.state.geometry);
   } else {
     gtk_window_fullscreen(GTK_WINDOW(widget));
     gtk_window_set_decorated(GTK_WINDOW(widget), false);
     gtk_widget_set_size_request(widget, OS::desktopGeometry().width, OS::desktopGeometry().height);
     gtk_window_set_resizable(GTK_WINDOW(widget), false);
   }
+  gdk_display_sync(gtk_widget_get_display(widget));
 }
 
 void pWindow::setGeometry(const Geometry &geometry) {
+  OS::processEvents();
+
   Geometry margin = frameMargin();
   gtk_window_move(GTK_WINDOW(widget), geometry.x - margin.x, geometry.y - margin.y);
-  gtk_window_resize(GTK_WINDOW(widget), 1, 1);
+
+//GdkGeometry geom;
+//geom.min_width = 1;
+//geom.min_height = 1;
+//gtk_window_set_geometry_hints(GTK_WINDOW(widget), GTK_WIDGET(widget), &geom, GDK_HINT_MIN_SIZE);
+
+  gtk_window_set_policy(GTK_WINDOW(widget), true, true, false);
   gtk_widget_set_size_request(formContainer, geometry.width, geometry.height);
-  foreach(layout, window.state.layout) {
+  gtk_window_resize(GTK_WINDOW(widget), geometry.width, geometry.height + menuHeight() + statusHeight());
+
+  for(auto &layout : window.state.layout) {
     Geometry geometry = this->geometry();
     geometry.x = geometry.y = 0;
     layout.setGeometry(geometry);
@@ -179,7 +192,7 @@ void pWindow::setGeometry(const Geometry &geometry) {
 }
 
 void pWindow::setMenuFont(const string &font) {
-  foreach(item, window.state.menu) item.p.setFont(font);
+  for(auto &item : window.state.menu) item.p.setFont(font);
 }
 
 void pWindow::setMenuVisible(bool visible) {
@@ -213,7 +226,7 @@ void pWindow::setVisible(bool visible) {
 }
 
 void pWindow::setWidgetFont(const string &font) {
-  foreach(item, window.state.widget) {
+  for(auto &item : window.state.widget) {
     if(item.state.font == "") item.setFont(font);
   }
 }
@@ -229,6 +242,10 @@ void pWindow::constructor() {
   }
 
   gtk_window_set_resizable(GTK_WINDOW(widget), true);
+  #if GTK_MAJOR_VERSION >= 3
+  gtk_window_set_has_resize_grip(GTK_WINDOW(widget), false);
+  #endif
+
   gtk_widget_set_app_paintable(widget, true);
   gtk_widget_add_events(widget, GDK_CONFIGURE);
 
@@ -261,9 +278,9 @@ void pWindow::constructor() {
 }
 
 unsigned pWindow::menuHeight() {
-  return window.state.menuVisible ? settings.menuGeometryHeight : 0;
+  return window.state.menuVisible ? settings->menuGeometryHeight : 0;
 }
 
 unsigned pWindow::statusHeight() {
-  return window.state.statusVisible ? settings.statusGeometryHeight : 0;
+  return window.state.statusVisible ? settings->statusGeometryHeight : 0;
 }

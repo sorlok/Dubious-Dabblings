@@ -1,5 +1,4 @@
-#ifndef NALL_STRING_CORE_HPP
-#define NALL_STRING_CORE_HPP
+#ifdef NALL_STRING_INTERNAL_HPP
 
 namespace nall {
 
@@ -8,7 +7,7 @@ static void istring(string &output) {
 
 template<typename T, typename... Args>
 static void istring(string &output, const T &value, Args&&... args) {
-  output.append_(to_string(value));
+  output.append_(make_string(value));
   istring(output, std::forward<Args>(args)...);
 }
 
@@ -18,6 +17,10 @@ void string::reserve(unsigned size_) {
     data = (char*)realloc(data, size + 1);
     data[size] = 0;
   }
+}
+
+bool string::empty() const {
+  return !*data;
 }
 
 template<typename... Args> string& string::assign(Args&&... args) {
@@ -66,15 +69,17 @@ bool string::operator> (const char *str) const { return strcmp(data, str)  > 0; 
 bool string::operator>=(const char *str) const { return strcmp(data, str) >= 0; }
 
 string& string::operator=(const string &value) {
+  if(&value == this) return *this;
   assign(value);
   return *this;
 }
 
 string& string::operator=(string &&source) {
+  if(&source == this) return *this;
   if(data) free(data);
   size = source.size;
   data = source.data;
-  source.data = 0;
+  source.data = nullptr;
   source.size = 0;
   return *this;
 }
@@ -87,14 +92,16 @@ template<typename... Args> string::string(Args&&... args) {
 }
 
 string::string(const string &value) {
+  if(&value == this) return;
   size = strlen(value);
   data = strdup(value);
 }
 
 string::string(string &&source) {
+  if(&source == this) return;
   size = source.size;
   data = source.data;
-  source.data = 0;
+  source.data = nullptr;
 }
 
 string::~string() {
@@ -131,13 +138,24 @@ optional<unsigned> lstring::find(const char *key) const {
   return { false, 0 };
 }
 
+bool lstring::operator==(const lstring &source) const {
+  if(this == &source) return true;
+  if(size() != source.size()) return false;
+  for(unsigned n = 0; n < size(); n++) {
+    if(operator[](n) != source[n]) return false;
+  }
+  return true;
+}
+
+bool lstring::operator!=(const lstring &source) const {
+  return !operator==(source);
+}
+
 inline lstring::lstring() {
 }
 
 inline lstring::lstring(std::initializer_list<string> list) {
-  for(const string *s = list.begin(); s != list.end(); ++s) {
-    operator<<(*s);
-  }
+  for(auto &data : list) append(data);
 }
 
 }

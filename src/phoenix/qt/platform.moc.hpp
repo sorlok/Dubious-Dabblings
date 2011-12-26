@@ -5,6 +5,8 @@ struct Settings : public configuration {
   unsigned frameGeometryY;
   unsigned frameGeometryWidth;
   unsigned frameGeometryHeight;
+  unsigned menuGeometryHeight;
+  unsigned statusGeometryHeight;
 
   void load();
   void save();
@@ -43,6 +45,7 @@ struct pOS : public pObject {
   static bool pendingEvents();
   static void processEvents();
   static void quit();
+  static void syncX();
 
   static void initialize();
 };
@@ -169,7 +172,7 @@ public:
   void destructor();
 
 public slots:
-  void onTick();
+  void onActivate();
 };
 
 struct pCheckItem : public QObject, public pAction {
@@ -188,7 +191,7 @@ public:
   void destructor();
 
 public slots:
-  void onTick();
+  void onToggle();
 };
 
 struct pRadioItem : public QObject, public pAction {
@@ -209,7 +212,7 @@ public:
   void destructor();
 
 public slots:
-  void onTick();
+  void onActivate();
 };
 
 struct pSizable : public pObject {
@@ -243,6 +246,7 @@ struct pWidget : public pSizable {
 
   pWidget(Widget &widget) : pSizable(widget), widget(widget) {}
   void constructor();
+  void synchronizeState();
   void destructor();
   virtual void orphan();
 };
@@ -263,7 +267,7 @@ public:
   void orphan();
 
 public slots:
-  void onTick();
+  void onActivate();
 };
 
 struct pCanvas : public QObject, public pWidget {
@@ -278,8 +282,7 @@ public:
     QtCanvas(pCanvas &self);
   } *qtCanvas;
 
-  uint32_t* buffer();
-  void setGeometry(const Geometry &geometry);
+  void setSize(const Size &size);
   void update();
 
   pCanvas(Canvas &canvas) : pWidget(canvas), canvas(canvas) {}
@@ -308,7 +311,7 @@ public:
   void orphan();
 
 public slots:
-  void onTick();
+  void onToggle();
 };
 
 struct pComboBox : public QObject, public pWidget {
@@ -469,7 +472,7 @@ public:
 public slots:
   void onActivate();
   void onChange(QTreeWidgetItem *item);
-  void onTick(QTreeWidgetItem *item);
+  void onToggle(QTreeWidgetItem *item);
 };
 
 struct pProgressBar : public pWidget {
@@ -505,7 +508,7 @@ public:
   void orphan();
 
 public slots:
-  void onTick();
+  void onActivate();
 };
 
 struct pTextEdit : public QObject, public pWidget {

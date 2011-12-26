@@ -41,23 +41,39 @@ enum : unsigned {
   MinimumSize =  0u,
 };
 
+struct Color {
+  uint8_t red, green, blue, alpha;
+  inline Color() : red(0), green(0), blue(0), alpha(255) {}
+  inline Color(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255) : red(red), green(green), blue(blue), alpha(alpha) {}
+};
+
+struct Position {
+  signed x, y;
+  inline Position() : x(0), y(0) {}
+  inline Position(signed x, signed y) : x(x), y(y) {}
+};
+
+struct Size {
+  unsigned width, height;
+  inline Size() : width(0), height(0) {}
+  inline Size(unsigned width, unsigned height) : width(width), height(height) {}
+};
+
 struct Geometry {
   signed x, y;
   unsigned width, height;
+  Position position() const;
+  Size size() const;
+  nall::string text() const;
   inline Geometry() : x(0), y(0), width(0), height(0) {}
   inline Geometry(signed x, signed y, unsigned width, unsigned height) : x(x), y(y), width(width), height(height) {}
+  Geometry(const nall::string &text);
 };
 
 struct Font {
   nall::string description;
   Geometry geometry(const nall::string &text);
   Font(const nall::string &description = "");
-};
-
-struct Color {
-  uint8_t red, green, blue, alpha;
-  inline Color() : red(0), green(0), blue(0), alpha(255) {}
-  inline Color(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255) : red(red), green(green), blue(blue), alpha(alpha) {}
 };
 
 struct Object {
@@ -133,6 +149,7 @@ struct Window : private nall::base_from_member<pWindow&>, Object {
   Geometry frameGeometry();
   Geometry frameMargin();
   bool focused();
+  bool fullScreen();
   Geometry geometry();
   void ignore();
   void remove(Layout &layout);
@@ -152,7 +169,9 @@ struct Window : private nall::base_from_member<pWindow&>, Object {
   void setTitle(const nall::string &text);
   void setVisible(bool visible = true);
   void setWidgetFont(const nall::string &font);
-  void synchronize();
+  nall::string statusText();
+  void synchronizeLayout();
+  bool visible();
 
   Window();
   ~Window();
@@ -162,8 +181,10 @@ struct Window : private nall::base_from_member<pWindow&>, Object {
 };
 
 struct Action : Object {
+  bool enabled();
   void setEnabled(bool enabled = true);
   void setVisible(bool visible = true);
+  bool visible();
 
   Action(pAction &p);
   ~Action();
@@ -191,7 +212,7 @@ struct Separator : private nall::base_from_member<pSeparator&>, Action {
 };
 
 struct Item : private nall::base_from_member<pItem&>, Action {
-  nall::function<void ()> onTick;
+  nall::function<void ()> onActivate;
 
   void setText(const nall::string &text);
 
@@ -203,7 +224,7 @@ struct Item : private nall::base_from_member<pItem&>, Action {
 };
 
 struct CheckItem : private nall::base_from_member<pCheckItem&>, Action {
-  nall::function<void ()> onTick;
+  nall::function<void ()> onToggle;
 
   bool checked();
   void setChecked(bool checked = true);
@@ -220,7 +241,7 @@ struct RadioItem : private nall::base_from_member<pRadioItem&>, Action {
   template<typename... Args> static void group(Args&... args) { group({ args... }); }
   static void group(const nall::reference_array<RadioItem&> &list);
 
-  nall::function<void ()> onTick;
+  nall::function<void ()> onActivate;
 
   bool checked();
   void setChecked();
@@ -254,7 +275,7 @@ struct Layout : private nall::base_from_member<pLayout&>, Sizable {
   virtual void append(Sizable &sizable);
   virtual void remove(Sizable &sizable);
   virtual void reset() {}
-  virtual void synchronize() = 0;
+  virtual void synchronizeLayout() = 0;
 
   Layout();
   Layout(pLayout &p);
@@ -285,7 +306,7 @@ struct Widget : private nall::base_from_member<pWidget&>, Sizable {
 };
 
 struct Button : private nall::base_from_member<pButton&>, Widget {
-  nall::function<void ()> onTick;
+  nall::function<void ()> onActivate;
 
   void setText(const nall::string &text);
 
@@ -297,16 +318,21 @@ struct Button : private nall::base_from_member<pButton&>, Widget {
 };
 
 struct Canvas : private nall::base_from_member<pCanvas&>, Widget {
-  uint32_t* buffer();
+  uint32_t* data();
+  bool setImage(const nall::image &image);
+  void setSize(const Size &size);
+  Size size();
   void update();
 
   Canvas();
   ~Canvas();
+  struct State;
+  State &state;
   pCanvas &p;
 };
 
 struct CheckBox : private nall::base_from_member<pCheckBox&>, Widget {
-  nall::function<void ()> onTick;
+  nall::function<void ()> onToggle;
 
   bool checked();
   void setChecked(bool checked = true);
@@ -354,6 +380,7 @@ struct HexEdit : private nall::base_from_member<pHexEdit&>, Widget {
 struct HorizontalScrollBar : private nall::base_from_member<pHorizontalScrollBar&>, Widget {
   nall::function<void ()> onChange;
 
+  unsigned length();
   unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
@@ -368,6 +395,7 @@ struct HorizontalScrollBar : private nall::base_from_member<pHorizontalScrollBar
 struct HorizontalSlider : private nall::base_from_member<pHorizontalSlider&>, Widget {
   nall::function<void ()> onChange;
 
+  unsigned length();
   unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
@@ -407,7 +435,7 @@ struct LineEdit : private nall::base_from_member<pLineEdit&>, Widget {
 struct ListView : private nall::base_from_member<pListView&>, Widget {
   nall::function<void ()> onActivate;
   nall::function<void ()> onChange;
-  nall::function<void (unsigned)> onTick;
+  nall::function<void (unsigned)> onToggle;
 
   template<typename... Args> void append(const Args&... args) { append_({ args... }); }
   void autoSizeColumns();
@@ -449,7 +477,7 @@ struct RadioBox : private nall::base_from_member<pRadioBox&>, Widget {
   template<typename... Args> static void group(Args&... args) { group({ args... }); }
   static void group(const nall::reference_array<RadioBox&> &list);
 
-  nall::function<void ()> onTick;
+  nall::function<void ()> onActivate;
 
   bool checked();
   void setChecked();
@@ -481,6 +509,7 @@ struct TextEdit : private nall::base_from_member<pTextEdit&>, Widget {
 struct VerticalScrollBar : private nall::base_from_member<pVerticalScrollBar&>, Widget {
   nall::function<void ()> onChange;
 
+  unsigned length();
   unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
@@ -495,6 +524,7 @@ struct VerticalScrollBar : private nall::base_from_member<pVerticalScrollBar&>, 
 struct VerticalSlider : private nall::base_from_member<pVerticalSlider&>, Widget {
   nall::function<void ()> onChange;
 
+  unsigned length();
   unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);

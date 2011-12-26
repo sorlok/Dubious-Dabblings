@@ -8,7 +8,7 @@ struct FixedLayout : Layout {
   void setEnabled(bool enabled = true);
   void setGeometry(const Geometry &geometry);
   void setVisible(bool visible = true);
-  void synchronize();
+  void synchronizeLayout();
   bool visible();
   FixedLayout();
   ~FixedLayout();
@@ -23,5 +23,5 @@ struct FixedLayout : Layout {
     Sizable *sizable;
     Geometry geometry;
   };
-  nall::linear_vector<Children> children;
+  nall::vector<Children> children;
 };

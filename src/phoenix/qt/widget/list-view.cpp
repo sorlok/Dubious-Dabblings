@@ -60,7 +60,7 @@ void pListView::setChecked(unsigned row, bool checked) {
 
 void pListView::setHeaderText(const lstring &text) {
   QStringList labels;
-  foreach(column, text) labels << QString::fromUtf8(column);
+  for(auto &column : text) labels << QString::fromUtf8(column);
 
   qtListView->setColumnCount(text.size());
   qtListView->setAlternatingRowColors(text.size() >= 2);
@@ -100,12 +100,13 @@ void pListView::constructor() {
 
   connect(qtListView, SIGNAL(itemActivated(QTreeWidgetItem*, int)), SLOT(onActivate()));
   connect(qtListView, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), SLOT(onChange(QTreeWidgetItem*)));
-  connect(qtListView, SIGNAL(itemChanged(QTreeWidgetItem*, int)), SLOT(onTick(QTreeWidgetItem*)));
+  connect(qtListView, SIGNAL(itemChanged(QTreeWidgetItem*, int)), SLOT(onToggle(QTreeWidgetItem*)));
 
+  pWidget::synchronizeState();
   setCheckable(listView.state.checkable);
   setHeaderText(listView.state.headerText.size() ? listView.state.headerText : lstring{ " " });
   setHeaderVisible(listView.state.headerVisible);
-  foreach(row, listView.state.text) append(row);
+  for(auto &row : listView.state.text) append(row);
   if(listView.state.checkable) {
     for(unsigned n = 0; n < listView.state.checked.size(); n++) {
       setChecked(n, listView.state.checked[n]);
@@ -113,6 +114,7 @@ void pListView::constructor() {
   }
   setSelected(listView.state.selected);
   if(listView.state.selected) setSelection(listView.state.selection);
+  autoSizeColumns();
 }
 
 void pListView::destructor() {
@@ -137,9 +139,9 @@ void pListView::onChange(QTreeWidgetItem *item) {
   if(locked == false && listView.onChange) listView.onChange();
 }
 
-void pListView::onTick(QTreeWidgetItem *item) {
+void pListView::onToggle(QTreeWidgetItem *item) {
   unsigned row = item->data(0, Qt::UserRole).toUInt();
   bool checkState = checked(row);
   listView.state.checked[row] = checkState;
-  if(locked == false && listView.onTick) listView.onTick(row);
+  if(locked == false && listView.onToggle) listView.onToggle(row);
 }
