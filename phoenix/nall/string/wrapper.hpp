@@ -1,9 +1,14 @@
-#ifndef NALL_STRING_WRAPPER_HPP
-#define NALL_STRING_WRAPPER_HPP
+#ifdef NALL_STRING_INTERNAL_HPP
 
 namespace nall {
 
 unsigned string::length() const { return strlen(data); }
+unsigned string::capacity() const { return size; }
+
+template<unsigned limit> lstring string::split(const char *key) const { lstring result; result.split<limit>(key, data); return result; }
+template<unsigned limit> lstring string::isplit(const char *key) const { lstring result; result.isplit<limit>(key, data); return result; }
+template<unsigned limit> lstring string::qsplit(const char *key) const { lstring result; result.qsplit<limit>(key, data); return result; }
+template<unsigned limit> lstring string::iqsplit(const char *key) const { lstring result; result.iqsplit<limit>(key, data); return result; }
 
 bool string::equals(const char *str) const { return !strcmp(data, str); }
 bool string::iequals(const char *str) const { return !istrcmp(data, str); }

@@ -8,6 +8,7 @@ void pWindow::append(Layout &layout) {
 }
 
 void pWindow::append(Menu &menu) {
+  menu.p.parentWindow = &window;
   updateMenu();
 }
 
@@ -109,7 +110,7 @@ void pWindow::setGeometry(const Geometry &geometry) {
     SWP_NOZORDER | SWP_FRAMECHANGED
   );
   SetWindowPos(hstatus, NULL, 0, 0, 0, 0, SWP_NOZORDER | SWP_FRAMECHANGED);
-  foreach(layout, window.state.layout) {
+  for(auto &layout : window.state.layout) {
     Geometry geom = this->geometry();
     geom.x = geom.y = 0;
     layout.setGeometry(geom);
@@ -158,7 +159,7 @@ void pWindow::setVisible(bool visible) {
 }
 
 void pWindow::setWidgetFont(const string &font) {
-  foreach(widget, window.state.widget) {
+  for(auto &widget : window.state.widget) {
     if(widget.state.font == "") widget.setFont(font);
   }
 }
@@ -190,9 +191,11 @@ void pWindow::updateMenu() {
   if(hmenu) DestroyMenu(hmenu);
   hmenu = CreateMenu();
 
-  foreach(menu, window.state.menu) {
+  for(auto &menu : window.state.menu) {
     menu.p.update(window);
-    AppendMenu(hmenu, MF_STRING | MF_POPUP, (UINT_PTR)menu.p.hmenu, utf16_t(menu.state.text));
+    if(menu.visible()) {
+      AppendMenu(hmenu, MF_STRING | MF_POPUP, (UINT_PTR)menu.p.hmenu, utf16_t(menu.state.text));
+    }
   }
 
   SetMenu(hwnd, window.state.menuVisible ? hmenu : 0);

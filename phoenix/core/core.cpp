@@ -13,7 +13,31 @@
   #include "../reference/platform.cpp"
 #endif
 
+static bool OS_quit = false;
 Window Window::None;
+
+//Geometry
+//========
+
+Position Geometry::position() const {
+  return { x, y };
+}
+
+Size Geometry::size() const {
+  return { width, height };
+}
+
+string Geometry::text() const {
+  return { x, ",", y, ",", width, ",", height };
+}
+
+Geometry::Geometry(const string &text) {
+  lstring part = text.split(",");
+  x = integer(part(0, "256"));
+  y = integer(part(1, "256"));
+  width = decimal(part(2, "256"));
+  height = decimal(part(3, "256"));
+}
 
 //Font
 //====
@@ -80,6 +104,7 @@ void OS::processEvents() {
 }
 
 void OS::quit() {
+  OS_quit = true;
   return pOS::quit();
 }
 
@@ -144,7 +169,7 @@ void Window::append(Layout &layout) {
     ((Sizable&)layout).state.window = this;
     ((Sizable&)layout).state.layout = 0;
     p.append(layout);
-    layout.synchronize();
+    layout.synchronizeLayout();
   }
 }
 
@@ -159,7 +184,6 @@ void Window::append(Widget &widget) {
   if(state.widget.append(widget)) {
     ((Sizable&)widget).state.window = this;
     p.append(widget);
-    synchronize();
   }
 }
 
@@ -182,6 +206,10 @@ Geometry Window::frameMargin() {
 
 bool Window::focused() {
   return p.focused();
+}
+
+bool Window::fullScreen() {
+  return state.fullScreen;
 }
 
 Geometry Window::geometry() {
@@ -278,6 +306,7 @@ void Window::setTitle(const string &text) {
 
 void Window::setVisible(bool visible) {
   state.visible = visible;
+  synchronizeLayout();
   return p.setVisible(visible);
 }
 
@@ -286,8 +315,16 @@ void Window::setWidgetFont(const string &font) {
   return p.setWidgetFont(font);
 }
 
-void Window::synchronize() {
-  setGeometry(geometry());
+string Window::statusText() {
+  return state.statusText;
+}
+
+void Window::synchronizeLayout() {
+  if(visible() && OS_quit == false) setGeometry(geometry());
+}
+
+bool Window::visible() {
+  return state.visible;
 }
 
 Window::Window():
@@ -306,6 +343,10 @@ Window::~Window() {
 //Action
 //======
 
+bool Action::enabled() {
+  return state.enabled;
+}
+
 void Action::setEnabled(bool enabled) {
   state.enabled = enabled;
   return p.setEnabled(enabled);
@@ -314,6 +355,10 @@ void Action::setEnabled(bool enabled) {
 void Action::setVisible(bool visible) {
   state.visible = visible;
   return p.setVisible(visible);
+}
+
+bool Action::visible() {
+  return state.visible;
 }
 
 Action::Action(pAction &p):
@@ -432,7 +477,7 @@ CheckItem::~CheckItem() {
 //=========
 
 void RadioItem::group(const reference_array<RadioItem&> &list) {
-  foreach(item, list) item.p.setGroup(item.state.group = list);
+  for(auto &item : list) item.p.setGroup(item.state.group = list);
   if(list.size()) list[0].setChecked();
 }
 
@@ -441,7 +486,7 @@ bool RadioItem::checked() {
 }
 
 void RadioItem::setChecked() {
-  foreach(item, state.group) item.state.checked = false;
+  for(auto &item : state.group) item.state.checked = false;
   state.checked = true;
   return p.setChecked();
 }
@@ -460,7 +505,7 @@ p(base_from_member<pRadioItem&>::value) {
 }
 
 RadioItem::~RadioItem() {
-  foreach(item, state.group) {
+  for(auto &item : state.group) {
     if(&item != this) item.state.group.remove(*this);
   }
   p.destructor();
@@ -501,15 +546,13 @@ void Layout::append(Sizable &sizable) {
 
   if(dynamic_cast<Layout*>(&sizable)) {
     Layout &layout = (Layout&)sizable;
-    layout.synchronize();
+    layout.synchronizeLayout();
   }
 
   if(dynamic_cast<Widget*>(&sizable)) {
     Widget &widget = (Widget&)sizable;
     if(sizable.window()) sizable.window()->append(widget);
   }
-
-  if(window()) window()->synchronize();
 }
 
 void Layout::remove(Sizable &sizable) {
@@ -520,8 +563,6 @@ void Layout::remove(Sizable &sizable) {
 
   sizable.state.layout = 0;
   sizable.state.window = 0;
-
-  if(window()) window()->synchronize();
 }
 
 Layout::Layout():
@@ -638,8 +679,29 @@ Button::~Button() {
 //Canvas
 //======
 
-uint32_t* Canvas::buffer() {
-  return p.buffer();
+uint32_t* Canvas::data() {
+  return state.data;
+}
+
+bool Canvas::setImage(const nall::image &image) {
+  if(image.data == nullptr || image.width == 0 || image.height == 0) return false;
+  state.width = image.width;
+  state.height = image.height;
+  setSize({ state.width, state.height });
+  memcpy(state.data, image.data, state.width * state.height * sizeof(uint32_t));
+  return true;
+}
+
+void Canvas::setSize(const Size &size) {
+  state.width = size.width;
+  state.height = size.height;
+  delete[] state.data;
+  state.data = new uint32_t[size.width * size.height];
+  return p.setSize(size);
+}
+
+Size Canvas::size() {
+  return { state.width, state.height };
 }
 
 void Canvas::update() {
@@ -647,14 +709,18 @@ void Canvas::update() {
 }
 
 Canvas::Canvas():
+state(*new State),
 base_from_member<pCanvas&>(*new pCanvas(*this)),
 Widget(base_from_member<pCanvas&>::value),
 p(base_from_member<pCanvas&>::value) {
+  state.data = new uint32_t[state.width * state.height];
   p.constructor();
 }
 
 Canvas::~Canvas() {
   p.destructor();
+  delete[] state.data;
+  delete &state;
 }
 
 //CheckBox
@@ -766,6 +832,10 @@ HexEdit::~HexEdit() {
 //HorizontalScrollBar
 //===================
 
+unsigned HorizontalScrollBar::length() {
+  return state.length;
+}
+
 unsigned HorizontalScrollBar::position() {
   return p.position();
 }
@@ -795,6 +865,10 @@ HorizontalScrollBar::~HorizontalScrollBar() {
 
 //HorizontalSlider
 //================
+
+unsigned HorizontalSlider::length() {
+  return state.length;
+}
 
 unsigned HorizontalSlider::position() {
   return p.position();
@@ -979,7 +1053,7 @@ ProgressBar::~ProgressBar() {
 //========
 
 void RadioBox::group(const reference_array<RadioBox&> &list) {
-  foreach(item, list) item.p.setGroup(item.state.group = list);
+  for(auto &item : list) item.p.setGroup(item.state.group = list);
   if(list.size()) list[0].setChecked();
 }
 
@@ -988,7 +1062,7 @@ bool RadioBox::checked() {
 }
 
 void RadioBox::setChecked() {
-  foreach(item, state.group) item.state.checked = false;
+  for(auto &item : state.group) item.state.checked = false;
   state.checked = true;
   return p.setChecked();
 }
@@ -1007,7 +1081,7 @@ p(base_from_member<pRadioBox&>::value) {
 }
 
 RadioBox::~RadioBox() {
-  foreach(item, state.group) {
+  for(auto &item : state.group) {
     if(&item != this) item.state.group.remove(*this);
   }
   p.destructor();
@@ -1057,6 +1131,10 @@ TextEdit::~TextEdit() {
 //VerticalScrollBar
 //=================
 
+unsigned VerticalScrollBar::length() {
+  return state.length;
+}
+
 unsigned VerticalScrollBar::position() {
   return p.position();
 }
@@ -1086,6 +1164,10 @@ VerticalScrollBar::~VerticalScrollBar() {
 
 //VerticalSlider
 //==============
+
+unsigned VerticalSlider::length() {
+  return state.length;
+}
 
 unsigned VerticalSlider::position() {
   return p.position();

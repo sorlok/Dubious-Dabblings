@@ -10,16 +10,16 @@ static void ListView_change(ListView *self) {
   }
 }
 
-static void ListView_tick(GtkCellRendererToggle *cell, gchar *path_string, ListView *self) {
+static void ListView_toggle(GtkCellRendererToggle *cell, gchar *path_string, ListView *self) {
   unsigned row = decimal(path_string);
   self->setChecked(row, !self->checked(row));
-  if(self->onTick) self->onTick(row);
+  if(self->onToggle) self->onToggle(row);
 }
 
 void pListView::append(const lstring &text) {
   GtkTreeIter iter;
   gtk_list_store_append(store, &iter);
-  foreach(item, text, n) gtk_list_store_set(store, &iter, 1 + n, (const char*)item, -1);
+  for(unsigned n = 0; n < text.size(); n++) gtk_list_store_set(store, &iter, 1 + n, (const char*)text[n], -1);
 }
 
 void pListView::autoSizeColumns() {
@@ -28,23 +28,18 @@ void pListView::autoSizeColumns() {
 
 bool pListView::checked(unsigned row) {
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(subWidget));
-  GtkTreePath *path = gtk_tree_path_new_from_string(string(row));
   GtkTreeIter iter;
   bool state;
-  gtk_tree_model_get_iter(model, &iter, path);
+  if(gtk_tree_model_get_iter_from_string(model, &iter, string(row)) == false) return false;
   gtk_tree_model_get(model, &iter, 0, &state, -1);
-  gtk_tree_path_free(path);
   return state;
 }
 
 void pListView::modify(unsigned row, const lstring &text) {
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(subWidget));
   GtkTreeIter iter;
-  for(unsigned i = 0; i <= row; i++) {
-    if(i == 0) gtk_tree_model_get_iter_first(model, &iter);
-    else gtk_tree_model_iter_next(model, &iter);
-  }
-  foreach(item, text, n) gtk_list_store_set(store, &iter, 1 + n, (const char*)item, -1);
+  gtk_tree_model_get_iter_from_string(model, &iter, string(row));
+  for(unsigned n = 0; n < text.size(); n++) gtk_list_store_set(store, &iter, 1 + n, (const char*)text[n], -1);
 }
 
 void pListView::reset() {
@@ -59,30 +54,18 @@ void pListView::reset() {
 
 bool pListView::selected() {
   GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(subWidget));
-  GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(subWidget));
-  GtkTreeIter iter;
-  if(gtk_tree_model_get_iter_first(model, &iter) == false) return false;
-  if(gtk_tree_selection_iter_is_selected(selection, &iter) == true) return true;
-  for(unsigned n = 1;; n++) {
-    if(gtk_tree_model_iter_next(model, &iter) == false) return false;
-    if(gtk_tree_selection_iter_is_selected(selection, &iter) == true) return true;
-  }
-  return false;
+  return gtk_tree_selection_get_selected(selection, 0, 0);
 }
 
 unsigned pListView::selection() {
-  if(selected() == false) return listView.state.selection;
-
   GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(subWidget));
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(subWidget));
   GtkTreeIter iter;
-  if(gtk_tree_model_get_iter_first(model, &iter) == false) return 0;
-  if(gtk_tree_selection_iter_is_selected(selection, &iter) == true) return 0;
-  for(unsigned n = 1;; n++) {
-    if(gtk_tree_model_iter_next(model, &iter) == false) return 0;
-    if(gtk_tree_selection_iter_is_selected(selection, &iter) == true) return n;
-  }
-  return 0;
+  if(gtk_tree_selection_get_selected(selection, 0, &iter) == false) return listView.state.selection;
+  char *path = gtk_tree_model_get_string_from_iter(model, &iter);
+  unsigned row = decimal(path);
+  g_free(path);
+  return row;
 }
 
 void pListView::setCheckable(bool checkable) {
@@ -91,11 +74,9 @@ void pListView::setCheckable(bool checkable) {
 
 void pListView::setChecked(unsigned row, bool checked) {
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(subWidget));
-  GtkTreePath *path = gtk_tree_path_new_from_string(string(row));
   GtkTreeIter iter;
-  gtk_tree_model_get_iter(model, &iter, path);
+  gtk_tree_model_get_iter_from_string(model, &iter, string(row));
   gtk_list_store_set(GTK_LIST_STORE(model), &iter, 0, checked, -1);
-  gtk_tree_path_free(path);
 }
 
 void pListView::setHeaderText(const lstring &text) {
@@ -117,25 +98,12 @@ void pListView::setSelected(bool selected) {
 }
 
 void pListView::setSelection(unsigned row) {
-  signed current = -1;
-  if(selected()) current = selection();
   GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(subWidget));
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(subWidget));
   gtk_tree_selection_unselect_all(selection);
-
   GtkTreeIter iter;
-  if(gtk_tree_model_get_iter_first(model, &iter) == false) return;
-  if(row == 0) {
-    gtk_tree_selection_select_iter(selection, &iter);
-    return;
-  }
-  for(unsigned n = 1;; n++) {
-    if(gtk_tree_model_iter_next(model, &iter) == false) return;
-    if(row == n) {
-      gtk_tree_selection_select_iter(selection, &iter);
-      return;
-    }
-  }
+  if(gtk_tree_model_get_iter_from_string(model, &iter, string(row)) == false) return;
+  gtk_tree_selection_select_iter(selection, &iter);
 }
 
 void pListView::constructor() {
@@ -148,11 +116,11 @@ void pListView::constructor() {
 
   lstring headerText;
   headerText.append("");  //checkbox column
-  foreach(headerItem, listView.state.headerText) headerText.append(headerItem);
+  for(auto &headerItem : listView.state.headerText) headerText.append(headerItem);
   if(headerText.size() == 1) headerText.append("");
 
   GType *v = (GType*)malloc(headerText.size() * sizeof(GType));
-  foreach(header, headerText, n) v[n] = (n == 0 ? G_TYPE_BOOLEAN : G_TYPE_STRING);
+  for(unsigned n = 0; n < headerText.size(); n++) v[n] = (n == 0 ? G_TYPE_BOOLEAN : G_TYPE_STRING);
   store = gtk_list_store_newv(headerText.size(), v);
   free(v);
 
@@ -160,19 +128,19 @@ void pListView::constructor() {
   gtk_container_add(GTK_CONTAINER(gtkWidget), subWidget);
   g_object_unref(G_OBJECT(store));
 
-  foreach(header, headerText, n) {
+  for(unsigned n = 0; n < headerText.size(); n++) {
     if(n == 0) {
       column[n].renderer = gtk_cell_renderer_toggle_new();
       column[n].column = gtk_tree_view_column_new_with_attributes("", column[n].renderer, "active", n, (void*)0);
       gtk_tree_view_column_set_resizable(column[n].column, false);
       gtk_tree_view_column_set_visible(column[n].column, false);
-      g_signal_connect(column[n].renderer, "toggled", G_CALLBACK(ListView_tick), (gpointer)&listView);
+      g_signal_connect(column[n].renderer, "toggled", G_CALLBACK(ListView_toggle), (gpointer)&listView);
     } else {
       column[n].renderer = gtk_cell_renderer_text_new();
       column[n].column = gtk_tree_view_column_new_with_attributes("", column[n].renderer, "text", n, (void*)0);
       gtk_tree_view_column_set_resizable(column[n].column, true);
     }
-    column[n].label = gtk_label_new(header);
+    column[n].label = gtk_label_new(headerText[n]);
     gtk_tree_view_column_set_widget(GTK_TREE_VIEW_COLUMN(column[n].column), column[n].label);
     gtk_tree_view_append_column(GTK_TREE_VIEW(subWidget), column[n].column);
     gtk_widget_show(column[n].label);
@@ -188,8 +156,8 @@ void pListView::constructor() {
 
   setHeaderVisible(listView.state.headerVisible);
   setCheckable(listView.state.checkable);
-  foreach(text, listView.state.text) append(text);
-  foreach(checked, listView.state.checked, n) setChecked(n, checked);
+  for(auto &text : listView.state.text) append(text);
+  for(unsigned n = 0; n < listView.state.checked.size(); n++) setChecked(n, listView.state.checked[n]);
   if(listView.state.selected) setSelection(listView.state.selection);
   autoSizeColumns();
 }

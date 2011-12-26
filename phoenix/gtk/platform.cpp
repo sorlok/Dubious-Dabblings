@@ -34,11 +34,11 @@
 Font pOS::defaultFont;
 
 Geometry pOS::availableGeometry() {
-  Display *display = XOpenDisplay(0);
+  XlibDisplay *display = XOpenDisplay(0);
   int screen = DefaultScreen(display);
 
-  static Atom atom = X11None;
-  if(atom == X11None) atom = XInternAtom(display, "_NET_WORKAREA", True);
+  static Atom atom = XlibNone;
+  if(atom == XlibNone) atom = XInternAtom(display, "_NET_WORKAREA", True);
 
   int format;
   unsigned char *data = 0;
@@ -81,7 +81,7 @@ static string pOS_fileDialog(bool save, Window &parent, const string &path, cons
 
   if(path) gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
 
-  foreach(filterItem, filter) {
+  for(auto &filterItem : filter) {
     GtkFileFilter *gtkFilter = gtk_file_filter_new();
     gtk_file_filter_set_name(gtkFilter, filterItem);
     lstring part;
@@ -89,7 +89,7 @@ static string pOS_fileDialog(bool save, Window &parent, const string &path, cons
     part[1].rtrim<1>(")");
     lstring list;
     list.split(",", part[1]);
-    foreach(pattern, list) gtk_file_filter_add_pattern(gtkFilter, pattern);
+    for(auto &pattern : list) gtk_file_filter_add_pattern(gtkFilter, pattern);
     gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), gtkFilter);
   }
 
@@ -150,12 +150,12 @@ void pOS::processEvents() {
 }
 
 void pOS::quit() {
-  settings.save();
   gtk_main_quit();
 }
 
 void pOS::initialize() {
-  settings.load();
+  settings = new Settings;
+  settings->load();
 
   int argc = 1;
   char *argv[2];
@@ -165,13 +165,16 @@ void pOS::initialize() {
   char **argvp = argv;
   gtk_init(&argc, &argvp);
 
-  gtk_rc_parse_string(
-    "style \"phoenix-gtk\"\n"
-    "{\n"
-    "  GtkComboBox::appears-as-list = 1\n"
-    "  GtkTreeView::vertical-separator = 0\n"
-    "}\n"
-  //"class \"GtkComboBox\" style \"phoenix-gtk\"\n"
-    "class \"GtkTreeView\" style \"phoenix-gtk\"\n"
-  );
+  gtk_rc_parse_string(R"(
+    style "phoenix-gtk"
+    {
+      GtkWindow::resize-grip-width = 0
+      GtkWindow::resize-grip-height = 0
+      GtkTreeView::vertical-separator = 0
+      GtkComboBox::appears-as-list = 1
+    }
+    class "GtkWindow" style "phoenix-gtk"
+    class "GtkTreeView" style "phoenix-gtk"
+  # class "GtkComboBox" style "phoenix-gtk"
+  )");
 }

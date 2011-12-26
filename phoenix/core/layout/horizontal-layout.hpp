@@ -1,5 +1,5 @@
 struct HorizontalLayout : public Layout {
-  void append(Sizable &sizable, unsigned width, unsigned height, unsigned spacing = 0);
+  void append(Sizable &sizable, const Size &size, unsigned spacing = 0);
   void append(Sizable &sizable);
   bool enabled();
   Geometry minimumGeometry();
@@ -10,7 +10,7 @@ struct HorizontalLayout : public Layout {
   void setGeometry(const Geometry &geometry);
   void setMargin(unsigned margin);
   void setVisible(bool visible = true);
-  void synchronize();
+  void synchronizeLayout();
   bool visible();
   HorizontalLayout();
   ~HorizontalLayout();
@@ -27,5 +27,5 @@ struct HorizontalLayout : public Layout {
     Sizable *sizable;
     unsigned width, height, spacing;
   };
-  nall::linear_vector<Children> children;
+  nall::vector<Children> children;
 };
