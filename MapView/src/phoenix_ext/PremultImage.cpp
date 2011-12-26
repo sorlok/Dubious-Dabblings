@@ -13,7 +13,7 @@ using std::vector;
 using std::string;
 
 
-PremultImage::PremultImage() : buffer_(NULL), size_({0,0,0,0})
+PremultImage::PremultImage() : buffer_(NULL), size_(0,0,0,0)
 {
 
 }
@@ -376,7 +376,7 @@ uint32_t* PremultImage::LoadPNGFile(const string& path, unsigned int& imgWidth, 
 	delete[] data;*/
 	png image;
 	bool decodedOk = image.decode(path.c_str());
-	image.transform();
+	//image.transform(); //No longer in API
 	//image.alphaTransform(0x40c0c0);
 
 	//Check

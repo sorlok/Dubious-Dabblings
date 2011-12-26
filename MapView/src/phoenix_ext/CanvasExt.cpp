@@ -5,7 +5,7 @@
 using namespace phoenix;
 
 
-CanvasExt::CanvasExt() : Canvas(), image_(), offset_({0,0,0,0}), lastW(0), lastH(0)
+CanvasExt::CanvasExt() : Canvas(), image_(), offset_(0,0,0,0), lastW(0), lastH(0)
 {
 }
 
@@ -74,7 +74,7 @@ void CanvasExt::updateCanvasBuffer()
 {
 	//std::cout <<"Repaint: " <<image_.getSize().width <<"," <<image_.getSize().height <<" on: " <<bufferSize().width <<"," <<bufferSize().height <<" at: " <<offset_.x <<"," <<offset_.y <<"\n";
 
-	uint32_t* buffer_ = buffer();
+	uint32_t* buffer_ = data();
 	const Geometry& geom = geometry();
 	lastW = geom.width;
 	lastH = geom.height;
