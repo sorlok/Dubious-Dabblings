@@ -47,11 +47,11 @@ static void Canvas_leave(Canvas *self) {
 
 
 
-uint32_t* pCanvas::buffer() {
+/*uint32_t* pCanvas::buffer() {
   return (uint32_t*)cairo_image_surface_get_data(surface);
-}
+}*/
 
-void pCanvas::setGeometry(const Geometry &geometry) {
+/*void pCanvas::setGeometry(const Geometry &geometry) {
   if(	geometry.width  != cairo_image_surface_get_width(surface)
 		|| geometry.height != cairo_image_surface_get_height(surface))
   {
@@ -61,7 +61,7 @@ void pCanvas::setGeometry(const Geometry &geometry) {
 
   pWidget::setGeometry(geometry);
   update();
-}
+}*/
 
 void pCanvas::update() {
   if(gtk_widget_get_realized(gtkWidget) == false) return;
