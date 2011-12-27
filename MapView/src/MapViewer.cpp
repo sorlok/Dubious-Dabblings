@@ -121,7 +121,7 @@ struct Application : Window {
 		layout.append(lbl, {Centered, {0.5}}, {Centered, {0.5, -10}});
 		layout.append(ok, {Centered, {0.5}}, {{lbl, 5}});
 
-		ok.onTick = [this] {
+		ok.onActivate = [this] {
 			setVisible(false);
 		};
 
@@ -230,7 +230,7 @@ struct Application : Window {
     bkgrd.fillRect({0, 0, w/2, h/2}, {0xFF, 0x00, 0x00});
     bkgrd.fillRect({w/4, h/4, w/2, h/2}, {0x80, 0x00, 0x00, 0xFF});
 
-    onClose = quitButton.onTick = [&layout] {
+    onClose = quitButton.onActivate = [&layout] {
       layout.setSkipGeomUpdates(true);
    	  OS::quit();
     };
@@ -242,7 +242,7 @@ struct Application : Window {
     	updateScrollbar(false);
     };
 
-    loadMapBtn.onTick = [this]() {
+    loadMapBtn.onActivate = [this]() {
     	if (!loadedMapOnce) {
     		PremultImage& bkgrd = myCanvas.getBufferedImage();
     		GameMap::InitTMXMap(myMap, "map_test.tmx");
@@ -259,7 +259,7 @@ struct Application : Window {
     	}
     };
 
-    testParrotBtn.onTick = { &Application::parrotTest, this };
+    testParrotBtn.onActivate = { &Application::parrotTest, this };
 
     onSize = [this]() {
     	//Has the buffer actually been destroyed?
