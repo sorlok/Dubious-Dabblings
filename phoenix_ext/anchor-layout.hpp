@@ -4,6 +4,7 @@
 #pragma once
 
 #include <phoenix.hpp>
+#include <nall/foreach.hpp>
 #include "scapegoat.hpp"
 
 
