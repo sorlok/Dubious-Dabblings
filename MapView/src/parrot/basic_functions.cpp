@@ -25,7 +25,7 @@ PMC* initParrot(const string& sourceFileName)
 	}
 
 	//Run the bytecode
-	if (!Parrot_api_run_bytecode(interpreter, pf, nullptr, nullptr)) { //what's sysargs vs. programargs?
+	if (!Parrot_api_run_bytecode(interpreter, pf, nullptr)) {
 		throw_last_parrot_error("Error running bytecode", interpreter);
 	}
 
