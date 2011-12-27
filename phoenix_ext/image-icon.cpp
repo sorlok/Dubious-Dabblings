@@ -44,7 +44,7 @@ void ImageIcon::setGeometry(const phoenix::Geometry &geometry)
 void ImageIcon::update()
 {
 	//First, fill it
-	uint32_t* buffer_ = buffer();
+	uint32_t* buffer_ = data();
 	const Geometry& geom = geometry();
 	std::fill(buffer_, buffer_+geom.width*geom.height, bkgrd);
 
@@ -62,18 +62,28 @@ void ImageIcon::update()
 			//We could simply flush the entire data array at once, but I think it's
 			//better to copy it row-by-row; that way, we have more flexibility later for
 			//drawing, e.g., a background or for tiling the input.
-			const uint32_t* src = img->data;
+			const uint8_t* src = img->data;
+			const unsigned bpp = img->info.bytesPerPixel;
 			uint32_t* dest = buffer_;
 
 			//Iterate & copy
 			for (size_t row=0; row<srcH; row++) {
 				//Copy that row over
 				//TODO: This should really pain ONTO the background color
-				memcpy(dest, src, srcW*sizeof(uint32_t));
+				//memcpy(dest, src, srcW*sizeof(uint32_t));
+				//TEMP fix: we can do this better later.
+				for (size_t col=0; col<srcW; row++) {
+					*dest = 0;
+					for (size_t bit=0; bit<bpp; bit++) {
+						*dest = ((*dest)<<8) | *src;
+						src++;
+					}
+					dest++;
+				}
 
 				//Increment
-				dest += geom.width;
-				src += srcW;
+				//dest += geom.width;
+				//src += srcW*bpp;
 			}
 		}
 	}

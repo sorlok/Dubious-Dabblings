@@ -4,7 +4,6 @@
 #pragma once
 
 #include <phoenix.hpp>
-#include <nall/foreach.hpp>
 #include "scapegoat.hpp"
 
 
@@ -131,7 +130,7 @@ public:
 	//Required functionality: Layout
 	void append(phoenix::Sizable& sizable); //Calling this is not recommended; I think it'll create default Attachments?
 	void remove(phoenix::Sizable& sizable);
-	void synchronize();
+	void synchronizeLayout();
 
 	//Workaround
 	void synchHack(Sizable* sizable);
@@ -204,7 +203,7 @@ public:
 	}
 
 	~ScopedLayoutLock() {
-		foreach(layout, layouts) {
+		for(auto& layout : layouts) {
 			layout->setSkipGeomUpdates(false);
 			if (layout->state.skippedAnUpdate) {
 				layout->setGeometry(layout->state.lastKnownSize);

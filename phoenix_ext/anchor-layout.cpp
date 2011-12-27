@@ -59,7 +59,7 @@ void AnchorLayout::append(Sizable &sizable) {
 	}
 	Layout::append(sizable);
 	if(window()) {
-		window()->synchronize();
+		window()->synchronizeLayout();
 	}
 }
 
@@ -79,7 +79,7 @@ void AnchorLayout::append(phoenix::Sizable &sizable, const Axis& horizontal, con
 	}
 	//Else, add a new item
 	children.insert(&sizable, { &sizable, horizontal, vertical });
-	synchronize();
+	synchronizeLayout();
 }
 
 
@@ -106,7 +106,7 @@ void AnchorLayout::synchHack(Sizable* sizable)
 	//This is required due to a bug in const-casting.
 	Layout::append(*sizable);
 }
-void AnchorLayout::synchronize()
+void AnchorLayout::synchronizeLayout()
 {
 	ScopedLayoutLock lock(this);
 

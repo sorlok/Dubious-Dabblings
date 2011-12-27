@@ -13,7 +13,7 @@ public:
 	//Required functionality: Layout
 	void append(phoenix::Sizable& sizable);
 	void remove(phoenix::Sizable& sizable);
-	void synchronize();
+	void synchronizeLayout();
 
 	//Required functionality: Sizable
 	virtual void setEnabled(bool enabled = true);

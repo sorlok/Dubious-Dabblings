@@ -57,7 +57,7 @@ void ThumbnailLayout::append(Sizable &sizable) {
 	}
 	Layout::append(sizable);
 	if(window()) {
-		window()->synchronize();
+		window()->synchronizeLayout();
 	}
 }
 
@@ -84,7 +84,7 @@ void ThumbnailLayout::synchHack(Sizable* sizable)
 }
 
 
-void ThumbnailLayout::synchronize()
+void ThumbnailLayout::synchronizeLayout()
 {
 	if (children.size()==0) {
 		return;
