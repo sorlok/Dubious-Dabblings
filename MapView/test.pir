@@ -7,8 +7,13 @@
 
 .namespace[]
 .sub 'main' :main
-    build_base_classes()
-    run_game()
+    .local pmc currRend
+
+    #Create an object of the subclass.
+    currRend = new ['DemoRendition']
+
+    #Run it.
+    run_game(currRend)
 .end
 
 

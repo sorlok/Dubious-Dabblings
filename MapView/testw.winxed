@@ -4,16 +4,98 @@ $load 'testp.pbc';  #Note: We can load .pir files too, but I'd rather handle com
 #Inherit from Rendition
 class WRendition : Rendition {
   function update() {
-    say("hello");
+    #TODO: Translate all this nonsense to winxed
+
+
+  .local pmc personImg
+  .local int w, h
+
+  #Initialize our polyScale property
+  $P0 = new 'Float'
+  $N0 = 1.0
+  $P0 = $N0
+  setattribute self, 'polyScale', $P0
+
+  #Initialize our polyScaleDec property
+  $P0 = new 'Integer'
+  $I0 = 1
+  $P0 = $I0
+  setattribute self, 'polyScaleDec', $P0
+
+  #Initialize our drawables array
+  $P0 = new 'ResizablePMCArray'
+  setattribute self, 'drawables', $P0
+
+  #Now, start assigning objects to that array.
+  $I0 = PFX_CanUse()
+  unless $I0 goto makeobjs
+
+  #Load the shader
+  $P1 = PFX_MakeNew('colorize.sfx')
+  if null $P1 goto makeobjs
+
+  #Set its properties (for now just use the defaults)
+  DEMO_SetDefaultPFX($P1)
+
+  #Save it in our array of objects
+  $P0.'push'($P1)
+  setattribute self, 'pfxShader', $P1
+  
+  #Make the rest of our objects
+  makeobjs:
+
+  #Images
+  personImg = IMG_MakeNew('person.png')
+  unless null personImg goto makeobjs2
+
+  #Error
+  say "Can't load image: person.png"
+  $P1 = new 'Exception'
+  throw $P1
+
+  #Make more objects
+  makeobjs2:
+
+  #Retrieve the image's width/height, for later
+  w = IMG_GetWidth(personImg)
+  w /= 2
+  h = IMG_GetHeight(personImg)
+  h /= 2
+
+  #Make sprite 1, set its properties, save it.
+  $P3 = SPR_MakeNew()
+  SPR_SetImage($P3, personImg)
+  $I0 = 800/3
+  $I1 = 600/2
+  SPR_SetPosition($P3, $I0, $I1)
+  SPR_SetCenter($P3, w, h)
+  $P0.'push'($P3)
+  setattribute self, 'spr1', $P3
+
+
+  #Make sprite 2, set its properties, save it.
+  $P2 = SPR_MakeNew()
+  SPR_SetImage($P2, personImg)
+  $I0 = 2*800
+  $I0 /= 3
+  $I1 = 600/2
+  SPR_SetPosition($P2, $I0, $I1)
+  SPR_SetCenter($P2, w, h)
+  $P0.'push'($P2)
+  setattribute self, 'spr2', $P2
+
+  #Make our cursor sprite
+  $P1 = DEMO_InitPoly()
+  $P0.'push'($P1)
+  setattribute self, 'polygon', $P1
+
   }
 }
 
 #Main loop
 function main[main](var args)
 {
-  #Build our first set of class definitions
-  build_base_classes();
-
-  run_game();
+  var currRend = new WRendition;
+  run_game(currRend);
 }
 
