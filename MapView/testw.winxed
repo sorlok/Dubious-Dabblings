@@ -90,7 +90,8 @@ class WRendition : Rendition {
     }
 
     #Update sprite 1's rotation
-    float newRot = SPR_GetRotation(self.spr1) + 50 * frameTimeS;
+    float newRot = SPR_GetRotation(self.spr1);
+    newRot += 50 * frameTimeS;
     SPR_SetRotation(self.spr1, newRot);
 
     #Update sprite 1's colorization
@@ -151,7 +152,8 @@ class WRendition : Rendition {
 #Main loop
 function main[main](var args)
 {
-  var currRend = new WRendition;
+  var currRend = new WRendition();
   run_game(currRend);
 }
+
 
