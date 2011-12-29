@@ -30,10 +30,10 @@ class WRendition : Rendition {
       self.pfxShader = PFX_MakeNew('colorize.sfx');
       if (self.pfxShader) {
         #Set its properties (for now just use the defaults)
-        DEMO_SetDefaultPFX(self.pfxShader);
+        DEMO_SetDefaultPFX(self.pfxShader);  #Note: This is causing a problem.
 
         #Save it in our array of objects
-        push(self.drawables, self.pfxShader);
+        #push(self.drawables, self.pfxShader);  #TODO: Re-enable later.
       }
     }
 
@@ -143,6 +143,7 @@ class WRendition : Rendition {
 
   function display() {
     #Draw every item in our array.
+    #TODO: I think we're actually supposed to iterate through this in reverse.
     for (var dw in self.drawables) {
       GAME_DrawItem(dw);
     }
