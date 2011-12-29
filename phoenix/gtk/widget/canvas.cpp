@@ -63,6 +63,11 @@ static void Canvas_leave(Canvas *self) {
   update();
 }*/
 
+void pCanvas::setSize(const Size &size) {
+  cairo_surface_destroy(surface);
+  surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, canvas.state.width, canvas.state.height);
+}
+
 void pCanvas::update() {
   if(gtk_widget_get_realized(gtkWidget) == false) return;
   gdk_window_invalidate_rect(gtk_widget_get_window(gtkWidget), 0, true);
