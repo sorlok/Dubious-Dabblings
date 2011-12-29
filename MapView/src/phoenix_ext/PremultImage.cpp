@@ -121,6 +121,8 @@ void PremultImage::initFromImage(const std::string& path)
 
 bool PremultImage::resetSize_(const Geometry& size)
 {
+	std::cout <<"New PNG size: " <<size.width <<"," <<size.height <<"\n";
+
 	//Delete the old one
 	if (buffer_) {
 		delete [] buffer_;
@@ -381,7 +383,7 @@ uint32_t* PremultImage::LoadPNGFile(const string& path, unsigned int& imgWidth, 
 
 	//Check
 	if (!decodedOk) {
-		return NULL;
+		return nullptr;
 	}
 
 	//Set width/height
@@ -396,6 +398,10 @@ uint32_t* PremultImage::LoadPNGFile(const string& path, unsigned int& imgWidth, 
 
 	//TEMP: For some reason, PNG flips out over a certain small file...
 	size_t size = image.info.width*image.info.height;
+
+	std::cout <<"Size: " <<image.size;
+	std::cout <<"Computed size: " <<size;
+
 	//if (size <= 15941) {
 		uint32_t* res = new uint32_t[size];
 		memcpy(res, image.data, size*sizeof(res[0]));

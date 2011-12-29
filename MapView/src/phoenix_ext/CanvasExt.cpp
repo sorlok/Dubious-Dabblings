@@ -75,7 +75,8 @@ void CanvasExt::updateCanvasBuffer()
 	//std::cout <<"Repaint: " <<image_.getSize().width <<"," <<image_.getSize().height <<" on: " <<bufferSize().width <<"," <<bufferSize().height <<" at: " <<offset_.x <<"," <<offset_.y <<"\n";
 
 	uint32_t* buffer_ = data();
-	const Geometry& geom = geometry();
+	//const Geometry& geom = geometry();
+	const Size& geom = size(); //NOTE: Why is this different than geometry()?
 	lastW = geom.width;
 	lastH = geom.height;
 
@@ -95,8 +96,15 @@ void CanvasExt::updateCanvasBuffer()
 	size_t rHeight = nall::min(offset_.y+image_.getSize().height, geom.height) - nall::max(0, offset_.y);
 	size_t rWidth = nall::min(offset_.x+image_.getSize().width, geom.width) - nall::max(0, offset_.x);
 
+	std::cout <<"Offset: " <<offset_.x <<"\n";
+	std::cout <<"Image width: " <<image_.getSize().width <<"\n";
+	std::cout <<"Geom width: " <<geom.width <<"\n";
+	std::cout <<"Buffer size: " <<size().width <<"," <<size().height <<"\n";
+
 	//Iterate
 	for (size_t row=0; row<rHeight; row++) {
+		std::cout <<"Row: " <<row <<" of width: " <<rWidth <<std::endl;
+
 		//Copy that row over
 		memcpy(dest, src, rWidth*sizeof(uint32_t));
 
