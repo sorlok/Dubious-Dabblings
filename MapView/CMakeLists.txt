@@ -37,13 +37,13 @@ ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 
 #Include directories ported over from Eclipse. Can be augmented later with pkgconfig.
-include_directories("${ProjDirPath}/../phoenix")
-include_directories("${ProjDirPath}/..")
-include_directories("${ProjDirPath}/src")
+include_directories("${PROJECT_SOURCE_DIR}/../phoenix")
+include_directories("${PROJECT_SOURCE_DIR}/..")
+include_directories("${PROJECT_SOURCE_DIR}/src")
 
 #Link directories
-link_directories ("${ProjDirPath}/../phoenix/build")
-link_directories ("${ProjDirPath}/../phoenix_ext/build")
+link_directories ("${PROJECT_SOURCE_DIR}/../phoenix/build")
+link_directories ("${PROJECT_SOURCE_DIR}/../phoenix_ext/build")
 
 #Group as many files as possible together automatically
 FILE(GLOB_RECURSE BASIC_CPP *.cpp)
