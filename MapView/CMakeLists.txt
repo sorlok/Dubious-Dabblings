@@ -68,12 +68,15 @@ LIST(APPEND IgnoreList ${IgnoreTmp})
 LIST(REMOVE_ITEM BASIC_CPP ${IgnoreList})
 
 #List of libraries to link
-SET(LibraryList X11 sfml-system phoenix_ext phoenix_ext_gtk tinyxml z)
+SET(LibraryList sfml-system phoenix_ext phoenix_ext_gtk tinyxml z)
 
 #Add Gtk-2 stuff
 find_package(GTK2 REQUIRED)
 include_directories(${GTK2_INCLUDE_DIRS})
 LIST(APPEND LibraryList ${GTK2_LIBRARIES})
+
+#Add X11
+LIST(APPEND LibraryList "X11")
 
 #Add Parrot stuff
 EXEC_PROGRAM(parrot_config ARGS embed-cflags OUTPUT_VARIABLE PARROT_CFLAGS)
