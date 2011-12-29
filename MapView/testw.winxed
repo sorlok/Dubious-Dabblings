@@ -1,9 +1,9 @@
+##Include our implemenation
+$load 'testp.pbc';  #Note: We can load .pir files too, but I'd rather handle compilation manually.
 
-
-
-
+#Main loop
 function main[main](var args)
 {
-  say("Testing!");
+  run_game();
 }
 
