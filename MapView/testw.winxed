@@ -38,104 +38,106 @@ class WRendition : Rendition {
     }
 
     #Images
-    personImg = IMG_MakeNew('person.png')
-    if (!personImg) {
+    self.personImg = IMG_MakeNew('person.png');
+    if (!self.personImg) {
       #Error
       throw "Can't load image: person.png";
     }
 
     #Retrieve the image's width/height, for later
-    int w = IMG_GetWidth(personImg) / 2;
-    int h = IMG_GetHeight(personImg) / 2;
+    int w = IMG_GetWidth(self.personImg) / 2;
+    int h = IMG_GetHeight(self.personImg) / 2;
 
     #Make sprite 1, set its properties, save it.
-    spr1 = SPR_MakeNew();
-    SPR_SetImage(spr1, personImg);
-    SPR_SetPosition(spr1, 800/3, 600/2);
-    SPR_SetCenter(spr1, w, h);
-    push(drawables, spr1);
+    self.spr1 = SPR_MakeNew();
+    SPR_SetImage(self.spr1, self.personImg);
+    SPR_SetPosition(self.spr1, 800/3, 600/2);
+    SPR_SetCenter(self.spr1, w, h);
+    push(self.drawables, self.spr1);
 
     #Make sprite 2, set its properties, save it.
-    spr2 = SPR_MakeNew();
-    SPR_SetImage(spr2, personImg);
-    SPR_SetPosition(spr2, 2*800/3, 600/2);
-    SPR_SetCenter(spr2, w, h);
-    push(drawables, spr2);
+    self.spr2 = SPR_MakeNew();
+    SPR_SetImage(self.spr2, self.personImg);
+    SPR_SetPosition(self.spr2, 2*800/3, 600/2);
+    SPR_SetCenter(self.spr2, w, h);
+    push(self.drawables, self.spr2);
 
     #Make our cursor sprite
-    polygon = DEMO_InitPoly();
-    push(drawables, polygon);
+    self.polygon = DEMO_InitPoly();
+    push(self.drawables, self.polygon);
   }
 
   function flip_poly_point(int id1, int id2) {
-    var clr0 = POLY_GetPointColor(polygon, id1);
-    var clr1 = POLY_GetPointColor(polygon, id2);
-    POLY_SetPointColor(polygon, id1, clr1);
-    POLY_SetPointColor(polygon, id2, clr0);
+    var clr0 = POLY_GetPointColor(self.polygon, id1);
+    var clr1 = POLY_GetPointColor(self.polygon, id2);
+    POLY_SetPointColor(self.polygon, id1, clr1);
+    POLY_SetPointColor(self.polygon, id2, clr0);
     GAME_DeleteColor(clr0);
     GAME_DeleteColor(clr1);
   }
 
   function update() {
     #Retrieve game timer
-    float frameTimeS = GAME_GetFrameTimeInS()
+    float frameTimeS = GAME_GetFrameTimeInS();
 
     #Retrieve mouse x,y
     int mouseX = INPUT_GetMouseX();
     int mouseY = INPUT_GetMouseY();
 
     #Update our post-effect shader
-    if (pfxShader) {
-      DEMO_UpdatePFXColor(pfxShader);
+    if (self.pfxShader) {
+      DEMO_UpdatePFXColor(self.pfxShader);
     }
 
     #Update sprite 1's rotation
-    float newRot = SPR_GetRotation(spr1) + 50 * frameTimeS;
-    SPR_SetRotation(spr1, newRot);
+    float newRot = SPR_GetRotation(self.spr1) + 50 * frameTimeS;
+    SPR_SetRotation(self.spr1, newRot);
 
     #Update sprite 1's colorization
-    var oldColor = SPR_GetColor(spr1);
-    int invScale = (1.0-polyScale) * 255;
+    var oldColor = SPR_GetColor(self.spr1);
+    float invScale = 1.0 - self.polyScale;
+    invScale *= 255;
     CLR_SetBlue(oldColor, invScale);
-    SPR_SetColor(spr1, oldColor);
+    SPR_SetColor(self.spr1, oldColor);
     GAME_DeleteColor(oldColor);
 
     #Update sprite 2's rotation
-    newRot = SPR_GetRotation(spr2) - 80 * frameTimeS;
-    SPR_SetRotation(spr2, newRot);
+    newRot = SPR_GetRotation(self.spr2) - 80 * frameTimeS;
+    SPR_SetRotation(self.spr2, newRot);
 
     #Update sprite 1's colorization
-    oldColor = SPR_GetColor(spr2);
-    invScale = polyScale * 255;
+    oldColor = SPR_GetColor(self.spr2);
+    invScale = self.polyScale;
+    invScale *= 255;
     CLR_SetAlpha(oldColor, invScale);
-    SPR_SetColor(spr2, oldColor);
+    SPR_SetColor(self.spr2, oldColor);
     GAME_DeleteColor(oldColor);
 
     #Update our polygon's scale factor
-    if (polyScaleDec==1) {
-      polyScale -= frameTimeS;
+    if (self.polyScaleDec==1) {
+      self.polyScale -= frameTimeS;
     } else {
-      polyScale += frameTimeS;
+      self.polyScale += frameTimeS;
     }
 
     #Boundary conditions
-    if (polyScale < 0.0) {
-      polyScale = 0.0;
-      polyScaleDec = 0;
+    if (self.polyScale < 0.0) {
+      self.polyScale = 0.0;
+      self.polyScaleDec = 0;
       self.flip_poly_point(1, 5);
       self.flip_poly_point(2, 4);
     }
-    if (polyScale > 1.0) {
-      polyScale = 1.0;
-      polyScaleDec = 1;
+    if (self.polyScale > 1.0) {
+      self.polyScale = 1.0;
+      self.polyScaleDec = 1;
     }
 
     #Set the polyline's x-scale
-    POLY_SetScaleX(polygon, polyScale);
+    POLY_SetScaleX(self.polygon, self.polyScale);
 
     #Set the polyline's position
-    POLY_SetPosX(polygon, mouseX);
-    POLY_SetPosY(polygon, mouseY);
+    POLY_SetPosX(self.polygon, mouseX);
+    POLY_SetPosY(self.polygon, mouseY);
   }  
 
   function display() {
