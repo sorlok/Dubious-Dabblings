@@ -1,9 +1,19 @@
 ##Include our implemenation
 $load 'testp.pbc';  #Note: We can load .pir files too, but I'd rather handle compilation manually.
 
+#Inherit from Rendition
+class WRendition : Rendition {
+  function update() {
+    say("hello");
+  }
+}
+
 #Main loop
 function main[main](var args)
 {
+  #Build our first set of class definitions
+  build_base_classes();
+
   run_game();
 }
 

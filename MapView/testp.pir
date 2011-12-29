@@ -12,6 +12,9 @@
 .sub 'display' :method
 .end
 
+.sub Rendition_class_init :anon :load :init
+    newclass $P0, [ 'Rendition' ]
+.end
 
 
 #####################################################################
@@ -648,18 +651,15 @@ savepoly:
 
 
 #####################################################################
-# Main game loop. Makes use of shared library code where possible.
+# Register our classes.
 #####################################################################
 
 .namespace[]
-.sub 'run_game'
+.sub 'build_base_classes'
     .local int res
-    .local pmc currRend
-    res = GAME_Init(800, 600, 32)
-    if res==0 goto done
 
     #Create Rendition and subclasses
-    $P0 = newclass 'Rendition'
+    $P0 = get_class 'Rendition'
     $P2 = newclass 'DemoRendition'
     addparent $P0, $P2
 
@@ -671,6 +671,23 @@ savepoly:
     addattribute $P2, 'polyScale'
     addattribute $P2, 'polyScaleDec'
     addattribute $P2, 'polygon'
+.end
+
+
+
+
+#####################################################################
+# Main game loop. Makes use of shared library code where possible.
+#####################################################################
+
+.namespace[]
+.sub 'run_game'
+    .local int res
+    .local pmc currRend
+
+    #Start the game
+    res = GAME_Init(800, 600, 32)
+    if res==0 goto done
 
     #Create an object of the subclass.
     currRend = new ['DemoRendition']
