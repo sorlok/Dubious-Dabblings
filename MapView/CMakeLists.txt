@@ -26,8 +26,8 @@ ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 #Generate a header file to contain configuration settings. This is useful
 #  for, e.g., cmake variable which can then be set via the gui. 
 configure_file (
-  "${PROJECT_SOURCE_DIR}/GenConfig.h.in"
-  "${PROJECT_SOURCE_DIR}/GenConfig.h"
+  "${PROJECT_SOURCE_DIR}/src/GenConfig.h.in"
+  "${PROJECT_SOURCE_DIR}/src/GenConfig.h"
 )
 
 #Cflags for C++0x support via gcc
@@ -70,6 +70,16 @@ LIST(REMOVE_ITEM BASIC_CPP ${IgnoreList})
 #List of libraries to link
 SET(LibraryList X11 sfml-system phoenix_ext phoenix_ext_gtk tinyxml z)
 
+#Add Gtk-2 stuff
+find_package(GTK2 REQUIRED)
+include_directories(${GTK2_INCLUDE_DIRS})
+LIST(APPEND LibraryList ${GTK2_LIBRARIES})
+
+#Add Parrot stuff
+#todo: Is this right?
+include_directories("`parrot_config embed-cflags`")
+LIST(APPEND LibraryList "`parrot_config embed-ldflags`")
+
 #TODO: pkg-config, parrot_config:
 #`pkg-config --cflags gtk+-2.0` `parrot_config embed-cflags`
 
@@ -77,7 +87,7 @@ SET(LibraryList X11 sfml-system phoenix_ext phoenix_ext_gtk tinyxml z)
 #`pkg-config --libs gtk+-2.0` `parrot_config embed-ldflags`
 
 #Our output executable and its input sources. List *.c files manually
-add_executable(MapView src/MapView.cpp ${BASIC_CPP})
+add_executable(MapView src/MapViewer.cpp ${BASIC_CPP})
 
 #Libraries to link, ported over from Eclipse.
 target_link_libraries (MapView ${LibraryList})

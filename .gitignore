@@ -9,3 +9,6 @@ phoenix_ext/build
 #Ignore gedit backup files
 *~
 
+#Never ignore gitignore files
+!.gitignore
+
