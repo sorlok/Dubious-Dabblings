@@ -76,15 +76,14 @@ include_directories(${GTK2_INCLUDE_DIRS})
 LIST(APPEND LibraryList ${GTK2_LIBRARIES})
 
 #Add Parrot stuff
-#todo: Is this right?
-include_directories("`parrot_config embed-cflags`")
-LIST(APPEND LibraryList "`parrot_config embed-ldflags`")
+EXEC_PROGRAM(parrot_config ARGS embed-cflags OUTPUT_VARIABLE PARROT_CFLAGS)
+EXEC_PROGRAM(parrot_config ARGS embed-ldflags OUTPUT_VARIABLE PARROT_LDFLAGS)
 
-#TODO: pkg-config, parrot_config:
-#`pkg-config --cflags gtk+-2.0` `parrot_config embed-cflags`
-
-#TODO: pkg-config, parrot_config:
-#`pkg-config --libs gtk+-2.0` `parrot_config embed-ldflags`
+#todo: Should try to make a FindParrot file.
+IF(CMAKE_COMPILER_IS_GNUCXX)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PARROT_CFLAGS}")
+  SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${PARROT_LDFLAGS}")
+ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 #Our output executable and its input sources. List *.c files manually
 add_executable(MapView src/MapViewer.cpp ${BASIC_CPP})
