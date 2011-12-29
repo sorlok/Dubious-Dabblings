@@ -3,8 +3,8 @@ $load 'testp.pbc';  #Note: We can load .pir files too, but I'd rather handle com
 
 #Inherit from Rendition
 class WRendition : Rendition {
-  float polyScale;    #How much to scale the polygon by.
-  int polyScaleDec;   #Are we scaling up or down? (boolean)
+  var polyScale;    #How much to scale the polygon by.
+  var polyScaleDec;   #Are we scaling up or down? (boolean)
   var drawables;      #Array of items we plan on drawing.
 
   var pfxShader;    #Our pixel shader
