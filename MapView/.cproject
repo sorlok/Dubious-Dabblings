@@ -17,9 +17,9 @@
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">
 <configuration artifactName="MapViewer" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.exe.debug.2144238435" name="Debug" parent="cdt.managedbuild.config.gnu.exe.debug">
 <folderInfo id="cdt.managedbuild.config.gnu.exe.debug.2144238435." name="/" resourcePath="">
-<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.1094800581" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.debug">
+<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.1094800581" name="Linux GCC" resourceTypeBasedDiscovery="true" superClass="cdt.managedbuild.toolchain.gnu.exe.debug">
 <targetPlatform id="cdt.managedbuild.target.gnu.platform.exe.debug.830579856" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.exe.debug"/>
-<builder buildPath="${workspace_loc:/Map Viewer/Debug}" id="cdt.managedbuild.target.gnu.builder.exe.debug.1813265861" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.exe.debug"/>
+<builder arguments="-C ${ProjDirPath}/Debug VERBOSE=1 -j2" autoBuildTarget="all" buildPath="" cleanBuildTarget="clean" command="make" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="cdt.managedbuild.target.gnu.builder.exe.debug.1813265861" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" parallelizationNumber="1" superClass="cdt.managedbuild.target.gnu.builder.exe.debug"/>
 <tool id="cdt.managedbuild.tool.gnu.archiver.base.1504326624" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 <tool command="g++" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG}${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.493473794" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug">
 <option id="gnu.cpp.compiler.exe.debug.option.optimization.level.1398033213" name="Optimization Level" superClass="gnu.cpp.compiler.exe.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
@@ -322,7 +322,7 @@
 </profile>
 </scannerConfigBuildInfo>
 <scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.2144238435;cdt.managedbuild.config.gnu.exe.debug.2144238435.;cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.493473794;cdt.managedbuild.tool.gnu.cpp.compiler.input.1619265655">
-<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP"/>
+<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP"/>
 <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
 <buildOutputProvider>
 <openAction enabled="true" filePath=""/>
@@ -405,7 +405,7 @@
 </profile>
 </scannerConfigBuildInfo>
 <scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.2144238435;cdt.managedbuild.config.gnu.exe.debug.2144238435.;cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1079962912;cdt.managedbuild.tool.gnu.c.compiler.input.577378318">
-<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
+<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
 <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
 <buildOutputProvider>
 <openAction enabled="true" filePath=""/>
@@ -488,6 +488,26 @@
 </profile>
 </scannerConfigBuildInfo>
 </storageModule>
+<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
+<buildTargets>
+<target name="Run CMake (Debug)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+<buildCommand>cmake</buildCommand>
+<buildArguments>-E chdir Debug/ cmake -G "Unix Makefiles" ../ -DCMAKE_BUILD_TYPE:STRING=Debug</buildArguments>
+<buildTarget/>
+<stopOnError>true</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+<runAllBuilders>false</runAllBuilders>
+</target>
+<target name="Run CMake (Release)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+<buildCommand>cmake</buildCommand>
+<buildArguments>-E chdir Release/ cmake -G "Unix Makefiles" ../ -DCMAKE_BUILD_TYPE:STRING=Release</buildArguments>
+<buildTarget/>
+<stopOnError>true</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+<runAllBuilders>false</runAllBuilders>
+</target>
+</buildTargets>
+</storageModule>
 </cconfiguration>
 <cconfiguration id="cdt.managedbuild.config.gnu.exe.release.669329604">
 <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.exe.release.669329604" moduleId="org.eclipse.cdt.core.settings" name="Release">
@@ -505,7 +525,7 @@
 <folderInfo id="cdt.managedbuild.config.gnu.exe.release.669329604." name="/" resourcePath="">
 <toolChain id="cdt.managedbuild.toolchain.gnu.exe.release.1125611132" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.release">
 <targetPlatform id="cdt.managedbuild.target.gnu.platform.exe.release.2008456529" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.exe.release"/>
-<builder buildPath="${workspace_loc:/Map Viewer/Release}" id="cdt.managedbuild.target.gnu.builder.exe.release.1583664425" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.exe.release"/>
+<builder arguments="-C ${ProjDirPath}/Release VERBOSE=1 -j2" buildPath="" command="make" id="cdt.managedbuild.target.gnu.builder.exe.release.1583664425" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.exe.release"/>
 <tool id="cdt.managedbuild.tool.gnu.archiver.base.235969873" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1498839644" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release">
 <option id="gnu.cpp.compiler.exe.release.option.optimization.level.1410313572" name="Optimization Level" superClass="gnu.cpp.compiler.exe.release.option.optimization.level" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
@@ -808,7 +828,7 @@
 </profile>
 </scannerConfigBuildInfo>
 <scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.2144238435;cdt.managedbuild.config.gnu.exe.debug.2144238435.;cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.493473794;cdt.managedbuild.tool.gnu.cpp.compiler.input.1619265655">
-<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP"/>
+<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP"/>
 <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
 <buildOutputProvider>
 <openAction enabled="true" filePath=""/>
@@ -891,7 +911,7 @@
 </profile>
 </scannerConfigBuildInfo>
 <scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.2144238435;cdt.managedbuild.config.gnu.exe.debug.2144238435.;cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1079962912;cdt.managedbuild.tool.gnu.c.compiler.input.577378318">
-<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
+<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
 <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
 <buildOutputProvider>
 <openAction enabled="true" filePath=""/>
@@ -973,6 +993,26 @@
 </scannerInfoProvider>
 </profile>
 </scannerConfigBuildInfo>
+</storageModule>
+<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
+<buildTargets>
+<target name="Run CMake (Debug)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+<buildCommand>cmake</buildCommand>
+<buildArguments>-E chdir Debug/ cmake -G "Unix Makefiles" ../ -DCMAKE_BUILD_TYPE:STRING=Debug</buildArguments>
+<buildTarget/>
+<stopOnError>true</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+<runAllBuilders>false</runAllBuilders>
+</target>
+<target name="Run CMake (Release)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+<buildCommand>cmake</buildCommand>
+<buildArguments>-E chdir Release/ cmake -G "Unix Makefiles" ../ -DCMAKE_BUILD_TYPE:STRING=Release</buildArguments>
+<buildTarget/>
+<stopOnError>true</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+<runAllBuilders>false</runAllBuilders>
+</target>
+</buildTargets>
 </storageModule>
 </cconfiguration>
 </storageModule>
