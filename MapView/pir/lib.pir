@@ -79,6 +79,18 @@ call:
   #Retrieve the library/function call
   lib = LIB_get_dll()
   func = dlfunc lib, meth_name, meth_sig
+  if func goto reallycall
+
+  #Error
+  $S0 = "Couldn't find function: " . meth_name 
+  $S0 .= " ("
+  $S0 .= meth_sig
+  $S0 .= ")"
+  $P0 = new 'Exception'
+  $P0 = $S0
+  throw $P0
+
+reallycall:
   ptr = func(args :flat)
   res = ptr
   unless has_wrap goto ret

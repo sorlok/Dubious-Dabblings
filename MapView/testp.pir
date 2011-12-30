@@ -7,6 +7,7 @@
 .include "pir/input.pir"
 .include "pir/image.pir"
 .include "pir/polygon.pir"
+.include "pir/sprite.pir"
 
 #####################################################################
 # Base classes, to be subclassed by our library.
@@ -157,100 +158,6 @@
   func = dlfunc lib, "demo_update_postfx_color", "vp"
   func(item)
 .end
-
-
-#Sprite
-.sub 'SPR_MakeNew'
-  .local pmc lib, func
-
-  lib = LIB_get_dll()
-  func = dlfunc lib, "new_sprite", "p"
-  $P0 = func()
-
-  .return($P0)
-.end
-
-.sub 'SPR_SetImage'
-  .param pmc item
-  .param pmc img
-  .local pmc lib, func
-  $P0 = img.'get_ptr'()
-
-  lib = LIB_get_dll()
-  func = dlfunc lib, "sprite_set_image", "vpp"
-  func(item, $P0)
-.end
-
-.sub 'SPR_SetPosition'
-  .param pmc item
-  .param int x
-  .param int y
-  .local pmc lib, func
-  lib = LIB_get_dll()
-  func = dlfunc lib, "sprite_set_position", "vpii"
-  func(item, x, y)
-.end
-
-.sub 'SPR_SetCenter'
-  .param pmc item
-  .param int x
-  .param int y
-  .local pmc lib, func
-  lib = LIB_get_dll()
-  func = dlfunc lib, "sprite_set_center", "vpii"
-  func(item, x, y)
-.end
-
-
-.sub 'SPR_GetRotation'
-  .param pmc item
-  .local pmc lib, func
-  .local num retVal
-  lib = LIB_get_dll()
-  func = dlfunc lib, "sprite_get_rotation", "fp"
-  retVal = func(item)
-  .return(retVal)
-.end
-
-
-.sub 'SPR_SetRotation'
-  .param pmc item
-  .param num angle
-  .local pmc lib, func
-  lib = LIB_get_dll()
-  func = dlfunc lib, "sprite_set_rotation", "vpf"
-  func(item, angle)
-.end
-
-
-.sub 'SPR_GetColor'
-  .param pmc item
-  .local pmc lib, func
-  lib = LIB_get_dll()
-  func = dlfunc lib, "sprite_get_color", "pp"
-  $P0 = func(item)
-
-  #Test
-  $P1  = new 'Color'
-  $P1.'set_ptr'($P0)
-  #Subclass isn't working...
-
-  .return($P1)
-.end
-
-
-.sub 'SPR_SetColor'
-  .param pmc item
-  .param pmc color
-  .local pmc lib, func
-  $P0 = color.'get_ptr'()
-
-  lib = LIB_get_dll()
-  func = dlfunc lib, "sprite_set_color", "vpp"
-  func(item, $P0)
-.end
-
-
 
 #Generic delete/draw stuff
 .sub 'GAME_DrawItem'

@@ -55,24 +55,24 @@
   h /= 2
 
   #Make sprite 1, set its properties, save it.
-  $P3 = SPR_MakeNew()
-  SPR_SetImage($P3, personImg)
+  $P3 = new 'Sprite'
+  $P3.'set_image'(personImg)
   $I0 = 800/3
   $I1 = 600/2
-  SPR_SetPosition($P3, $I0, $I1)
-  SPR_SetCenter($P3, w, h)
+  $P3.'set_position'($I0, $I1)
+  $P3.'set_center'(w, h)
   $P0.'push'($P3)
   setattribute self, 'spr1', $P3
 
 
   #Make sprite 2, set its properties, save it.
-  $P2 = SPR_MakeNew()
-  SPR_SetImage($P2, personImg)
+  $P2 = new 'Sprite'
+  $P2.'set_image'(personImg)
   $I0 = 2*800
   $I0 /= 3
   $I1 = 600/2
-  SPR_SetPosition($P2, $I0, $I1)
-  SPR_SetCenter($P2, w, h)
+  $P2.'set_position'($I0, $I1)
+  $P2.'set_center'(w, h)
   $P0.'push'($P2)
   setattribute self, 'spr2', $P2
 
@@ -126,33 +126,33 @@ getinput:
   #Update sprite 1's rotation
   $P1 = getattribute self, 'spr1'
   $N0 = 50 * frameTimeS
-  $N1 = SPR_GetRotation($P1)
+  $N1 = $P1.'get_rotation'()
   $N0 += $N1
-  SPR_SetRotation($P1, $N0)
+  $P1.'set_rotation'($N0)
 
   #Update sprite 1's colorization
-  $P0 = SPR_GetColor($P1)
+  $P0 = $P1.'get_color'()
   $N0 = 1.0-polyScale
   $N0 *= 255
   $I0 = $N0
   $P0.'set_blue'($I0)
-  SPR_SetColor($P1, $P0)
+  $P1.'set_color'($P0)
   #GAME_DeleteColor($P0) #Should be automatic
 
   #Update sprite 2's rotation
   $P1 = getattribute self, 'spr2'
   $N0 = 80 * frameTimeS
-  $N1 = SPR_GetRotation($P1)
+  $N1 = $P1.'get_rotation'()
   $N0 = $N1 - $N0
-  SPR_SetRotation($P1, $N0)
+  $P1.'set_rotation'($N0)
 
   #Update sprite 2's colorization
-  $P0 = SPR_GetColor($P1)
+  $P0 = $P1.'get_color'($P1)
   $N0 = polyScale
   $N0 *= 255
   $I0 = $N0
   $P0.'set_alpha'($I0)
-  SPR_SetColor($P1, $P0)
+  $P1.'set_color'($P0)
   #GAME_DeleteColor($P0)
 
   #Update our polygon's scale factor
@@ -197,9 +197,6 @@ savepoly:
   #Set the polyline's position
   $P0.'set_pos_x'(mouseX)
   $P0.'set_pos_y'(mouseY)
-  
-
-  
 .end
 
 .sub 'display' :method
