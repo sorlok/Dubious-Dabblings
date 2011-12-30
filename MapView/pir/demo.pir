@@ -36,3 +36,15 @@
   LIB_dispatch_method(self, 'game_set_poly_pos', 'vii', x, y)
 .end
 
+
+.namespace ['PostFX']
+
+.sub 'DEMO_set_default_pfx' :method
+  LIB_dispatch_method(self, 'demo_set_default_postfx', 'vp')
+.end
+
+.sub 'DEMO_update_pfx_color' :method
+  LIB_dispatch_method(self, 'demo_update_postfx_color', 'vp')
+.end
+
+

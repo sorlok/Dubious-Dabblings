@@ -27,23 +27,21 @@
   setattribute self, 'drawables', $P0
 
   #Now, start assigning objects to that array.
-  $I0 = PFX_CanUse()
+  $I0 = GAME_CanUsePFX()
   unless $I0 goto makeobjs
 
   #Load the shader
-  $P1 = PFX_MakeNew('colorize.sfx')
-  if null $P1 goto makeobjs
+  $P1 = new 'PostFX'
+  $P1.'load_file'('colorize.sfx')  #TODO: This can fail!
 
   #Set its properties (for now just use the defaults)
-  DEMO_SetDefaultPFX($P1)
+  $P1.'DEMO_set_default_pfx'()
 
   #Save it in our array of objects
   $P0.'push'($P1)
   setattribute self, 'pfxShader', $P1
-  
-  #Make the rest of our objects
-  makeobjs:
 
+makeobjs:
   #Images
   personImg = new 'Image'
   personImg.'load_file'('person.png')
@@ -120,8 +118,8 @@ getinput:
   mouseY = $P0.'get_mouse_y'()
 
   #Update our post-effect shader
-  $P0 = getattribute self, 'pfxShader'   #Note: This _could_ be null...
-  DEMO_UpdatePFXColor($P0)
+  $P0 = getattribute self, 'pfxShader'
+  $P0.'DEMO_update_pfx_color'()
 
   #Update sprite 1's rotation
   $P1 = getattribute self, 'spr1'

@@ -8,6 +8,7 @@
 .include "pir/image.pir"
 .include "pir/polygon.pir"
 .include "pir/sprite.pir"
+.include "pir/postfx.pir"
 .include "pir/demo.pir"
 
 #####################################################################
@@ -96,7 +97,7 @@
 
 
 #PostFX
-.sub 'PFX_CanUse'
+.sub 'GAME_CanUsePFX'
   .local pmc lib, func
   lib = LIB_get_dll()
   func = dlfunc lib, "can_use_postfx", "i"
@@ -104,39 +105,6 @@
   .return($I0)
 .end
 
-
-.sub 'PFX_MakeNew'
-  .param string filename
-  .local pmc lib, func, bb
-
-  #Convert the string to a byte buffer
-  bb = new ['ByteBuffer']
-  bb = filename
-  push bb, 0
-
-  lib = LIB_get_dll()
-  func = dlfunc lib, "new_postfx", "pp"
-  $P0 = func(bb)
-
-  .return($P0)
-.end
-
-
-.sub 'DEMO_SetDefaultPFX'
-  .param pmc item
-  .local pmc lib, func
-  lib = LIB_get_dll()
-  func = dlfunc lib, "demo_set_default_postfx", "vp"
-  func(item)
-.end
-
-.sub 'DEMO_UpdatePFXColor'
-  .param pmc item
-  .local pmc lib, func
-  lib = LIB_get_dll()
-  func = dlfunc lib, "demo_update_postfx_color", "vp"
-  func(item)
-.end
 
 #Generic delete/draw stuff
 .sub 'GAME_DrawItem'
