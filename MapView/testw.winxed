@@ -41,7 +41,7 @@ class WRendition : Rendition {
     self.personImg = IMG_MakeNew('person.png');
     if (!self.personImg) {
       #Error
-      throw "Can't load image: person.png";
+      throw Error("Can't load image: person.png");
     }
 
     #Retrieve the image's width/height, for later
@@ -154,6 +154,12 @@ class WRendition : Rendition {
 function main[main](var args)
 {
   var currRend = new WRendition();
+
+  #Heavy-handed check.
+  if (currRend instanceof Rendition) {
+    say ("Correct! - It's a Rendition");
+  }
+
   run_game(currRend);
 }
 
