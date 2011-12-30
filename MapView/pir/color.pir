@@ -2,7 +2,7 @@
 # Color class; wraps an sfml::Color* and provides cleanup on destruction
 #####################################################################
 
-.include "wrapped.pir"
+.include "pir/wrapped.pir"
 
 .namespace ['Color']
 
@@ -16,7 +16,7 @@
 .end
 
 #Reclaim this color.
-.sub 'cleanup' :vtable
+.sub 'cleanup' :method
   .param pmc ptr
   GAME_DeleteColor(ptr)
 .end

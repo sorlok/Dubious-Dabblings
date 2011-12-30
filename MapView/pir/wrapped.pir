@@ -45,7 +45,7 @@ done:
 .end
 
 #Called on destruction; ptr will be non-null
-.sub 'cleanup' :vtable
+.sub 'cleanup' :method
   .param pmc ptr
 .end
 
