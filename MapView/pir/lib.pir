@@ -33,17 +33,28 @@
   .param pmc caller
   .param string meth_name
   .param string meth_sig
-  .param pmc arg1
-  .local pmc lib, func, ptr
+  .param pmc     arg1  :optional
+  .param int has_arg1  :opt_flag
+  .local pmc lib, func, ptr, args
 
   #Retrieve the pointer
   $P0 = find_method caller, 'get_ptr'
   ptr = caller.$P0()
 
+  #Build up a list of arguments; start with the pointer
+  args = new 'ResizablePMCArray'
+  push args, ptr
+
+  #Add arg1
+  unless has_arg1 goto call  
+  push args, arg1
+
+call:
   #Retrieve the library/function call
   lib = LIB_get_dll()
   func = dlfunc lib, meth_name, meth_sig
-  func(ptr, arg1)
+  $P0 = func(args :flat)
+  .return($P0)
 .end
 
 
