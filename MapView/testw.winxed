@@ -160,6 +160,10 @@ function main[main](var args)
     say ("Correct! - It's a Rendition");
   }
 
+  #Better check
+  find_method(currRend, "update");
+  find_method(currRend, "display");
+
   run_game(currRend);
 }
 
