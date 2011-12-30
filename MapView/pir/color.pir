@@ -1,9 +1,6 @@
 #####################################################################
 # Color class; wraps an sfml::Color* and provides cleanup on destruction
 #####################################################################
-.include "pir/lib.pir"
-.include "pir/wrapped.pir"
-
 .namespace ['Color']
 
 #Initialization code.

@@ -2,7 +2,9 @@
 
 #More stuff
 .include "pir/lib.pir"
+.include "pir/wrapped.pir"
 .include "pir/color.pir"
+.include "pir/input.pir"
 
 #####################################################################
 # Base classes, to be subclassed by our library.

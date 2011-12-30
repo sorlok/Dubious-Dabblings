@@ -3,7 +3,6 @@
 #   must be closed later.
 # cleanup(p) - Called on destruction if the wrapped item is non-null.
 #####################################################################
-
 .namespace ['Wrapped']
 
 #Initializing a Wrapped object directly always fails.

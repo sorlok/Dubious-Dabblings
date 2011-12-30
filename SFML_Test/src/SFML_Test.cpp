@@ -69,6 +69,7 @@ DLLEXPORT void color_set_blue(sf::Color* item, int blue);
 DLLEXPORT void color_set_alpha(sf::Color* item, int alpha);
 
 //Game functionality
+DLLEXPORT const sf::Input* game_get_input();
 DLLEXPORT int game_get_mouse_x();
 DLLEXPORT int game_get_mouse_y();
 DLLEXPORT float game_get_frame_time_s();
@@ -371,6 +372,10 @@ void game_draw_item(sf::Drawable* item)
 	myWindow.Draw(*item);
 }
 
+const sf::Input* game_get_input()
+{
+	return &myWindow.GetInput();
+}
 
 int game_get_mouse_x()
 {
