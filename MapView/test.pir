@@ -138,7 +138,7 @@
   $N0 = 1.0-polyScale
   $N0 *= 255
   $I0 = $N0
-  CLR_SetBlue($P0, $I0)
+  $P0.'set_blue'($I0)
   SPR_SetColor($P1, $P0)
   #GAME_DeleteColor($P0) #Should be automatic
 
@@ -154,7 +154,7 @@
   $N0 = polyScale
   $N0 *= 255
   $I0 = $N0
-  CLR_SetAlpha($P0, $I0)
+  $P0.'set_alpha'($I0)
   SPR_SetColor($P1, $P0)
   #GAME_DeleteColor($P0)
 

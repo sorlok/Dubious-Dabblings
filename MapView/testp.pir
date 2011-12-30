@@ -1,6 +1,7 @@
 ###Main library code.
 
 #More stuff
+.include "pir/lib.pir"
 .include "pir/color.pir"
 
 #####################################################################
@@ -29,28 +30,6 @@
 #####################################################################
 
 .namespace[]
-
-#Internal function: Get the DLL
-.sub 'INT_GetDLL'
-  .local pmc lib
-
-  #Already loaded once
-  get_hll_global lib, 'library_pmc'
-  unless null lib goto end
-
-  #Loading for the first time
-  lib = loadlib "/home/sethhetu/dubious/MapView/libsfml_engine.so"
-  set_hll_global 'library_pmc', lib
-  if lib goto end
-  
-  #Error
-  $P0 = new 'Exception'
-  $P0 = "Couldn't find library!"
-  throw $P0
-
-  end:
-  .return(lib)
-.end
 
 #Initialize the engine. 
 .sub 'GAME_Init'
@@ -385,51 +364,6 @@
   lib = INT_GetDLL()
   func = dlfunc lib, "poly_set_pos_y", "vpi"
   func(item, pos)
-.end
-
-
-.sub 'CLR_SetRed'
-  .param pmc item
-  .param pmc red
-  .local pmc lib, func
-  lib = INT_GetDLL()
-  func = dlfunc lib, "color_set_red", "vpi"
-  func(item, red)
-.end
-
-
-.sub 'CLR_SetGreen'
-  .param pmc item
-  .param pmc green
-  .local pmc lib, func
-  $P0 = item.'get_ptr'()
-
-  lib = INT_GetDLL()
-  func = dlfunc lib, "color_set_green", "vpi"
-  func($P0, green)
-.end
-
-.sub 'CLR_SetBlue'
-  .param pmc item
-  .param pmc blue
-  .local pmc lib, func
-  $P0 = item.'get_ptr'()
-
-  lib = INT_GetDLL()
-  func = dlfunc lib, "color_set_blue", "vpi"
-  func($P0, blue)
-.end
-
-
-.sub 'CLR_SetAlpha'
-  .param pmc item
-  .param pmc alpha
-  .local pmc lib, func
-  $P0 = item.'get_ptr'()
-
-  lib = INT_GetDLL()
-  func = dlfunc lib, "color_set_alpha", "vpi"
-  func($P0, alpha)
 .end
 
 
