@@ -15,7 +15,7 @@
 #Reclaim this color.
 .sub 'cleanup' :method
   .param pmc ptr
-  GAME_DeleteColor(ptr)
+  LIB_delete_color(ptr)
 .end
 
 #Modify the red value.

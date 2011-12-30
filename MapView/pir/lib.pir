@@ -26,6 +26,29 @@
   .return(lib)
 .end
 
+
+#Delete a drawable item.
+.sub 'LIB_delete_drawable'
+  .param pmc item
+  null $P0
+  LIB_dispatch_method($P0, 'game_del_item', 'vp', item)
+.end
+
+#Delete a color
+.sub 'LIB_delete_color'
+  .param pmc item
+  null $P0
+  LIB_dispatch_method($P0, 'game_del_color', 'vp', item)
+.end
+
+#Delete an image
+.sub 'LIB_delete_image'
+  .param pmc item
+  null $P0
+  LIB_dispatch_method($P0, 'game_del_image', 'vp', item)
+.end
+
+
 #Dispatch a method on _some_ library object. 
 .sub 'LIB_dispatch_method'
   .param pmc caller
@@ -38,6 +61,8 @@
   .param int has_arg1  :opt_flag
   .param pmc     arg2  :optional
   .param int has_arg2  :opt_flag
+  .param pmc     arg3  :optional
+  .param int has_arg3  :opt_flag
 
   #Wrap the result?
   .param string     wrap :optional :named("wrap")
@@ -75,6 +100,16 @@ addarg1:
   $P0 = find_method arg2, 'get_ptr'
   $P1 = arg2.$P0()
 addarg2:
+  push args, $P1
+
+  #Add arg3
+  unless has_arg3 goto call
+  $P1 = arg3
+  $I0 = can arg3, 'get_ptr'
+  unless $I0 goto addarg3
+  $P0 = find_method arg3, 'get_ptr'
+  $P1 = arg3.$P0()
+addarg3:
   push args, $P1
 
 call:

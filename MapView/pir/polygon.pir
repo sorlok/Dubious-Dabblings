@@ -15,7 +15,7 @@
 #Reclaim this polygon.
 .sub 'cleanup' :method
   .param pmc ptr
-  GAME_DeleteItem(ptr)
+  LIB_delete_item(ptr)
 .end
 
 #Retrieve the color of this polygon at a particular point

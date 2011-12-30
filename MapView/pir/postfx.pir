@@ -15,7 +15,7 @@
 #Reclaim this pfx pointer.
 .sub 'cleanup' :method
   .param pmc ptr
-  GAME_DeleteItem(ptr)
+  LIB_delete_item(ptr)
 .end
 
 #Load from file

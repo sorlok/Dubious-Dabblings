@@ -8,11 +8,11 @@
   .local pmc ptr
 
   #Retrieve the current window's Input object.
-  ptr = LIB_dispatch_method(self, 'game_get_input', 'p')
+  #ptr = LIB_dispatch_method(self, 'game_get_input', 'p')
 
   #Save it
-  $P0 = find_method self, 'set_ptr'
-  self.$P0(ptr)
+  #$P0 = find_method self, 'set_ptr'
+  #self.$P0(ptr)
 .end
 .sub 'init_pmc' :vtable
   $P0 = new 'Exception'
@@ -20,26 +20,23 @@
   throw $P0
 .end
 
-#Don't do anything; Input is effectively a singleton.
-.sub 'cleanup' :method
-  .param pmc ptr
-.end
-
 #Get the mouse's x coordinate
 .sub 'get_mouse_x' :method
-  $I0 = LIB_dispatch_method(self, 'game_get_mouse_x', 'i')
+  null $P0
+  $I0 = LIB_dispatch_method($P0, 'game_get_mouse_x', 'i')
   .return($I0)
 .end
 
 #Get the mouse's y coordinate
 .sub 'get_mouse_y' :method
-  $I0 = LIB_dispatch_method(self, 'game_get_mouse_y', 'i')
+  null $P0
+  $I0 = LIB_dispatch_method($P0, 'game_get_mouse_y', 'i')
   .return($I0)
 .end
 
 #Initialize this class.
 .sub Input_class_init :anon :load :init
-  $P0 = subclass 'Wrapped', 'Input'
+  $P0 = newclass 'Input'
 .end
 
 

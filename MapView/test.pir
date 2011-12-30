@@ -9,6 +9,13 @@
 .sub 'init' :vtable
   .local pmc personImg
   .local int w, h
+  .local pmc game
+
+  #TODO: Currently testp.pir and test.pir both maintain their own game objects.
+  #      This isn't a problem (since Game has no state) but later we'll want to move
+  #      the remaining game loop code out of testp.
+  game = new 'Game'
+  setattribute self, 'game', game
 
   #Initialize our polyScale property
   $P0 = new 'Float'
@@ -27,7 +34,7 @@
   setattribute self, 'drawables', $P0
 
   #Now, start assigning objects to that array.
-  $I0 = GAME_CanUsePFX()
+  $I0 = game.'can_use_pfx'()
   unless $I0 goto makeobjs
 
   #Load the shader
@@ -95,12 +102,14 @@ makeobjs:
 
 
 .sub 'update' :method 
-  .local pmc drawables 
+  .local pmc drawables, game
   .local int index, size, polyScaleDec, mouseX, mouseY
   .local num frameTimeS, polyScale
 
+  game = getattribute self, 'game'
+
   #Retrieve game timer, current scale
-  frameTimeS = GAME_GetFrameTimeInS()
+  frameTimeS = game.'get_frame_time_in_s'()
   $P0 = getattribute self, 'polyScale'
   polyScale = $P0
   $P0 = getattribute self, 'polyScaleDec'
@@ -109,7 +118,7 @@ makeobjs:
   #Set input manager?
   $P0 = getattribute self, 'input'
   unless null $P0 goto getinput
-  $P0 = new ['Input']
+  $P0 = new 'Input'
   setattribute self, 'input', $P0
 
 getinput:
@@ -135,7 +144,6 @@ getinput:
   $I0 = $N0
   $P0.'set_blue'($I0)
   $P1.'set_color'($P0)
-  #GAME_DeleteColor($P0) #Should be automatic
 
   #Update sprite 2's rotation
   $P1 = getattribute self, 'spr2'
@@ -151,7 +159,6 @@ getinput:
   $I0 = $N0
   $P0.'set_alpha'($I0)
   $P1.'set_color'($P0)
-  #GAME_DeleteColor($P0)
 
   #Update our polygon's scale factor
   $N0 = 1
@@ -198,8 +205,10 @@ savepoly:
 .end
 
 .sub 'display' :method
-  .local pmc drawables 
+  .local pmc drawables, game
   .local int index, size
+
+  game = getattribute self, 'game'
 
   #Now, update any objects in our 'drawables' 
   drawables = getattribute self, 'drawables'
@@ -209,7 +218,7 @@ savepoly:
     index -= 1
     if index < 0 goto done
     $P0 = drawables[index]
-    GAME_DrawItem($P0)
+    game.'draw_item'($P0)
     goto at_item
   done:
 .end
@@ -221,6 +230,7 @@ savepoly:
 
     #Assign some attributes
     addattribute $P2, 'drawables'
+    addattribute $P2, 'game'
     addattribute $P2, 'pfxShader'
     addattribute $P2, 'spr1'
     addattribute $P2, 'spr2'

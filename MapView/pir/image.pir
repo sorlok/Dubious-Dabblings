@@ -40,7 +40,7 @@ store:
 #Reclaim this image.
 .sub 'cleanup' :method
   .param pmc ptr
-  GAME_DeleteImage(ptr)
+  LIB_delete_image(ptr)
 .end
 
 #Retrieve this image's width
