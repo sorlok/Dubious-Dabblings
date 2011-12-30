@@ -101,8 +101,8 @@
   $P1 = POLY_GetPointColor(poly, id2)
   POLY_SetPointColor(poly, id1, $P1)
   POLY_SetPointColor(poly, id2, $P0)
-  GAME_DeleteColor($P0)
-  GAME_DeleteColor($P1)
+  #GAME_DeleteColor($P0)
+  #GAME_DeleteColor($P1)
 .end
 
 
@@ -140,7 +140,7 @@
   $I0 = $N0
   CLR_SetBlue($P0, $I0)
   SPR_SetColor($P1, $P0)
-  GAME_DeleteColor($P0)
+  #GAME_DeleteColor($P0) #Should be automatic
 
   #Update sprite 2's rotation
   $P1 = getattribute self, 'spr2'
@@ -156,7 +156,7 @@
   $I0 = $N0
   CLR_SetAlpha($P0, $I0)
   SPR_SetColor($P1, $P0)
-  GAME_DeleteColor($P0)
+  #GAME_DeleteColor($P0)
 
   #Update our polygon's scale factor
   $N0 = 1

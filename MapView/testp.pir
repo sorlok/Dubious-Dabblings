@@ -300,7 +300,7 @@
   $P1.'set_ptr'($P0)
   #Subclass isn't working...
 
-  .return($P0)
+  .return($P1)
 .end
 
 
@@ -308,9 +308,11 @@
   .param pmc item
   .param pmc color
   .local pmc lib, func
+  $P0 = color.'get_ptr'()
+
   lib = INT_GetDLL()
   func = dlfunc lib, "sprite_set_color", "vpp"
-  func(item, color)
+  func(item, $P0)
 .end
 
 
@@ -321,7 +323,13 @@
   lib = INT_GetDLL()
   func = dlfunc lib, "poly_get_point_color", "ppi"
   $P0 = func(item, index)
-  .return($P0)
+
+  #Test
+  $P1  = new 'Color'
+  $P1.'set_ptr'($P0)
+  #Subclass isn't working...
+
+  .return($P1)
 .end
 
 .sub 'POLY_SetPointColor'
@@ -329,9 +337,11 @@
   .param int index
   .param pmc color
   .local pmc lib, func
+  $P0 = color.'get_ptr'()
+
   lib = INT_GetDLL()
   func = dlfunc lib, "poly_set_point_color", "vpip"
-  func(item, index, color)
+  func(item, index, $P0)
 .end
 
 .sub 'POLY_SetScaleX'
@@ -385,18 +395,22 @@
   .param pmc item
   .param pmc green
   .local pmc lib, func
+  $P0 = item.'get_ptr'()
+
   lib = INT_GetDLL()
   func = dlfunc lib, "color_set_green", "vpi"
-  func(item, green)
+  func($P0, green)
 .end
 
 .sub 'CLR_SetBlue'
   .param pmc item
   .param pmc blue
   .local pmc lib, func
+  $P0 = item.'get_ptr'()
+
   lib = INT_GetDLL()
   func = dlfunc lib, "color_set_blue", "vpi"
-  func(item, blue)
+  func($P0, blue)
 .end
 
 
@@ -404,9 +418,11 @@
   .param pmc item
   .param pmc alpha
   .local pmc lib, func
+  $P0 = item.'get_ptr'()
+
   lib = INT_GetDLL()
   func = dlfunc lib, "color_set_alpha", "vpi"
-  func(item, alpha)
+  func($P0, alpha)
 .end
 
 
