@@ -3,7 +3,7 @@
 #####################################################################
 
 #Internal function: Get the DLL
-.sub 'INT_GetDLL'
+.sub 'LIB_get_dll'
   .local pmc lib
 
   #Already loaded once
@@ -23,4 +23,28 @@
   end:
   .return(lib)
 .end
+
+#Dispatch a method on _some_ library object. 
+#TODO: This is pretty bad; can't we dispatch better?
+#      Possibly using: http://parrot.github.com/html/docs/compiler_faq.pod.html
+#      Lists "optional" and using "flat" syntax. Hopefully that works here.
+#TODO: We also need a way to handle return values... can we ".return(void)"?
+.sub 'LIB_dispatch_method'
+  .param pmc caller
+  .param string meth_name
+  .param string meth_sig
+  .param pmc arg1
+  .local pmc lib, func, ptr
+
+  #Retrieve the pointer
+  $P0 = find_method caller, 'get_ptr'
+  ptr = caller.$P0()
+
+  #Retrieve the library/function call
+  lib = LIB_get_dll()
+  func = dlfunc lib, meth_name, meth_sig
+  func(ptr, arg1)
+.end
+
+
 

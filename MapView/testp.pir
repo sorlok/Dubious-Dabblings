@@ -37,7 +37,7 @@
   .param int height
   .param int depth
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "init_sfml", "iiii"
   $I0 = func(width, height, depth)
   .return($I0)
@@ -47,7 +47,7 @@
 #Process all events from the engine.
 .sub 'GAME_ProcessEvents'
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "sfml_handle_events", "i"
   $I0 = func()
   .return($I0)
@@ -57,7 +57,7 @@
 #Close the game engine
 .sub 'GAME_Close'
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "close_sfml", "v"
   func()
 .end
@@ -66,14 +66,14 @@
 #Retrieve current mouse x/y
 .sub 'INPUT_GetMouseX'
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "game_get_mouse_x", "i"
   $I0 = func()
   .return($I0)
 .end
 .sub 'INPUT_GetMouseY'
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "game_get_mouse_y", "i"
   $I0 = func()
   .return($I0)
@@ -82,7 +82,7 @@
 
 .sub 'GAME_GetFrameTimeInS'
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "game_get_frame_time_s", "f"
   $N0 = func()
   .return($N0)
@@ -93,7 +93,7 @@
 #Sample code to draw objects from SampleUpdate. To be removed.
 .sub 'DEMO_SampleDisplay'
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "demo_display", "v"
   func()
 .end
@@ -102,7 +102,7 @@
 .sub 'DEMO_InitPoly'
   .local pmc lib, func
 
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "demo_init_poly", "p"
   $P0 = func()
 
@@ -113,7 +113,7 @@
 #Push all updates to the screen
 .sub 'GAME_Display'
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "sfml_display", "v"
   func()
 .end
@@ -125,7 +125,7 @@
   .param int x
   .param int y
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "game_set_poly_pos", "vii"
   func(x, y)
 .end
@@ -134,7 +134,7 @@
 #PostFX
 .sub 'PFX_CanUse'
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "can_use_postfx", "i"
   $I0 = func()
   .return($I0)
@@ -150,7 +150,7 @@
   bb = filename
   push bb, 0
 
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "new_postfx", "pp"
   $P0 = func(bb)
 
@@ -161,7 +161,7 @@
 .sub 'DEMO_SetDefaultPFX'
   .param pmc item
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "demo_set_default_postfx", "vp"
   func(item)
 .end
@@ -169,7 +169,7 @@
 .sub 'DEMO_UpdatePFXColor'
   .param pmc item
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "demo_update_postfx_color", "vp"
   func(item)
 .end
@@ -186,7 +186,7 @@
   bb = filename
   push bb, 0
 
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "new_image", "pp"
   $P0 = func(bb)
 
@@ -196,7 +196,7 @@
 .sub 'IMG_GetWidth'
   .param pmc item
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "image_get_width", "ip"
   $I0 = func(item)
   .return($I0)
@@ -205,7 +205,7 @@
 .sub 'IMG_GetHeight'
   .param pmc item
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "image_get_height", "ip"
   $I0 = func(item)
   .return($I0)
@@ -216,7 +216,7 @@
 .sub 'SPR_MakeNew'
   .local pmc lib, func
 
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "new_sprite", "p"
   $P0 = func()
 
@@ -227,7 +227,7 @@
   .param pmc item
   .param pmc img
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "sprite_set_image", "vpp"
   func(item, img)
 .end
@@ -237,7 +237,7 @@
   .param int x
   .param int y
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "sprite_set_position", "vpii"
   func(item, x, y)
 .end
@@ -247,7 +247,7 @@
   .param int x
   .param int y
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "sprite_set_center", "vpii"
   func(item, x, y)
 .end
@@ -257,7 +257,7 @@
   .param pmc item
   .local pmc lib, func
   .local num retVal
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "sprite_get_rotation", "fp"
   retVal = func(item)
   .return(retVal)
@@ -268,7 +268,7 @@
   .param pmc item
   .param num angle
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "sprite_set_rotation", "vpf"
   func(item, angle)
 .end
@@ -277,7 +277,7 @@
 .sub 'SPR_GetColor'
   .param pmc item
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "sprite_get_color", "pp"
   $P0 = func(item)
 
@@ -296,7 +296,7 @@
   .local pmc lib, func
   $P0 = color.'get_ptr'()
 
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "sprite_set_color", "vpp"
   func(item, $P0)
 .end
@@ -306,7 +306,7 @@
   .param pmc item
   .param int index
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "poly_get_point_color", "ppi"
   $P0 = func(item, index)
 
@@ -325,7 +325,7 @@
   .local pmc lib, func
   $P0 = color.'get_ptr'()
 
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "poly_set_point_color", "vpip"
   func(item, index, $P0)
 .end
@@ -334,7 +334,7 @@
   .param pmc item
   .param num scale
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "poly_set_scale_x", "vpf"
   func(item, scale)
 .end
@@ -343,7 +343,7 @@
   .param pmc item
   .param num scale
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "poly_set_scale_y", "vpf"
   func(item, scale)
 .end
@@ -352,7 +352,7 @@
   .param pmc item
   .param int pos
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "poly_set_pos_x", "vpi"
   func(item, pos)
 .end
@@ -361,7 +361,7 @@
   .param pmc item
   .param int pos
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "poly_set_pos_y", "vpi"
   func(item, pos)
 .end
@@ -371,7 +371,7 @@
 .sub 'GAME_DrawItem'
   .param pmc item
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "game_draw_item", "vp"
   func(item)
 .end
@@ -380,7 +380,7 @@
 .sub 'GAME_DeleteItem'
   .param pmc item
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "game_del_item", "vp"
   func(item)
 .end
@@ -388,7 +388,7 @@
 .sub 'GAME_DeleteColor'
   .param pmc item
   .local pmc lib, func
-  lib = INT_GetDLL()
+  lib = LIB_get_dll()
   func = dlfunc lib, "game_del_color", "vp"
   func(item)
 .end
