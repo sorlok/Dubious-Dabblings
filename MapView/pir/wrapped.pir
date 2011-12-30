@@ -14,9 +14,13 @@
   self.'err'()
 .end
 .sub 'err' :method
+  $S0 = typeof self
+  unless $S0 == 'Wrapped' goto skip
+
   $P0 = new 'Exception'
   $P0 = "Can't construct Wrapped objects directly."
   throw $P0
+skip:
 .end
 
 #Set the pointed-to object.

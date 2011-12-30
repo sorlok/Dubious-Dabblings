@@ -225,9 +225,7 @@ savepoly:
 
 .sub DemoRendition_class_init :anon :load :init
     #Set up inheritance
-    $P0 = get_class 'Rendition'
-    $P2 = newclass 'DemoRendition'
-    addparent $P0, $P2
+    $P2 = subclass 'Rendition', 'DemoRendition'
 
     #Assign some attributes
     addattribute $P2, 'drawables'

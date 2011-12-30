@@ -31,9 +31,7 @@
 
 #Initialize this class.
 .sub Color_class_init :anon :load :init
-  $P0 = get_class 'Wrapped'
-  $P1 = newclass 'Color'
-  addparent $P0, $P1
+  $P0 = subclass 'Wrapped', 'Color'
 .end
 
 
