@@ -294,6 +294,12 @@
   lib = INT_GetDLL()
   func = dlfunc lib, "sprite_get_color", "pp"
   $P0 = func(item)
+
+  #Test
+  $P1  = new 'Color'
+  $P1.'set_ptr'($P0)
+  #Subclass isn't working...
+
   .return($P0)
 .end
 
