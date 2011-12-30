@@ -34,6 +34,7 @@
 #Get the mouse's y coordinate
 .sub 'get_mouse_y' :method
   $I0 = LIB_dispatch_method(self, 'game_get_mouse_y', 'i')
+  .return($I0)
 .end
 
 #Initialize this class.
