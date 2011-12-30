@@ -2,6 +2,8 @@
 # Various functions related to loading the physical library.
 #####################################################################
 
+.namespace[]
+
 #Internal function: Get the DLL
 .sub 'LIB_get_dll'
   .local pmc lib

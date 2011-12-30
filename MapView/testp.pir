@@ -8,6 +8,7 @@
 .include "pir/image.pir"
 .include "pir/polygon.pir"
 .include "pir/sprite.pir"
+.include "pir/demo.pir"
 
 #####################################################################
 # Base classes, to be subclassed by our library.
@@ -78,29 +79,7 @@
 
 
 
-#Sample code to draw objects from SampleUpdate. To be removed.
-.sub 'DEMO_SampleDisplay'
-  .local pmc lib, func
-  lib = LIB_get_dll()
-  func = dlfunc lib, "demo_display", "v"
-  func()
-.end
 
-#DEMO: Create a polygon
-.sub 'DEMO_InitPoly'
-  .local pmc ptr, poly
-
-  #Make it
-  null $P0
-  ptr = LIB_dispatch_method($P0, 'demo_init_poly', 'p')
-  poly = new 'Polygon'
-
-  #Save it
-  $P0 = find_method poly, 'set_ptr'
-  poly.$P0(ptr)
-
-  .return(poly)
-.end
 
 
 #Push all updates to the screen
