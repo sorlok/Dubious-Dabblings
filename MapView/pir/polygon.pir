@@ -12,13 +12,6 @@
   throw $P0
 .end
 
-#DEMO: Update our "poly" position with the given x/y
-.sub 'DEMO_set_pos' :method
-  .param int x
-  .param int y
-  LIB_dispatch_method(self, 'game_set_poly_pos', 'vii', x, y)
-.end
-
 #Reclaim this polygon.
 .sub 'cleanup' :method
   .param pmc ptr
