@@ -254,7 +254,7 @@ savepoly:
 
   #Start the game
   game = new 'Game'
-  res = game.'init'(800, 600, 32)
+  res = game.'init_game'(800, 600, 32)
   unless res goto done
 
   say "Starting main loop"

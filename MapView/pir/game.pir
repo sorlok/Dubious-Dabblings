@@ -13,7 +13,7 @@
 .end
 
 #Initialize the engine. Returns non-zero for success.
-.sub 'init' :method
+.sub 'init_game' :method
   .param int width
   .param int height
   .param int depth
