@@ -89,12 +89,10 @@
   .param int id2
   .local pmc poly
   poly = getattribute self, 'polygon'
-  $P0 = POLY_GetPointColor(poly, id1)
-  $P1 = POLY_GetPointColor(poly, id2)
-  POLY_SetPointColor(poly, id1, $P1)
-  POLY_SetPointColor(poly, id2, $P0)
-  #GAME_DeleteColor($P0)
-  #GAME_DeleteColor($P1)
+  $P0 = poly.'get_point_color'(id1)
+  $P1 = poly.'get_point_color'(id2)
+  poly.'set_point_color'(id1, $P1)
+  poly.'set_point_color'(id2, $P0)
 .end
 
 
@@ -194,11 +192,11 @@ savepoly:
 
   #Set the polyline's x-scale
   $P0 = getattribute self, 'polygon'
-  POLY_SetScaleX($P0, polyScale)
+  $P0.'set_scale_x'(polyScale)
 
   #Set the polyline's position
-  POLY_SetPosX($P0, mouseX)
-  POLY_SetPosY($P0, mouseY)
+  $P0.'set_pos_x'(mouseX)
+  $P0.'set_pos_y'(mouseY)
   
 
   

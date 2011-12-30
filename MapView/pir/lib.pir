@@ -25,19 +25,23 @@
 .end
 
 #Dispatch a method on _some_ library object. 
-#TODO: This is pretty bad; can't we dispatch better?
-#      Possibly using: http://parrot.github.com/html/docs/compiler_faq.pod.html
-#      Lists "optional" and using "flat" syntax. Hopefully that works here.
-#TODO: We also need a way to handle return values... can we ".return(void)"?
 .sub 'LIB_dispatch_method'
   .param pmc caller
   .param string meth_name
   .param string meth_sig
+
+  #Program args. Can be primitives (int/string), pointers (pmc), or Wrapped sub-classes.
+  # (Wrapped will behave as expected.)
   .param pmc     arg1  :optional
   .param int has_arg1  :opt_flag
   .param pmc     arg2  :optional
   .param int has_arg2  :opt_flag
-  .local pmc lib, func, ptr, args
+
+  #Wrap the result?
+  .param string     wrap :optional :named("wrap")
+  .param int    has_wrap :opt_flag
+
+  .local pmc lib, func, ptr, args, res, ptr
 
   #Args
   args = new 'ResizablePMCArray'
@@ -50,21 +54,42 @@
   #Build up a list of arguments; start with the pointer
   push args, ptr
 
-addargs:
+addargs:  
   #Add arg1
-  unless has_arg1 goto call  
-  push args, arg1
+  unless has_arg1 goto call
+  $P1 = arg1
+  $I0 = can arg1, 'get_ptr'
+  unless $I0 goto addarg1
+  $P0 = find_method arg1, 'get_ptr'
+  $P1 = arg1.$P0()
+addarg1:
+  push args, $P1
 
   #Add arg2
-  unless has_arg2 goto call  
-  push args, arg2
+  unless has_arg2 goto call
+  $P1 = arg2
+  $I0 = can arg2, 'get_ptr'
+  unless $I0 goto addarg2
+  $P0 = find_method arg2, 'get_ptr'
+  $P1 = arg2.$P0()
+addarg2:
+  push args, $P1
 
 call:
   #Retrieve the library/function call
   lib = LIB_get_dll()
   func = dlfunc lib, meth_name, meth_sig
-  $P0 = func(args :flat)
-  .return($P0)
+  ptr = func(args :flat)
+  res = ptr
+  unless has_wrap goto ret
+
+  #Wrap the result
+  res = new wrap
+  $P0 = find_method res, 'set_ptr'
+  res.$P0(ptr)
+
+ret:
+  .return(res)
 .end
 
 

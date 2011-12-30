@@ -6,6 +6,7 @@
 .include "pir/color.pir"
 .include "pir/input.pir"
 .include "pir/image.pir"
+.include "pir/polygon.pir"
 
 #####################################################################
 # Base classes, to be subclassed by our library.
@@ -84,15 +85,20 @@
   func()
 .end
 
-#Create a polygon
+#DEMO: Create a polygon
 .sub 'DEMO_InitPoly'
-  .local pmc lib, func
+  .local pmc ptr, poly
 
-  lib = LIB_get_dll()
-  func = dlfunc lib, "demo_init_poly", "p"
-  $P0 = func()
+  #Make it
+  null $P0
+  ptr = LIB_dispatch_method($P0, 'demo_init_poly', 'p')
+  poly = new 'Polygon'
 
-  .return($P0)
+  #Save it
+  $P0 = find_method poly, 'set_ptr'
+  poly.$P0(ptr)
+
+  .return(poly)
 .end
 
 
@@ -106,15 +112,7 @@
 
 
 
-#Update our "poly" position with the given x/y
-.sub 'DEMO_SetPolyPos'
-  .param int x
-  .param int y
-  .local pmc lib, func
-  lib = LIB_get_dll()
-  func = dlfunc lib, "game_set_poly_pos", "vii"
-  func(x, y)
-.end
+
 
 
 #PostFX
@@ -253,78 +251,23 @@
 .end
 
 
-.sub 'POLY_GetPointColor'
-  .param pmc item
-  .param int index
-  .local pmc lib, func
-  lib = LIB_get_dll()
-  func = dlfunc lib, "poly_get_point_color", "ppi"
-  $P0 = func(item, index)
-
-  #Test
-  $P1  = new 'Color'
-  $P1.'set_ptr'($P0)
-  #Subclass isn't working...
-
-  .return($P1)
-.end
-
-.sub 'POLY_SetPointColor'
-  .param pmc item
-  .param int index
-  .param pmc color
-  .local pmc lib, func
-  $P0 = color.'get_ptr'()
-
-  lib = LIB_get_dll()
-  func = dlfunc lib, "poly_set_point_color", "vpip"
-  func(item, index, $P0)
-.end
-
-.sub 'POLY_SetScaleX'
-  .param pmc item
-  .param num scale
-  .local pmc lib, func
-  lib = LIB_get_dll()
-  func = dlfunc lib, "poly_set_scale_x", "vpf"
-  func(item, scale)
-.end
-
-.sub 'POLY_SetScaleY'
-  .param pmc item
-  .param num scale
-  .local pmc lib, func
-  lib = LIB_get_dll()
-  func = dlfunc lib, "poly_set_scale_y", "vpf"
-  func(item, scale)
-.end
-
-.sub 'POLY_SetPosX'
-  .param pmc item
-  .param int pos
-  .local pmc lib, func
-  lib = LIB_get_dll()
-  func = dlfunc lib, "poly_set_pos_x", "vpi"
-  func(item, pos)
-.end
-
-.sub 'POLY_SetPosY'
-  .param pmc item
-  .param int pos
-  .local pmc lib, func
-  lib = LIB_get_dll()
-  func = dlfunc lib, "poly_set_pos_y", "vpi"
-  func(item, pos)
-.end
-
 
 #Generic delete/draw stuff
 .sub 'GAME_DrawItem'
   .param pmc item
   .local pmc lib, func
+
+  #De-pointerize (if needed)
+  $P1 = item
+  $I0 = can item, 'get_ptr'
+  unless $I0 goto nowdraw
+  $P0 = find_method item, 'get_ptr'
+  $P1 = item.$P0()
+
+nowdraw:
   lib = LIB_get_dll()
   func = dlfunc lib, "game_draw_item", "vp"
-  func(item)
+  func($P1)
 .end
 
 
