@@ -1,3 +1,8 @@
+###Main library code.
+
+#More stuff
+.include "pir/color.pir"
+
 #####################################################################
 # Base classes, to be subclassed by our library.
 #####################################################################
