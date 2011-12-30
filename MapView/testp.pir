@@ -65,23 +65,6 @@
 .end
 
 
-#Retrieve current mouse x/y
-.sub 'INPUT_GetMouseX'
-  .local pmc lib, func
-  lib = LIB_get_dll()
-  func = dlfunc lib, "game_get_mouse_x", "i"
-  $I0 = func()
-  .return($I0)
-.end
-.sub 'INPUT_GetMouseY'
-  .local pmc lib, func
-  lib = LIB_get_dll()
-  func = dlfunc lib, "game_get_mouse_y", "i"
-  $I0 = func()
-  .return($I0)
-.end
-
-
 .sub 'GAME_GetFrameTimeInS'
   .local pmc lib, func
   lib = LIB_get_dll()

@@ -118,9 +118,16 @@
   $P0 = getattribute self, 'polyScaleDec'
   polyScaleDec = $P0
 
+  #Set input manager?
+  $P0 = getattribute self, 'input'
+  unless null $P0 goto getinput
+  $P0 = new ['Input']
+  setattribute self, 'input', $P0
+
+getinput:
   #Retrieve mouse x,y
-  mouseX = INPUT_GetMouseX()
-  mouseY = INPUT_GetMouseY()
+  mouseX = $P0.'get_mouse_x'()
+  mouseY = $P0.'get_mouse_y'()
 
   #Update our post-effect shader
   $P0 = getattribute self, 'pfxShader'   #Note: This _could_ be null...
@@ -235,6 +242,7 @@ savepoly:
     addattribute $P2, 'polyScale'
     addattribute $P2, 'polyScaleDec'
     addattribute $P2, 'polygon'
+    addattribute $P2, 'input'
 .end
 
 
