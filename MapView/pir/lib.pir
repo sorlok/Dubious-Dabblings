@@ -35,19 +35,29 @@
   .param string meth_sig
   .param pmc     arg1  :optional
   .param int has_arg1  :opt_flag
+  .param pmc     arg2  :optional
+  .param int has_arg2  :opt_flag
   .local pmc lib, func, ptr, args
+
+  #Args
+  args = new 'ResizablePMCArray'
+  if null caller goto addargs #Skip if caller is null
 
   #Retrieve the pointer
   $P0 = find_method caller, 'get_ptr'
   ptr = caller.$P0()
 
   #Build up a list of arguments; start with the pointer
-  args = new 'ResizablePMCArray'
   push args, ptr
 
+addargs:
   #Add arg1
   unless has_arg1 goto call  
   push args, arg1
+
+  #Add arg2
+  unless has_arg2 goto call  
+  push args, arg2
 
 call:
   #Retrieve the library/function call

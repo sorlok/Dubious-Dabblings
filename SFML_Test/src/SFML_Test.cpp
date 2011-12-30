@@ -74,8 +74,11 @@ DLLEXPORT int game_get_mouse_x();
 DLLEXPORT int game_get_mouse_y();
 DLLEXPORT float game_get_frame_time_s();
 DLLEXPORT void game_draw_item(sf::Drawable* item);
+
+//Cleanup
 DLLEXPORT void game_del_item(sf::Drawable* item);
 DLLEXPORT void game_del_color(sf::Color* color);
+DLLEXPORT void game_del_image(sf::Image* item);
 
 
 
@@ -346,6 +349,11 @@ void game_del_item(sf::Drawable* item)
 void game_del_color(sf::Color* color)
 {
 	delete color;
+}
+
+void game_del_image(sf::Image* img)
+{
+	delete img;
 }
 
 

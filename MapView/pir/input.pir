@@ -12,11 +12,11 @@
 
   #Save it
   $P0 = find_method self, 'set_ptr'
-  ptr = self.$P0(ptr)
+  self.$P0(ptr)
 .end
 .sub 'init_pmc' :vtable
   $P0 = new 'Exception'
-  $P0 = "Currently can't create a Input with args."
+  $P0 = "Currently can't create an Input with args."
   throw $P0
 .end
 

@@ -5,6 +5,7 @@
 .include "pir/wrapped.pir"
 .include "pir/color.pir"
 .include "pir/input.pir"
+.include "pir/image.pir"
 
 #####################################################################
 # Base classes, to be subclassed by our library.
@@ -160,43 +161,6 @@
 .end
 
 
-
-#Image
-.sub 'IMG_MakeNew'
-  .param string filename
-  .local pmc lib, func, bb
-
-  #Convert the string to a byte buffer
-  bb = new ['ByteBuffer']
-  bb = filename
-  push bb, 0
-
-  lib = LIB_get_dll()
-  func = dlfunc lib, "new_image", "pp"
-  $P0 = func(bb)
-
-  .return($P0)
-.end
-
-.sub 'IMG_GetWidth'
-  .param pmc item
-  .local pmc lib, func
-  lib = LIB_get_dll()
-  func = dlfunc lib, "image_get_width", "ip"
-  $I0 = func(item)
-  .return($I0)
-.end
-
-.sub 'IMG_GetHeight'
-  .param pmc item
-  .local pmc lib, func
-  lib = LIB_get_dll()
-  func = dlfunc lib, "image_get_height", "ip"
-  $I0 = func(item)
-  .return($I0)
-.end
-
-
 #Sprite
 .sub 'SPR_MakeNew'
   .local pmc lib, func
@@ -212,9 +176,11 @@
   .param pmc item
   .param pmc img
   .local pmc lib, func
+  $P0 = img.'get_ptr'()
+
   lib = LIB_get_dll()
   func = dlfunc lib, "sprite_set_image", "vpp"
-  func(item, img)
+  func(item, $P0)
 .end
 
 .sub 'SPR_SetPosition'
@@ -378,6 +344,13 @@
   func(item)
 .end
 
+.sub 'GAME_DeleteImage'
+  .param pmc item
+  .local pmc lib, func
+  lib = LIB_get_dll()
+  func = dlfunc lib, "game_del_image", "vp"
+  func(item)
+.end
 
 
 

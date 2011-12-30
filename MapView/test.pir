@@ -45,21 +45,13 @@
   makeobjs:
 
   #Images
-  personImg = IMG_MakeNew('person.png')
-  unless null personImg goto makeobjs2
-
-  #Error
-  say "Can't load image: person.png"
-  $P1 = new 'Exception'
-  throw $P1
-
-  #Make more objects
-  makeobjs2:
+  personImg = new 'Image'
+  personImg.'load_file'('person.png')
 
   #Retrieve the image's width/height, for later
-  w = IMG_GetWidth(personImg)
+  w = personImg.'get_width'()
   w /= 2
-  h = IMG_GetHeight(personImg)
+  h = personImg.'get_height'()
   h /= 2
 
   #Make sprite 1, set its properties, save it.
