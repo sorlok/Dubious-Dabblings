@@ -147,7 +147,7 @@ getinput:
   $P1.'set_rotation'($N0)
 
   #Update sprite 2's colorization
-  $P0 = $P1.'get_color'($P1)
+  $P0 = $P1.'get_color'()
   $N0 = polyScale
   $N0 *= 255
   $I0 = $N0
