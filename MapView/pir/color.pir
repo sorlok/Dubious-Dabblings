@@ -2,39 +2,38 @@
 # Color class; wraps an sfml::Color* and provides cleanup on destruction
 #####################################################################
 
+.include "wrapped.pir"
+
 .namespace ['Color']
+
+#Initialization code.
 .sub 'init' :vtable
 .end
-
-.sub 'set_ptr' :method
-  .param pmc otherPtr
-  setattribute self, 'ptr', otherPtr
-.end
-
-.sub 'get_ptr' :method
-  .local pmc ptr
-  ptr = getattribute self, 'ptr'
-  .return(ptr)
-.end
-
 .sub 'init_pmc' :vtable
   $P0 = new 'Exception'
   $P0 = "Currently can't create a Color with args."
   throw $P0
 .end
 
-.sub 'destroy' :vtable
-  .local pmc ptr
-  ptr = getattribute self, 'ptr'
-  unless ptr goto done
+#Reclaim this color.
+.sub 'cleanup' :vtable
+  .param pmc ptr
   GAME_DeleteColor(ptr)
-  say "Color reclaimed"
-done:
 .end
 
+#TODO:
+#  CLR_SetRed
+#  CLR_SetGreen
+#  CLR_SetBlue
+#  CLR_SetAlpha
+#  Make other classes Color-aware.
+#  Re-work existing library code; consistent naming, etc.
+
+#Initialize this class.
 .sub Color_class_init :anon :load :init
-  $P0 = newclass 'Color'
-  addattribute $P0, 'ptr'
+  $P0 = get_class 'Wrapped'
+  $P1 = newclass 'Color'
+  addparent $P0, $P1
 .end
 
 
