@@ -1,5 +1,5 @@
 ##File containing our implementation.
-.include 'testp.pir'
+.include 'pir/interfaces.pir'
 
 #####################################################################
 # Sample rendition subclass that loads our existing demo and displays it.
@@ -238,6 +238,52 @@ savepoly:
     addattribute $P2, 'polyScaleDec'
     addattribute $P2, 'polygon'
     addattribute $P2, 'input'
+.end
+
+
+#####################################################################
+# Main game loop
+##################################################################### 
+
+.namespace []
+
+.sub 'run_game'
+  .local int res
+  .param pmc currRend
+  .local pmc game
+
+  #Start the game
+  game = new 'Game'
+  res = game.'init'(800, 600, 32)
+  unless res goto done
+
+  say "Starting main loop"
+
+  #Main Loop
+  main_loop:
+    #Have our game handle expected events
+    res = game.'process_events'()
+
+    #Call our sample game object's update method
+    currRend.'update'()
+
+    #Display what we've just rendered
+    DEMO_SampleDisplay()
+
+    #And here is where the real updating happens
+    currRend.'display'()
+
+    #Here we go
+    game.'display'()
+
+    #Continue to update
+    unless res goto main_loop
+
+  #When we're done, clean up
+  game.'close'()
+
+  done:
+    say "Done"
 .end
 
 
