@@ -9,7 +9,10 @@ set (Basic_VERSION_MAJOR 0)
 set (Basic_VERSION_MINOR 1)
 
 #Option: build tests. Currently has no effect.
-option(BUILD_TESTS "Build unit tests." OFF) 
+option(BUILD_TESTS "Build unit tests." OFF)
+
+#Option: build shared library.
+option(BUILD_SHARED_LIBRARY "Build the shared library." OFF)  
 
 #Turn on verbose output
 SET(CMAKE_VERBOSE_MAKEFILE ON)
@@ -51,17 +54,18 @@ FILE(GLOB_RECURSE BASIC_CPP *.cpp)
 #Create a list of items to remove from the Build.
 # Adding main.cpp to this list makes a good starting point, and ensures
 # we always have at least one item to remove from BASIC_CPP
-#TEMP: Why isn't the previous line working?
 FILE(GLOB IgnoreList "src/MapViewer.cpp")
 
-#Remove the "Build" directory
-#FILE(GLOB_RECURSE IgnoreTmp "Build/*.c" "Build/*.cpp")
-#LIST(APPEND IgnoreList ${IgnoreTmp})
+#Remove the library too...
+FILE(GLOB IgnoreTmp "src/SFML_Engine.cpp")
+LIST(APPEND IgnoreList ${IgnoreTmp})
 
 #Remove the "Debug" directories
 FILE(GLOB_RECURSE IgnoreTmp "Debug/*.c" "Debug/*.cpp")
 LIST(APPEND IgnoreList ${IgnoreTmp})
 FILE(GLOB_RECURSE IgnoreTmp "Release/*.c" "Release/*.cpp")
+LIST(APPEND IgnoreList ${IgnoreTmp})
+FILE(GLOB_RECURSE IgnoreTmp "Shared/*.c" "Shared/*.cpp")
 LIST(APPEND IgnoreList ${IgnoreTmp})
 
 #Actually remove these
@@ -95,11 +99,18 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
   LIST(APPEND LibraryList ${PARROT_LDFLAGS})
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
-#Our output executable and its input sources. List *.c files manually
-add_executable(MapView src/MapViewer.cpp ${BASIC_CPP})
+#Build shared library, or exe?
+IF (${BUILD_SHARED_LIBRARY} MATCHES "OFF")
+  #Our output executable and its input sources. List *.c files manually
+  add_executable(MapView src/MapViewer.cpp ${BASIC_CPP})
+    
+  #Libraries to link, ported over from Eclipse.
+  target_link_libraries (MapView ${LibraryList})
+ELSE()
+  #Our shared lib
+  ADD_LIBRARY(sfml_engine SHARED src/SFML_Engine.cpp ${BASIC_CPP})
+ENDIF (${BUILD_SHARED_LIBRARY} MATCHES "OFF")
 
-#Libraries to link, ported over from Eclipse.
-target_link_libraries (MapView ${LibraryList})
 
 
 

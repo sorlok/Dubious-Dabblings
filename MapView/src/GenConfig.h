@@ -6,5 +6,7 @@
 #define MAPVIEW_VERSION_MAJOR ""
 #define MAPVIEW_VERSION_MINOR ""
 
-//Can add more cmake-imported flags here, as required.
+//Flags imported from cmake
+#define BUILD_SHARED_LIBRARY
+
 

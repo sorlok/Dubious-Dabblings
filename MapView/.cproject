@@ -493,7 +493,6 @@
 <target name="Run CMake (Debug)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 <buildCommand>cmake</buildCommand>
 <buildArguments>-E chdir Debug/ cmake -G "Unix Makefiles" ../ -DCMAKE_BUILD_TYPE:STRING=Debug</buildArguments>
-<buildTarget/>
 <stopOnError>true</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
 <runAllBuilders>false</runAllBuilders>
@@ -501,6 +500,13 @@
 <target name="Run CMake (Release)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 <buildCommand>cmake</buildCommand>
 <buildArguments>-E chdir Release/ cmake -G "Unix Makefiles" ../ -DCMAKE_BUILD_TYPE:STRING=Release</buildArguments>
+<stopOnError>true</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+<runAllBuilders>false</runAllBuilders>
+</target>
+<target name="Run CMake (Shared Debug)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+<buildCommand>cmake</buildCommand>
+<buildArguments>-E chdir Debug/ cmake -G "Unix Makefiles" ../ -DCMAKE_BUILD_TYPE:STRING=Debug -DBUILD_SHARED_LIBRARY:BOOL=ON</buildArguments>
 <buildTarget/>
 <stopOnError>true</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
@@ -999,7 +1005,6 @@
 <target name="Run CMake (Debug)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 <buildCommand>cmake</buildCommand>
 <buildArguments>-E chdir Debug/ cmake -G "Unix Makefiles" ../ -DCMAKE_BUILD_TYPE:STRING=Debug</buildArguments>
-<buildTarget/>
 <stopOnError>true</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
 <runAllBuilders>false</runAllBuilders>
@@ -1007,6 +1012,13 @@
 <target name="Run CMake (Release)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 <buildCommand>cmake</buildCommand>
 <buildArguments>-E chdir Release/ cmake -G "Unix Makefiles" ../ -DCMAKE_BUILD_TYPE:STRING=Release</buildArguments>
+<stopOnError>true</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+<runAllBuilders>false</runAllBuilders>
+</target>
+<target name="Run CMake (Shared Debug)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+<buildCommand>cmake</buildCommand>
+<buildArguments>-E chdir Debug/ cmake -G "Unix Makefiles" ../ -DCMAKE_BUILD_TYPE:STRING=Debug -DBUILD_SHARED_LIBRARY:BOOL=ON</buildArguments>
 <buildTarget/>
 <stopOnError>true</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
