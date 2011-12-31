@@ -359,8 +359,8 @@ void game_del_image(sf::Image* img)
 
 void demo_set_default_postfx(sf::PostFX* item)
 {
-	item->SetTexture("framebuffer", NULL); //"NULL" means use the screen.
 	item->SetParameter("color", 1.f, 1.f, 1.f);
+	item->SetTexture("framebuffer", NULL); //"NULL" means use the screen.
 }
 
 
