@@ -107,8 +107,12 @@ IF (${BUILD_SHARED_LIBRARY} MATCHES "OFF")
   #Libraries to link, ported over from Eclipse.
   target_link_libraries (MapView ${LibraryList})
 ELSE()
+  #More flags...
+  LIST(APPEND LibraryList sfml-graphics sfml-window sfml-system)
+
   #Our shared lib
   ADD_LIBRARY(sfml_engine SHARED src/SFML_Engine.cpp ${BASIC_CPP})
+  target_link_libraries (sfml_engine ${LibraryList})
 ENDIF (${BUILD_SHARED_LIBRARY} MATCHES "OFF")
 
 
