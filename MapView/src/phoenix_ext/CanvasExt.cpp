@@ -1,3 +1,6 @@
+#include "GenConfig.h" //TODO: Move to a sep. library project
+#ifndef BUILD_SHARED_LIBRARY
+
 #include "CanvasExt.hpp"
 
 #include <iostream>
@@ -125,3 +128,4 @@ void CanvasExt::update()
 }
 
 
+#endif //build_shared

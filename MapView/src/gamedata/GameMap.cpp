@@ -14,7 +14,7 @@ GameMap::GameMap()
 }
 
 
-
+#ifndef BUILD_SHARED_LIBRARY
 void GameMap::InitTMXMap(GameMap& map, const std::string& path)
 {
 	//Read it
@@ -150,7 +150,7 @@ void GameMap::PaintImage(PremultImage& image)
 		}
 	}
 }
-
+#endif
 
 
 

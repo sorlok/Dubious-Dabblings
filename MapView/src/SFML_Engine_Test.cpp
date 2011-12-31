@@ -5,8 +5,18 @@
 
 int main(int argc, char** argv)
 {
-	//TODO: Better usage example!
-	init_sfml(100, 100, 32);
+	//Simple game loop
+	init_sfml(800, 600, 32);
+
+	int res = 0;
+	while (!res) {
+	    res = sfml_handle_events();
+	    demo_display();
+	    sfml_display();
+	}
+
+	//Cleanup
+	close_sfml();
 
 	return 0;
 }

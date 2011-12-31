@@ -1,3 +1,7 @@
+#include "GenConfig.h"
+#ifndef BUILD_SHARED_LIBRARY
+
+
 //Turn on debugging info  --note: This won't actually matter later when
 //          using the library, since all output code is in the CPP file.
 #define ANCHOR_LAYOUT_ERRORS_ON
@@ -323,3 +327,5 @@ int main(int argc, char* argv[])
   OS::main();
   return 0;
 }
+
+#endif //BUILD_SHARED_LIBRARY

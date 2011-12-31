@@ -1,3 +1,6 @@
+#include "GenConfig.h" //TODO: Move to a sep. library project
+#ifndef BUILD_SHARED_LIBRARY
+
 #include "PremultImage.hpp"
 
 //NOTE: Including PNG here is buggy... it seems to be the ONLY place it can be included!
@@ -527,3 +530,4 @@ uint32_t* PremultImage::LoadPNGFile(const string& path, unsigned int& imgWidth, 
 }
 
 
+#endif //build_shared
