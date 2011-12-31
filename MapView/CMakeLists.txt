@@ -60,6 +60,10 @@ FILE(GLOB IgnoreList "src/MapViewer.cpp")
 FILE(GLOB IgnoreTmp "src/SFML_Engine.cpp")
 LIST(APPEND IgnoreList ${IgnoreTmp})
 
+#And its test file
+FILE(GLOB IgnoreTmp "src/SFML_Engine_Test.cpp")
+LIST(APPEND IgnoreList ${IgnoreTmp})
+
 #Remove the "Debug" directories
 FILE(GLOB_RECURSE IgnoreTmp "Debug/*.c" "Debug/*.cpp")
 LIST(APPEND IgnoreList ${IgnoreTmp})
@@ -71,8 +75,15 @@ LIST(APPEND IgnoreList ${IgnoreTmp})
 #Actually remove these
 LIST(REMOVE_ITEM BASIC_CPP ${IgnoreList})
 
-#List of libraries to link
-SET(LibraryList sfml-system phoenix_ext phoenix_ext_gtk tinyxml z)
+#List of libraries to link 
+SET(LibraryList sfml-system tinyxml z)
+
+#Libraries change depending on what we're building
+IF (${BUILD_SHARED_LIBRARY} MATCHES "OFF")
+  LIST(APPEND LibraryList phoenix_ext phoenix_ext_gtk)
+ELSE()
+  LIST(APPEND LibraryList sfml-graphics sfml-window)
+ENDIF (${BUILD_SHARED_LIBRARY} MATCHES "OFF")
 
 #Add Gtk-2 stuff
 find_package(GTK2 REQUIRED)
@@ -107,12 +118,13 @@ IF (${BUILD_SHARED_LIBRARY} MATCHES "OFF")
   #Libraries to link, ported over from Eclipse.
   target_link_libraries (MapView ${LibraryList})
 ELSE()
-  #More flags...
-  LIST(APPEND LibraryList sfml-graphics sfml-window sfml-system)
-
   #Our shared lib
   ADD_LIBRARY(sfml_engine SHARED src/SFML_Engine.cpp ${BASIC_CPP})
   target_link_libraries (sfml_engine ${LibraryList})
+  
+  #We build a small executable with the library, just to make sure linking works.
+  add_executable(EngineTest src/SFML_Engine_Test.cpp ${BASIC_CPP})
+  target_link_libraries (EngineTest ${LibraryList} sfml_engine)
 ENDIF (${BUILD_SHARED_LIBRARY} MATCHES "OFF")
 
 
