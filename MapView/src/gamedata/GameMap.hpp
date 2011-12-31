@@ -6,6 +6,8 @@
 
 #include <cstdint>
 #include <vector>
+#include <stdexcept>
+#include <string>
 
 #ifndef BUILD_SHARED_LIBRARY
 #include "phoenix_ext/PremultImage.hpp"
@@ -20,21 +22,22 @@ public:
 	GameMap();
 
 	///Load a "Tiled" TMX map.
-#ifndef BUILD_SHARED_LIBRARY
 	static void InitTMXMap(GameMap& map, const std::string& path);
 	//TODO: More map types
 
-
+#ifndef BUILD_SHARED_LIBRARY
 	///Use this map to paint a PremultImage
 	void PaintImage(PremultImage& image);
 	//TODO: Another function called "UpdateImage" which handles animations, cursors, etc.
 
 //private: //TODO: Better encapsulation
 	void PaintTile(size_t tileX, size_t tileY, int tileID, PremultImage& img);
-#endif
 
+	//???
 	std::vector<uint32_t*> tiles;
 	std::vector< std::vector<int> > maplayer;
+#endif
+
 	unsigned int tileSize;
 
 #ifndef BUILD_SHARED_LIBRARY

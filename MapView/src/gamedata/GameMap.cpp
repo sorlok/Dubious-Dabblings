@@ -1,6 +1,7 @@
 #include "GameMap.hpp"
 
 #include <algorithm>
+#include <iostream>
 
 #include "tmx/Tmx.h"
 
@@ -13,8 +14,6 @@ GameMap::GameMap()
 
 }
 
-
-#ifndef BUILD_SHARED_LIBRARY
 void GameMap::InitTMXMap(GameMap& map, const std::string& path)
 {
 	//Read it
@@ -49,18 +48,16 @@ void GameMap::InitTMXMap(GameMap& map, const std::string& path)
 	unsigned int tsImgHeight;
 
 	//Load the image.
-	uint32_t* pngBuffer = PremultImage::LoadPNGFile(tmxMap.GetFilepath() + "/" + tsImage.GetSource(), tsImgWidth, tsImgHeight);
+	/*uint32_t* pngBuffer = PremultImage::LoadPNGFile(tmxMap.GetFilepath() + "/" + tsImage.GetSource(), tsImgWidth, tsImgHeight);
 	if (!pngBuffer) {
 		throw std::runtime_error("Error loading PNG file.");
-	}
+	}*/
 
 	//Iterate over every tile; save it.
 	size_t numCols = tsImgWidth / tileset.GetTileWidth();
 	size_t numRows = tsImgHeight / tileset.GetTileHeight();
 
-	std::cout <<"Num tiles: " <<tsImgWidth <<" X " <<tileset.GetTileWidth() <<"\n";
-
-	for (size_t tileY=0; tileY<numRows; tileY++) {
+	/*for (size_t tileY=0; tileY<numRows; tileY++) {
 		for (size_t tileX=0; tileX<numCols; tileX++) {
 			//Prepare a new tile entry.
 			map.tiles.push_back(new uint32_t[map.tileSize*map.tileSize]);
@@ -78,12 +75,12 @@ void GameMap::InitTMXMap(GameMap& map, const std::string& path)
 				srcRow += tsImgWidth;
 			}
 		}
-	}
+	}*/
 
 	//Recover some memory.
-	if (pngBuffer) {
+	/*if (pngBuffer) {
 		delete [] pngBuffer;
-	}
+	}*/
 
 	//Double-check our layer.
 	const Tmx::Layer& layer = *(tmxMap.GetLayer(0));
@@ -96,8 +93,8 @@ void GameMap::InitTMXMap(GameMap& map, const std::string& path)
 	size_t firstGID = tileset.GetFirstGid();
 
 	//NOTE: Tiled wastes a lot of width/height on empty cell values, but oh well.
-	map.mapSizeInTiles = {0, 0, tmxMap.GetWidth(), tmxMap.GetHeight()};
-	for (size_t tileY=0; tileY<(size_t)tmxMap.GetHeight(); tileY++) {
+	//map.mapSizeInTiles = {0, 0, tmxMap.GetWidth(), tmxMap.GetHeight()};
+	/*for (size_t tileY=0; tileY<(size_t)tmxMap.GetHeight(); tileY++) {
 		vector<int> thisRow;
 
 		//map.maplayer[tileY].resize(numCols, -1);
@@ -109,13 +106,15 @@ void GameMap::InitTMXMap(GameMap& map, const std::string& path)
 		}
 
 		map.maplayer.push_back(thisRow);
-	}
+	}*/
 
 
-	std::cout <<"TMX Map Loaded: " <<path <<"\n";
+	std::cout <<"TMX Map Loaded: " <<path <<std::endl;
 
 }
 
+
+#ifndef BUILD_SHARED_LIBRARY
 
 //Helper: paint a tile
 void GameMap::PaintTile(size_t tileX, size_t tileY, int tileID, PremultImage& img)
