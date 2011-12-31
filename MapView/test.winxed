@@ -41,7 +41,7 @@ class WRendition : Rendition {
         self.pfxShader.DEMO_set_default_pfx();  #Note: This is causing a problem.
 
         #Save it in our array of objects
-        #push(self.drawables, self.pfxShader);  #TODO: Re-enable later.
+        push(self.drawables, self.pfxShader);  #TODO: Re-enable later.
       #}
     }
 
@@ -161,11 +161,12 @@ class WRendition : Rendition {
 
 
 #Main game loop
-function run_game(var currRend)
+function run_game()
 {
   #Start the game
   var game = new Game;
   int res = game.init_game(800, 600, 32);
+  var currRend = new WRendition();
   say ("Starting main loop");
 
   #Main Loop
@@ -196,19 +197,19 @@ function run_game(var currRend)
 #Main function
 function main[main](var args)
 {
-  var currRend = new WRendition();
+  #var currRend = new WRendition();
 
   #Heavy-handed check.
-  if (currRend instanceof Rendition) {
-    say ("Correct! - It's a Rendition");
-  }
+  #if (currRend instanceof Rendition) {
+  #  say ("Correct! - It's a Rendition");
+  #}
 
   #Better check
-  find_method(currRend, "update");
-  find_method(currRend, "display");
+  #find_method(currRend, "update");
+  #find_method(currRend, "display");
 
   #Run the game
-  run_game(currRend);
+  run_game();
 }
 
 
