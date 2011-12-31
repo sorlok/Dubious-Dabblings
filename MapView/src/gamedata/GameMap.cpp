@@ -3,6 +3,9 @@
 #include <algorithm>
 #include <iostream>
 
+//We don't like to phoenix, but we can still use nall
+#include <nall/file.hpp>
+
 #include "tmx/Tmx.h"
 
 using std::string;
@@ -46,6 +49,9 @@ void GameMap::InitTMXMap(GameMap& map, const std::string& path)
 	//In case they're not explicitly set:
 	unsigned int tsImgWidth;
 	unsigned int tsImgHeight;
+
+	map.tilePalettePath = tmxMap.GetFilepath() + "/" + tsImage.GetSource();
+	if (!nall::file::exists(map.tilePalettePath.c_str())) { throw std::runtime_error("Tileset palette file doesn't exist."); }
 
 	//Load the image.
 	/*uint32_t* pngBuffer = PremultImage::LoadPNGFile(tmxMap.GetFilepath() + "/" + tsImage.GetSource(), tsImgWidth, tsImgHeight);

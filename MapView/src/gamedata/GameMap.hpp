@@ -39,6 +39,7 @@ public:
 #endif
 
 	unsigned int tileSize;
+	std::string tilePalettePath;
 
 #ifndef BUILD_SHARED_LIBRARY
 	phoenix::Geometry mapSizeInTiles;
