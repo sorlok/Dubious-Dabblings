@@ -1,0 +1,57 @@
+#####################################################################
+# Simple TileSet subclass
+#####################################################################
+
+class SimpleTileSet : TileSet {
+  #The image containing our palette.
+  var img;
+  var size;
+  var tiles;
+
+  #Load a file as the tileset; check it fits within the given tileSize.
+  function load_file(string filename, int tileSize) {
+    #Load properties.
+    self.img = new Image;
+    self.img.load_file(filename);
+
+    #Check size
+    if ((self.img.get_width()%tileSize!=0) || (self.img.get_height()%tileSize!=0)) {
+      throw Error("TileSet image is not divisible by tile size.");
+    }
+
+    #Set size, create array of sprites
+    int num_rows = self.img.get_height()/tileSize;
+    int num_cols = self.img.get_width()/tileSize;
+    self.size = (num_cols * num_rows);
+    self.tiles = [];
+    for (int row=0; row<num_rows; row++) {
+      for (int col=0; col<num_cols; col++) {
+        #Make a new sprite
+        var spr = new Sprite;
+        spr.set_image(self.img);
+
+        #Bound it, save it
+        spr.set_sub_rect(col*self.tileSize, row*self.tileSize, self.tileSize, self.tileSize);
+        push(self.tiles, spr);
+      }
+    }
+  }
+
+  function get_size() {
+    return self.size;
+  }
+
+  function draw_tile(var game, int id, int x, int y) {
+    if (id<0 || id>=self.size) {
+      throw Error("Attempting to draw tile which is out of tileset range.");
+    }
+
+    #Get it, position it, draw it.
+    var spr = self.tiles[id];
+    spr.set_position(x, y);
+    game.draw_item(spr);
+  }
+
+
+}
+

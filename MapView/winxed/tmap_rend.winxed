@@ -20,7 +20,6 @@ class TileMapRendition : Rendition {
     #Now load our TMX map.
     #self.currmap = new TileMap;
     #self.currmap.load_file('map_test.tmx');
-    #push(self.drawables, self.currmap);
   }
 
   function update() {

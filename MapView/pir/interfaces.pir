@@ -9,6 +9,7 @@
 .include "pir/postfx.pir"
 .include "pir/game.pir"
 .include "pir/demo.pir"
+.include "pir/tileset.pir"
 
 #####################################################################
 # Base classes, to be subclassed by our library.
