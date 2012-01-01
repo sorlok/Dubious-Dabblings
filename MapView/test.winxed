@@ -160,56 +160,47 @@ class WRendition : Rendition {
 }
 
 
-#Main game loop
-function run_game()
-{
-  #Start the game
-  var game = new Game;
-  int res = game.init_game(800, 600, 32);
-  var currRend = new WRendition();
-  say ("Starting main loop");
-
-  #Main Loop
-  res = 0;
-  while(!res) {
-    #Have our game handle expected events
-    res = game.process_events();
-
-    #Call our sample game object's update method
-    currRend.update();
-
-    #Display what we've just rendered
-    DEMO_SampleDisplay();
-
-    #And here is where the real updating happens
-    currRend.display();
-
-    #Here we go
-    game.display();
+#Inherit from Game
+class SimpleGame : Game {
+  function SimpleGame(int width, int height, int depth) {
+    int res = self.init_game(width, height, depth);
+    if (!res) {
+      throw Error("Couldn't initialize game.");
+    }
   }
 
-  #When we're done, clean up
-  game.close();
-  say('Done');
+  function run_loop(var currRend) {
+    int res = 0;
+    while(!res) {
+      #Have our game handle expected events
+      res = self.process_events();
+
+      #Call our sample game object's update method
+      currRend.update();
+
+      #Display what we've just rendered
+      DEMO_SampleDisplay();
+
+      #And here is where the real updating happens
+      currRend.display();
+
+      #Here we go
+      self.display();
+    }
+  }
 }
 
 
 #Main function
 function main[main](var args)
 {
-  #var currRend = new WRendition();
+  var game = new SimpleGame(800, 600, 32);
+  var rend = new WRendition();
 
-  #Heavy-handed check.
-  #if (currRend instanceof Rendition) {
-  #  say ("Correct! - It's a Rendition");
-  #}
-
-  #Better check
-  #find_method(currRend, "update");
-  #find_method(currRend, "display");
-
-  #Run the game
-  run_game();
+  say ('Starting game loop');
+  game.run_loop(rend);
+  game.close();
+  say ('Done');
 }
 
 
