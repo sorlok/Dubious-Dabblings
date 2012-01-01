@@ -278,6 +278,7 @@ GameMap* new_tmx_map(const char* filename)
 	try {
 		GameMap::InitTMXMap(*res, filename);
 	} catch (std::exception& ex) {
+		std::cout <<"Error loading map: " <<ex.what() <<std::endl;
 		delete res;
 		return NULL;
 	}

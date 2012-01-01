@@ -32,7 +32,7 @@ class SimpleTileMap : TileMap {
   function load_tmx_map(string filename) {
     #Manage the pointer.
     var ptr = LIB_dispatch_method(null, 'new_tmx_map', 'pp', filename);
-    if (!ptr) { throw Error("Couldn't load TMX file."); }
+    if (ptr==null) { throw Error("Couldn't load TMX file: " + filename); }
     self.set_ptr(ptr);
   }
 
@@ -54,6 +54,8 @@ class SimpleTileMap : TileMap {
     endTileX   = self.bound(endTileX, 0, self.get_width()-1);
     startTileY = self.bound(startTileY, 0, self.get_width()-1);
     endTileY   = self.bound(endTileY, 0, self.get_width()-1);
+
+    say("Drawing: " + startTileX + "->" + endTileX + " ; " + startTileY + "->" + endTileY);    
 
     #Draw each tile at the correct position.
     int offsetX = -self.offsetX % tile_size;
