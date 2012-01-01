@@ -99,20 +99,21 @@ void GameMap::InitTMXMap(GameMap& map, const std::string& path)
 	size_t firstGID = tileset.GetFirstGid();
 
 	//NOTE: Tiled wastes a lot of width/height on empty cell values, but oh well.
-	//map.mapSizeInTiles = {0, 0, tmxMap.GetWidth(), tmxMap.GetHeight()};
-	/*for (size_t tileY=0; tileY<(size_t)tmxMap.GetHeight(); tileY++) {
+	map.mapSizeInTiles.first = tmxMap.GetWidth();
+	map.mapSizeInTiles.second = tmxMap.GetHeight();
+	for (size_t tileY=0; tileY<(size_t)tmxMap.GetHeight(); tileY++) {
 		vector<int> thisRow;
-
-		//map.maplayer[tileY].resize(numCols, -1);
 		for (size_t tileX=0; tileX<(size_t)tmxMap.GetWidth(); tileX++) {
+			int resTileID = -1;
 			size_t tileGID = layer.GetTile(tileX, tileY).gid;
 			if (tileGID >= firstGID) {
-				thisRow.push_back(tileGID - firstGID);
+				resTileID = tileGID - firstGID;
 			}
+			thisRow.push_back(resTileID);
 		}
 
 		map.maplayer.push_back(thisRow);
-	}*/
+	}
 
 
 	std::cout <<"TMX Map Loaded: " <<path <<std::endl;

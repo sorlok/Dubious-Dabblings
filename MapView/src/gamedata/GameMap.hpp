@@ -35,15 +35,13 @@ public:
 
 	//???
 	std::vector<uint32_t*> tiles;
-	std::vector< std::vector<int> > maplayer;
 #endif
 
 	unsigned int tileSize;
 	std::string tilePalettePath;
 
-#ifndef BUILD_SHARED_LIBRARY
-	phoenix::Geometry mapSizeInTiles;
-#endif
+	std::vector< std::vector<int> > maplayer;
+	std::pair<unsigned int, unsigned int> mapSizeInTiles;
 
 
 
