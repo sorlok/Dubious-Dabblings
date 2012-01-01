@@ -30,6 +30,9 @@ class SimpleTileSet : TileSet {
         var spr = new Sprite;
         spr.set_image(self.img);
 
+        #This performs better if no alpha blending is used.
+        spr.set_blend_off();
+
         #Bound it, save it
         spr.set_sub_rect(col*tileSize, row*tileSize, tileSize, tileSize);
         push(self.tiles, spr);

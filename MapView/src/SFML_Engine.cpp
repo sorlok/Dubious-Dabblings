@@ -144,6 +144,12 @@ sf::Sprite* new_sprite()
 void sprite_set_image(sf::Sprite* item, const sf::Image* img)
 {
 	item->SetImage(*img);
+	//item->SetBlendMode(sf::Blend::None); //TODO: Set manually later.
+}
+
+void sprite_set_blend_off(sf::Sprite* item)
+{
+	item->SetBlendMode(sf::Blend::None);
 }
 
 void sprite_set_sub_rect(sf::Sprite* item, int x, int y, int width, int height)

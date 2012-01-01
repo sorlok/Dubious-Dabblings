@@ -30,6 +30,11 @@
   LIB_dispatch_method(self, 'sprite_set_image', 'vpp', img)
 .end
 
+#Turn off alpha blending
+.sub 'set_blend_off' :method
+  LIB_dispatch_method(self, 'sprite_set_blend_off', 'vp')
+.end
+
 #Designate a sub-rectangle of this image to be used for display
 .sub 'set_sub_rect' :method
   .param int x

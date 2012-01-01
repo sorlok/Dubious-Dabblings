@@ -47,6 +47,7 @@ DLLEXPORT int image_get_height(const sf::Image* item);
 //Sprite
 DLLEXPORT sf::Sprite* new_sprite();
 DLLEXPORT void sprite_set_image(sf::Sprite* item, const sf::Image* img);
+DLLEXPORT void sprite_set_blend_off(sf::Sprite* item);
 DLLEXPORT void sprite_set_sub_rect(sf::Sprite* item, int x, int y, int width, int height);
 DLLEXPORT void sprite_set_position(sf::Sprite* item, int x, int y);
 DLLEXPORT void sprite_set_center(sf::Sprite* item, int x, int y);
