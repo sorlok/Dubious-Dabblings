@@ -41,6 +41,10 @@
 .sub 'get_tile_size' :method
 .end
 
+#Retrieve the path to this map's tile image.
+.sub 'get_tile_palette_path' :method
+.end
+
 #Retrieve this map's width in tiles
 .sub 'get_width' :method
 .end

@@ -300,7 +300,12 @@ int gamemap_get_map_height(GameMap* item)
 	return item->mapSizeInTiles.second;
 }
 
-//string gamemap_get_tile_palette_path(GameMap* item); //TODO
+//NOTE: The pointer returned by this is only valid for the lifetime of the
+//      GameMap (so wrap it early!). It should NOT be freed.
+const char* gamemap_get_tile_palette_path(GameMap* item)
+{
+	return item->tilePalettePath.c_str();
+}
 
 int gamemap_get_tile_at(GameMap* item, int x, int y)
 {

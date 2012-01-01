@@ -73,7 +73,7 @@ DLLEXPORT GameMap* new_tmx_map(const char* filename);
 DLLEXPORT int gamemap_get_tile_size(GameMap* item);
 DLLEXPORT int gamemap_get_map_width(GameMap* item);
 DLLEXPORT int gamemap_get_map_height(GameMap* item);
-//DLLEXPORT string gamemap_get_tile_palette_path(GameMap* item); //TODO: How to do this?
+DLLEXPORT const char* gamemap_get_tile_palette_path(GameMap* item);
 DLLEXPORT int gamemap_get_tile_at(GameMap* item, int x, int y);
 
 //Game functionality

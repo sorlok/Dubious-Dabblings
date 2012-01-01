@@ -97,6 +97,13 @@ class SimpleTileMap : TileMap {
     return res;
   }
 
+  #Retrieve the path to this tilemap's palette.
+  function get_tile_palette_path() {
+    var res = LIB_dispatch_method(self, 'gamemap_get_tile_palette_path', 'pp');
+    string resS = res.as_string();
+    return res;
+  }
+
   #Retrieve this map's width in tiles
   function get_width() {
     int res = LIB_dispatch_method(self, 'gamemap_get_map_width', 'ip');
