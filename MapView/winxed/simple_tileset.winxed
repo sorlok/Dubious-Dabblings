@@ -52,6 +52,6 @@ class SimpleTileSet : TileSet {
     game.draw_item(spr);
   }
 
-
 }
+
 

@@ -30,6 +30,15 @@
   LIB_dispatch_method(self, 'sprite_set_image', 'vpp', img)
 .end
 
+#Designate a sub-rectangle of this image to be used for display
+.sub 'set_sub_rect' :method
+  .param int x
+  .param int y
+  .param int width
+  .param int height
+  LIB_dispatch_method(self, 'sprite_set_sub_rect', 'vpiiii', x, y, width, height)
+.end
+
 #Set this sprite's position (x,y)
 .sub 'set_position' :method
   .param int x

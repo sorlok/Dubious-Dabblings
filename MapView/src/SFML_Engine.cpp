@@ -143,6 +143,12 @@ void sprite_set_image(sf::Sprite* item, const sf::Image* img)
 	item->SetImage(*img);
 }
 
+void sprite_set_sub_rect(sf::Sprite* item, int x, int y, int width, int height)
+{
+	sf::IntRect rect(x, y, x+width, y+height);
+	item->SetSubRect(rect);
+}
+
 void sprite_set_position(sf::Sprite* item, int x, int y)
 {
 	item->SetPosition(x, y);
