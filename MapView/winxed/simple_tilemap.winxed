@@ -55,8 +55,6 @@ class SimpleTileMap : TileMap {
     startTileY = self.bound(startTileY, 0, self.get_width()-1);
     endTileY   = self.bound(endTileY, 0, self.get_width()-1);
 
-    say("Drawing: " + startTileX + "->" + endTileX + " ; " + startTileY + "->" + endTileY);    
-
     #Draw each tile at the correct position.
     int offsetX = -self.offsetX % tile_size;
     int offsetY = -self.offsetY % tile_size;

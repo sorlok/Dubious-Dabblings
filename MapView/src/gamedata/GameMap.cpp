@@ -121,7 +121,7 @@ void GameMap::InitTMXMap(GameMap& map, const std::string& path)
 	}
 
 
-	std::cout <<"TMX Map Loaded: " <<path <<std::endl;
+	std::cout <<"TMX Map Loaded: " <<path <<" [" <<(map.maplayer.size()>0?map.maplayer[0].size():0) <<"," <<map.maplayer.size() <<"]" <<std::endl;
 
 }
 

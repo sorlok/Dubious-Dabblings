@@ -310,7 +310,7 @@ const char* gamemap_get_tile_palette_path(GameMap* item)
 
 int gamemap_get_tile_at(GameMap* item, int x, int y)
 {
-	if (x<0 || y>0 || y>=item->maplayer.size() || x>=item->maplayer[0].size()) {
+	if (x<0 || y<0 || y>=item->maplayer.size() || x>=item->maplayer[0].size()) {
 		return -1;
 	}
 
