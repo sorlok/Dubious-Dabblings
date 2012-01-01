@@ -1,0 +1,56 @@
+#####################################################################
+# Simple tilemap
+#####################################################################
+class SimpleTileMap : TileMap {
+  #Dispatch to a relevant map loader.
+  function load_file(string filename) {
+    #Get the extension
+    int i = indexof(filename, '.');  #TODO: Make sure we get the LAST index point.
+    if (0) { throw Error("Bad map file name."); } #TODO: Check if it failed.
+    string ext = substr(filename, i+1, length(filename)-(i+1));
+
+    #Dispatch based on the extension
+    if (ext == 'tmx') {
+      self.load_tmx_map(filename);
+    } else { throw Error("Unknown map extension."); }
+  }
+
+  #Load a map in the tmx format.
+  function load_tmx_map(string filename) {
+    #Manage the pointer.
+    var ptr = LIB_dispatch_method(null, 'new_tmx_map', 'pp', filename);
+    if (!ptr) { throw Error("Couldn't load TMX file."); }
+    self.set_ptr(ptr);
+  }
+
+}
+
+
+
+#Todo: Import
+
+
+#Retrieve the maximum number of tiles in this image.
+.sub 'get_size' :method
+.end
+
+#Move this tilemap. The offset specifies where the top-left corner of the map should appear.
+.sub 'set_offset' :method
+  .param int x
+  .param int y
+.end
+
+#Retrieve offset: x
+.sub 'get_offset_x' :method
+.end
+
+#Retrieve offset: y
+.sub 'get_offset_y' :method
+.end
+
+#Initialize this class.
+.sub TileMap_class_init :anon :load :init
+  $P0 = newclass 'TileMap'
+.end
+
+

@@ -247,6 +247,13 @@ void game_del_image(sf::Image* img)
 	delete img;
 }
 
+//TODO: Perhaps our game items should all have a common parent class to
+//      make dispatch easier?
+void game_del_gamemap(GameMap* item)
+{
+	delete item;
+}
+
 
 void demo_set_default_postfx(sf::PostFX* item)
 {

@@ -2,6 +2,8 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 
+#include "gamedata/GameMap.hpp"
+
 #include <list>
 #include <iostream>
 #include <sstream>
@@ -77,6 +79,7 @@ DLLEXPORT void game_draw_item(sf::Drawable* item);
 DLLEXPORT void game_del_item(sf::Drawable* item);
 DLLEXPORT void game_del_color(sf::Color* color);
 DLLEXPORT void game_del_image(sf::Image* item);
+DLLEXPORT void game_del_gamemap(GameMap* item);
 
 
 

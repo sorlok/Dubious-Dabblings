@@ -10,6 +10,7 @@
 .include "pir/game.pir"
 .include "pir/demo.pir"
 .include "pir/tileset.pir"
+.include "pir/tilemap.pir"
 
 #####################################################################
 # Base classes, to be subclassed by our library.

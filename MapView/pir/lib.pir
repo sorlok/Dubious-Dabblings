@@ -48,6 +48,13 @@
   LIB_dispatch_method($P0, 'game_del_image', 'vp', item)
 .end
 
+#Delete a game map
+.sub 'LIB_delete_gamemap'
+  .param pmc item
+  null $P0
+  LIB_dispatch_method($P0, 'game_del_gamemap', 'vp', item)
+.end
+
 
 #Dispatch a method on _some_ library object. 
 .sub 'LIB_dispatch_method'
@@ -84,31 +91,58 @@
 addargs:  
   #Add arg1
   unless has_arg1 goto call
+  $S0 = typeof arg1
+  if $S0 == 'String' goto bufferarg1 #Wrap strings in a buffer?
   $P1 = arg1
-  $I0 = can arg1, 'get_ptr'
+  $I0 = can arg1, 'get_ptr' #Dereference pointers?
   unless $I0 goto addarg1
   $P0 = find_method arg1, 'get_ptr'
   $P1 = arg1.$P0()
+  goto addarg1
+bufferarg1:
+  $S0 = arg1
+  bb = new ['ByteBuffer']
+  bb = $S0
+  push bb, 0
+  $P1 = bb
 addarg1:
   push args, $P1
 
   #Add arg2
   unless has_arg2 goto call
+  $S0 = typeof arg2
+  if $S0 == 'String' goto bufferarg2 #Wrap strings in a buffer?
   $P1 = arg2
-  $I0 = can arg2, 'get_ptr'
+  $I0 = can arg2, 'get_ptr' #Dereference pointers?
   unless $I0 goto addarg2
   $P0 = find_method arg2, 'get_ptr'
   $P1 = arg2.$P0()
+  goto addarg2
+bufferarg2:
+  $S0 = arg2
+  bb = new ['ByteBuffer']
+  bb = $S0
+  push bb, 0
+  $P1 = bb
 addarg2:
   push args, $P1
 
   #Add arg3
   unless has_arg3 goto call
+  $S0 = typeof arg3
+  if $S0 == 'String' goto bufferarg3 #Wrap strings in a buffer?
   $P1 = arg3
-  $I0 = can arg3, 'get_ptr'
+  $I0 = can arg3, 'get_ptr' #Dereference pointers?
   unless $I0 goto addarg3
   $P0 = find_method arg3, 'get_ptr'
   $P1 = arg3.$P0()
+  goto addarg3
+bufferarg3:
+  $S0 = arg3
+  bb = new ['ByteBuffer']
+  bb = $S0
+  push bb, 0
+  $P1 = bb
 addarg3:
   push args, $P1
 
