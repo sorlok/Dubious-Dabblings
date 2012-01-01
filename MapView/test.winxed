@@ -13,10 +13,10 @@ class WRendition : Rendition {
   var spr2;         #Second person sprite
   var polygon;      #Our cursor
 
-  var game; #TODO: This is currently duplicated in our main loop...
+  var game;
   var input;
 
-  function WRendition() {
+  function WRendition(var game) {
     #Initialize our polyScale property
     self.polyScale = 1.0;
 
@@ -27,7 +27,7 @@ class WRendition : Rendition {
     self.drawables = [];
 
     #New game object/input tracker
-    self.game = new Game;
+    self.game = game;
     self.input = new Input;
 
     #Now, start assigning objects to that array.
@@ -195,7 +195,7 @@ class SimpleGame : Game {
 function main[main](var args)
 {
   var game = new SimpleGame(800, 600, 32);
-  var rend = new WRendition();
+  var rend = new WRendition(game);
 
   say ('Starting game loop');
   game.run_loop(rend);
