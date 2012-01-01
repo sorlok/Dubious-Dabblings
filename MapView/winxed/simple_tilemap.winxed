@@ -21,7 +21,7 @@ class SimpleTileMap : TileMap {
     #Load tileset
     string tsfile = self.get_tile_palette_path();
     self.tileset = new SimpleTileSet;
-    self.tileset.load_file(tsfile);
+    self.tileset.load_file(tsfile, self.get_tile_size());
 
     #Reset offset
     self.offsetX = 0;
@@ -60,7 +60,9 @@ class SimpleTileMap : TileMap {
     int offsetY = -self.offsetY % tile_size;
     for (int ty=startTileY; ty<=endTileY; ty++) {
       for (int tx=startTileX; tx<=endTileX; tx++) {
-        self.tileset.draw_tile(game, self.get_tile_at(tx, ty), offsetX, offsetY);
+        int tile_id = self.get_tile_at(tx, ty);
+        if (tile_id<0) { continue; }
+        self.tileset.draw_tile(game, tile_id, offsetX, offsetY);
         offsetX += tile_size;
       }
       offsetX = -self.offsetX % tile_size;
@@ -101,7 +103,7 @@ class SimpleTileMap : TileMap {
   function get_tile_palette_path() {
     var res = LIB_dispatch_method(self, 'gamemap_get_tile_palette_path', 'pp');
     string resS = res.as_string();
-    return res;
+    return resS;
   }
 
   #Retrieve this map's width in tiles
