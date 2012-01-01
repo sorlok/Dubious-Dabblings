@@ -43,6 +43,7 @@ DLLEXPORT sf::Shape* demo_init_poly();
 DLLEXPORT sf::Image* new_image(const char* filename);
 DLLEXPORT int image_get_width(const sf::Image* item);
 DLLEXPORT int image_get_height(const sf::Image* item);
+DLLEXPORT void image_set_smooth(sf::Image* item, int smooth);
 
 //Sprite
 DLLEXPORT sf::Sprite* new_sprite();

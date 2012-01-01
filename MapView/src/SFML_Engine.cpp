@@ -134,6 +134,11 @@ int image_get_height(const sf::Image* item)
 	return item->GetHeight();
 }
 
+void image_set_smooth(sf::Image* item, int smooth)
+{
+	item->SetSmooth(smooth==0?false:true);
+}
+
 
 sf::Sprite* new_sprite()
 {
@@ -144,7 +149,6 @@ sf::Sprite* new_sprite()
 void sprite_set_image(sf::Sprite* item, const sf::Image* img)
 {
 	item->SetImage(*img);
-	//item->SetBlendMode(sf::Blend::None); //TODO: Set manually later.
 }
 
 void sprite_set_blend_off(sf::Sprite* item)

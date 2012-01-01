@@ -55,6 +55,12 @@ store:
   .return($I0)
 .end
 
+#Turn smoothing on or off
+.sub 'set_smooth' :method
+  .param int smooth
+  LIB_dispatch_method(self, 'image_set_smooth', 'vpi', smooth)
+.end
+
 #Initialize this class.
 .sub Image_class_init :anon :load :init
   $P0 = subclass 'Wrapped', 'Image'

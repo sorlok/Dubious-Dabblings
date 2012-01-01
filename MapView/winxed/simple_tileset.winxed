@@ -14,6 +14,9 @@ class SimpleTileSet : TileSet {
     self.img = new Image;
     self.img.load_file(filename);
 
+    #Turn off smoothing; required to look decent.
+    self.img.set_smooth(0);
+
     #Check size
     if ((self.img.get_width()%tileSize!=0) || (self.img.get_height()%tileSize!=0)) {
       throw Error("TileSet image is not divisible by tile size.");
