@@ -101,6 +101,12 @@ addargs:
   goto addarg1
 bufferarg1:
   $S0 = arg1
+
+  #Debug
+  say 'Wrapping String'
+  say $S0
+  #End Debug
+
   bb = new ['ByteBuffer']
   bb = $S0
   push bb, 0

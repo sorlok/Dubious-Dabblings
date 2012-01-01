@@ -272,6 +272,53 @@ void demo_update_postfx_color(sf::PostFX* item)
 }
 
 
+GameMap* new_tmx_map(const char* filename)
+{
+	GameMap* res = new GameMap();
+	try {
+		GameMap::InitTMXMap(*res, filename);
+	} catch (std::exception& ex) {
+		delete res;
+		return NULL;
+	}
+
+	return res;
+}
+
+int gamemap_get_tile_size(GameMap* item)
+{
+	return item->tileSize;
+}
+
+int gamemap_get_map_width(GameMap* item)
+{
+	return item->mapSizeInTiles.first;
+}
+
+int gamemap_get_map_height(GameMap* item)
+{
+	return item->mapSizeInTiles.second;
+}
+
+//string gamemap_get_tile_palette_path(GameMap* item); //TODO
+
+int get_tile_at(GameMap* item, int x, int y)
+{
+	if (x<0 || y>0 || y>=item->maplayer.size() || x>=item->maplayer[0].size()) {
+		return -1;
+	}
+
+	return item->maplayer[y][x];
+}
+
+
+unsigned int tileSize;
+std::string tilePalettePath;
+
+std::vector< std::vector<int> > maplayer;
+std::pair<unsigned int, unsigned int> mapSizeInTiles;
+
+
 
 void game_draw_item(sf::Drawable* item)
 {
