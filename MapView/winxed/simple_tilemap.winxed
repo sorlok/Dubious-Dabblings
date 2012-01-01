@@ -2,6 +2,9 @@
 # Simple tilemap
 #####################################################################
 class SimpleTileMap : TileMap {
+  var offsetX;
+  var offsetY;
+
   #Dispatch to a relevant map loader.
   function load_file(string filename) {
     #Get the extension
@@ -13,6 +16,10 @@ class SimpleTileMap : TileMap {
     if (ext == 'tmx') {
       self.load_tmx_map(filename);
     } else { throw Error("Unknown map extension."); }
+
+    #Reset offset
+    self.offsetX = 0;
+    self.offsetY = 0;
   }
 
   #Load a map in the tmx format.
@@ -23,34 +30,21 @@ class SimpleTileMap : TileMap {
     self.set_ptr(ptr);
   }
 
+  #Set the tilemap's current offset.
+  function set_offset(int x, int y) {
+    self.offsetX = x;
+    self.offsetY = y;
+  }
+
+  #Retrieve offset: X
+  function get_offset_x() {
+    return self.offsetX;
+  }
+
+  #Retrieve offset: Y
+  function get_offset_y() {
+    return self.offsetY;
+  }
+
 }
-
-
-
-#Todo: Import
-
-
-#Retrieve the maximum number of tiles in this image.
-.sub 'get_size' :method
-.end
-
-#Move this tilemap. The offset specifies where the top-left corner of the map should appear.
-.sub 'set_offset' :method
-  .param int x
-  .param int y
-.end
-
-#Retrieve offset: x
-.sub 'get_offset_x' :method
-.end
-
-#Retrieve offset: y
-.sub 'get_offset_y' :method
-.end
-
-#Initialize this class.
-.sub TileMap_class_init :anon :load :init
-  $P0 = newclass 'TileMap'
-.end
-
 

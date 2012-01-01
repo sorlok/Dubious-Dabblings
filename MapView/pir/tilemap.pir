@@ -23,10 +23,6 @@
   .param string filename
 .end
 
-#Retrieve the maximum number of tiles in this image.
-.sub 'get_size' :method
-.end
-
 #Move this tilemap. The offset specifies where the top-left corner of the map should appear.
 .sub 'set_offset' :method
   .param int x
