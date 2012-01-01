@@ -1,0 +1,41 @@
+###################################################
+# Allows you to display a tilemap on-screen and 
+#   scroll it with the arrow keys.
+###################################################
+class TileMapRendition : Rendition {
+  var currmap;
+
+  var drawables;
+  var game;
+  var input;
+
+  function TileMapRendition(var game) {
+    #New game object/input tracker
+    self.game = game;
+    self.input = new Input;
+
+    #Initialize our drawables array
+    self.drawables = [];
+
+    #Now load our TMX map.
+    #self.currmap = new TileMap;
+    #self.currmap.load_file('map_test.tmx');
+    #push(self.drawables, self.currmap);
+  }
+
+  function update() {
+    #Retrieve game timer
+    float frameTimeS = self.game.get_frame_time_in_s();
+
+
+  }  
+
+  function display() {
+    #Draw every item in our array.
+    for (var dw in self.drawables) {
+      self.game.draw_item(dw);
+    }
+  }
+}
+
+

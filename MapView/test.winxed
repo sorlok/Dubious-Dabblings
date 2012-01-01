@@ -1,6 +1,7 @@
 ##Include our implemenation
 $load 'pir/interfaces.pir'; 
 $include 'winxed/sample_rend.winxed';
+$include 'winxed/tmap_rend.winxed';
 $include 'winxed/simple_game.winxed';
 
 
@@ -8,7 +9,7 @@ $include 'winxed/simple_game.winxed';
 function main[main](var args)
 {
   var game = new SimpleGame(800, 600, 32);
-  var rend = new SampleRendition(game);
+  var rend = new TileMapRendition(game);
 
   say ('Starting game loop');
   game.run_loop(rend);
