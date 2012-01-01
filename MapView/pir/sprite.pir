@@ -44,6 +44,18 @@
   LIB_dispatch_method(self, 'sprite_set_sub_rect', 'vpiiii', x, y, width, height)
 .end
 
+#Retrieve sub-rectangle: x
+.sub 'get_sub_rect_x' :method
+  $I0 = LIB_dispatch_method(self, 'sprite_get_sub_rect_x', 'ip')
+  .return($I0)
+.end
+
+#Retrieve sub-rectangle: y
+.sub 'get_sub_rect_y' :method
+  $I0 = LIB_dispatch_method(self, 'sprite_get_sub_rect_y', 'ip')
+  .return($I0)
+.end
+
 #Set this sprite's position (x,y)
 .sub 'set_position' :method
   .param int x

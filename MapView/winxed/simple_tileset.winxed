@@ -8,11 +8,16 @@ class SimpleTileSet : TileSet {
   var size;
   var tiles;
 
+  var tileSize;  #Duplicate, but needed for now.
+
   #Load a file as the tileset; check it fits within the given tileSize.
   function load_file(string filename, int tileSize) {
     #Load properties.
     self.img = new Image;
     self.img.load_file(filename);
+
+    #Save for later
+    self.tileSize = tileSize;
 
     #Turn off smoothing; required to look decent.
     self.img.set_smooth(0);
@@ -47,15 +52,38 @@ class SimpleTileSet : TileSet {
     return self.size;
   }
 
-  function draw_tile(var game, int id, int x, int y) {
+  function check_tile_id(int id) {
     if (id<0 || id>=self.size) {
       throw Error("Attempting to draw tile which is out of tileset range.");
     }
+  }
+
+  function draw_tile(var game, int id, int x, int y) {
+    self.check_tile_id(id);
 
     #Get it, position it, draw it.
     var spr = self.tiles[id];
     spr.set_position(x, y);
     game.draw_item(spr);
+  }
+
+  #Stamp an image onto another. We are guaranteed to have space on the image, but 
+  #   besides that it gets a bit messy.
+  function stamp_image(var img, int id, int destX, int destY) {
+    self.check_tile_id(id);
+
+    #Turn the ID into x/y coordinates.
+    var spr = self.tiles[id];
+    int srcX = spr.get_sub_rect_x();
+    int srcY = spr.get_sub_rect_y();
+
+    #Loop, draw
+    for (int y=0; y<self.tileSize; y++) {
+      for (int x=0; x<self.tileSize; x++) {
+        var clr = self.img.get_pixel(x+srcX, y+srcY);
+        img.set_pixel(x+destX, y+destY, clr);
+      }
+    }
   }
 
 

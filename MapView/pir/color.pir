@@ -12,6 +12,19 @@
   throw $P0
 .end
 
+#Make a new color
+.sub 'init_new' :method
+  .param int red
+  .param int green
+  .param int blue
+  .local pmc ptr
+
+  null $P0
+  ptr = LIB_dispatch_method($P0, 'new_color', 'piii', red, green, blue)
+  $P0 = find_method self, 'set_ptr'
+  self.$P0(ptr)
+.end
+
 #Reclaim this color.
 .sub 'cleanup' :method
   .param pmc ptr

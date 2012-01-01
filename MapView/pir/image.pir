@@ -12,6 +12,19 @@
   throw $P0
 .end
 
+.sub 'init_empty_image' :method
+  .param int width
+  .param int height
+  .param pmc bkgrdColor
+  .local pmc ptr
+
+  #Dispatch, save
+  null $P0
+  ptr = LIB_dispatch_method($P0, 'image_init_empty', 'piip', width, height, bkgrdColor)
+  $P0 = find_method self, 'set_ptr'
+  self.$P0(ptr)
+.end
+
 .sub 'load_file' :method
   .param string filename
   .local pmc bb, ptr
@@ -59,6 +72,22 @@ store:
 .sub 'set_smooth' :method
   .param int smooth
   LIB_dispatch_method(self, 'image_set_smooth', 'vpi', smooth)
+.end
+
+#Read pixel
+.sub 'get_pixel' :method
+  .param int x
+  .param int y
+  $P0 = LIB_dispatch_method(self, 'image_get_pixel', 'ppii', x, y, 'wrap'=>'Color')
+  .return($P0)
+.end
+
+#Modify pixel (slow)
+.sub 'set_pixel' :method
+  .param int x
+  .param int y
+  .param pmc color
+  LIB_dispatch_method(self, 'image_set_pixel', 'vpiip', x, y, color)
 .end
 
 #Initialize this class.

@@ -41,9 +41,12 @@ DLLEXPORT sf::Shape* demo_init_poly();
 
 //Image
 DLLEXPORT sf::Image* new_image(const char* filename);
+DLLEXPORT sf::Image* image_init_empty(int width, int height, sf::Color* bkgrdColor);
 DLLEXPORT int image_get_width(const sf::Image* item);
 DLLEXPORT int image_get_height(const sf::Image* item);
 DLLEXPORT void image_set_smooth(sf::Image* item, int smooth);
+DLLEXPORT sf::Color* image_get_pixel(const sf::Image* item, int x, int y);
+DLLEXPORT void image_set_pixel(sf::Image* item, int x, int y, sf::Color* color);
 
 //Sprite
 DLLEXPORT sf::Sprite* new_sprite();
@@ -56,6 +59,8 @@ DLLEXPORT float sprite_get_rotation(const sf::Sprite* item);
 DLLEXPORT void sprite_set_rotation(sf::Sprite* item, float angle);
 DLLEXPORT sf::Color* sprite_get_color(const sf::Sprite* item);
 DLLEXPORT void sprite_set_color(sf::Sprite* item, sf::Color* color);
+DLLEXPORT int sprite_get_sub_rect_x(const sf::Sprite* item);
+DLLEXPORT int sprite_get_sub_rect_y(const sf::Sprite* item);
 
 //Polygon
 DLLEXPORT sf::Color* poly_get_point_color(const sf::Shape* item, int pointID);
@@ -66,6 +71,7 @@ DLLEXPORT void poly_set_pos_x(sf::Shape* item, int pos);
 DLLEXPORT void poly_set_pos_y(sf::Shape* item, int pos);
 
 //Color
+DLLEXPORT sf::Color* new_color(int red, int green, int blue);
 DLLEXPORT void color_set_red(sf::Color* item, int red);
 DLLEXPORT void color_set_green(sf::Color* item, int green);
 DLLEXPORT void color_set_blue(sf::Color* item, int blue);

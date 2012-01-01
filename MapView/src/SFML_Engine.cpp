@@ -134,6 +134,18 @@ int image_get_height(const sf::Image* item)
 	return item->GetHeight();
 }
 
+sf::Color* image_get_pixel(const sf::Image* item, int x, int y)
+{
+	sf::Color* res = new sf::Color(item->GetPixel(x, y));
+	return res;
+}
+
+void image_set_pixel(sf::Image* item, int x, int y, sf::Color* color)
+{
+	item->SetPixel(x, y, *color);
+}
+
+
 void image_set_smooth(sf::Image* item, int smooth)
 {
 	item->SetSmooth(smooth==0?false:true);
@@ -144,6 +156,18 @@ sf::Sprite* new_sprite()
 {
 	sf::Sprite* item = new sf::Sprite();
 	return item;
+}
+
+sf::Color* new_color(int red, int green, int blue)
+{
+	sf::Color* res = new sf::Color(red&0xFF, green&0xFF, blue&0xFF);
+	return res;
+}
+
+sf::Image* image_init_empty(int width, int height, sf::Color* bkgrdColor)
+{
+	sf::Image* res = new sf::Image(width, height, *bkgrdColor);
+	return res;
 }
 
 void sprite_set_image(sf::Sprite* item, const sf::Image* img)
@@ -170,6 +194,16 @@ void sprite_set_position(sf::Sprite* item, int x, int y)
 void sprite_set_center(sf::Sprite* item, int x, int y)
 {
 	item->SetCenter(x, y);
+}
+
+int sprite_get_sub_rect_x(const sf::Sprite* item)
+{
+	return item->GetSubRect().Left;
+}
+
+int sprite_get_sub_rect_y(const sf::Sprite* item)
+{
+	return item->GetSubRect().Top;
 }
 
 float sprite_get_rotation(const sf::Sprite* item)
