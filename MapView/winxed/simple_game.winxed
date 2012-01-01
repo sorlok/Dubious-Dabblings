@@ -13,14 +13,17 @@ class SimpleGame : Game {
       #Have our game handle expected events
       res = self.process_events();
 
+      #Background
+      self.clear_display();
+
       #Call our sample game object's update method
       currRend.update();
 
-      #Display what we've just rendered
-      DEMO_SampleDisplay();
-
       #And here is where the real updating happens
       currRend.display();
+
+      #Display what we've just rendered
+      DEMO_SampleDisplay();
 
       #Here we go
       self.display();

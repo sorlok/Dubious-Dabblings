@@ -55,11 +55,14 @@ int sfml_handle_events()
 }
 
 
+void clear_display()
+{
+	myWindow.Clear(sf::Color(0x33, 0x33, 0x33));
+}
+
 
 void demo_display()
 {
-	myWindow.Clear(sf::Color(0x33, 0x33, 0x33));
-
 	if (myWindow.GetFrameTime()>0.0) {
 		framerate.addSample(1.0/myWindow.GetFrameTime());
 	}

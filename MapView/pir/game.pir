@@ -45,6 +45,12 @@
   .return($N0)
 .end
 
+#Clear the screen
+.sub 'clear_display' :method
+  null $P0
+  LIB_dispatch_method($P0, 'clear_display', 'v')
+.end
+
 #Push all updates to the screen
 .sub 'display' :method
   null $P0

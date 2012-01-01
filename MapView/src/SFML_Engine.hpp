@@ -25,6 +25,7 @@ extern "C" {
 //Core functionality
 DLLEXPORT int init_sfml(int width, int height, int depth);
 DLLEXPORT int sfml_handle_events();
+DLLEXPORT void clear_display();
 DLLEXPORT void demo_display();
 DLLEXPORT void sfml_display();
 DLLEXPORT void close_sfml();
