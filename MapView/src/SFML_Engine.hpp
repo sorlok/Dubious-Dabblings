@@ -74,12 +74,14 @@ DLLEXPORT int gamemap_get_tile_size(GameMap* item);
 DLLEXPORT int gamemap_get_map_width(GameMap* item);
 DLLEXPORT int gamemap_get_map_height(GameMap* item);
 //DLLEXPORT string gamemap_get_tile_palette_path(GameMap* item); //TODO: How to do this?
-DLLEXPORT int get_tile_at(GameMap* item, int x, int y);
+DLLEXPORT int gamemap_get_tile_at(GameMap* item, int x, int y);
 
 //Game functionality
 DLLEXPORT const sf::Input* game_get_input();
 DLLEXPORT int game_get_mouse_x();
 DLLEXPORT int game_get_mouse_y();
+DLLEXPORT int game_get_width();
+DLLEXPORT int game_get_height();
 DLLEXPORT float game_get_frame_time_s();
 DLLEXPORT void game_draw_item(sf::Drawable* item);
 

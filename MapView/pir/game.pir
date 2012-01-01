@@ -58,6 +58,20 @@
   .return($I0)
 .end
 
+#Retrieve the window's width
+.sub 'get_width' :method
+  null $P0
+  $I0 = LIB_dispatch_method($P0, 'game_get_width', 'i')
+  .return($I0)
+.end
+
+#Retrieve the window's height
+.sub 'get_height' :method
+  null $P0
+  $I0 = LIB_dispatch_method($P0, 'game_get_height', 'i')
+  .return($I0)
+.end
+
 #Generic delete/draw stuff
 .sub 'draw_item' :method
   .param pmc item

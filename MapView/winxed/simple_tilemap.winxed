@@ -4,6 +4,7 @@
 class SimpleTileMap : TileMap {
   var offsetX;
   var offsetY;
+  var tileset;
 
   #Dispatch to a relevant map loader.
   function load_file(string filename) {
@@ -17,6 +18,11 @@ class SimpleTileMap : TileMap {
       self.load_tmx_map(filename);
     } else { throw Error("Unknown map extension."); }
 
+    #Load tileset
+    string tsfile = self.get_tile_palette_path();
+    self.tileset = new SimpleTileSet;
+    self.tileset.load_file(tsfile);
+
     #Reset offset
     self.offsetX = 0;
     self.offsetY = 0;
@@ -28,6 +34,45 @@ class SimpleTileMap : TileMap {
     var ptr = LIB_dispatch_method(null, 'new_tmx_map', 'pp', filename);
     if (!ptr) { throw Error("Couldn't load TMX file."); }
     self.set_ptr(ptr);
+  }
+
+  #Draw 
+  function draw(var game) {
+    #Calculate once
+    int area_w = game.get_width();
+    int area_h = game.get_height();
+    int tile_size = self.get_tile_size();
+
+    #Estimate tiles to draw
+    int startTileX = self.offsetX / tile_size;
+    int endTileX = (self.offsetX+area_w) / tile_size;
+    int startTileY = self.offsetY / tile_size;
+    int endTileY = (self.offsetY+area_h) / tile_size;
+
+    #Bound.
+    startTileX = self.bound(startTileX, 0, self.get_width()-1);
+    endTileX   = self.bound(endTileX, 0, self.get_width()-1);
+    startTileY = self.bound(startTileY, 0, self.get_width()-1);
+    endTileY   = self.bound(endTileY, 0, self.get_width()-1);
+
+    #Draw each tile at the correct position.
+    int offsetX = -self.offsetX % tile_size;
+    int offsetY = -self.offsetY % tile_size;
+    for (int ty=startTileY; ty<=endTileY; ty++) {
+      for (int tx=startTileX; tx<=endTileX; tx++) {
+        self.tileset.draw_tile(game, self.get_tile_at(tx, ty), offsetX, offsetY);
+        offsetX += tile_size;
+      }
+      offsetX = -self.offsetX % tile_size;
+      offsetY += tile_size;
+    }
+  }
+
+  #Bound. (Note: Can we avoid making this a member function?)
+  function bound(int value, int minval, int maxval) {
+    if (value<minval) { return minval; }
+    if (value>maxval) { return maxval; }
+    return value;
   }
 
   #Set the tilemap's current offset.
@@ -44,6 +89,30 @@ class SimpleTileMap : TileMap {
   #Retrieve offset: Y
   function get_offset_y() {
     return self.offsetY;
+  }
+
+  #Retrieve tile size
+  function get_tile_size() {
+    int res = LIB_dispatch_method(self, 'gamemap_get_tile_size', 'ip');
+    return res;
+  }
+
+  #Retrieve this map's width in tiles
+  function get_width() {
+    int res = LIB_dispatch_method(self, 'gamemap_get_map_width', 'ip');
+    return res;
+  }
+
+  #Retrieve this map's height in tiles
+  function get_height() {
+    int res = LIB_dispatch_method(self, 'gamemap_get_map_height', 'ip');
+    return res;
+  }
+
+  #Get the tile ID of the tile at (x,y)
+  function get_tile_at(int x, int y) {
+    int res = LIB_dispatch_method(self, 'gamemap_get_tile_at', 'ipii', x, y);
+    return res;
   }
 
 }

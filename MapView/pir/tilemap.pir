@@ -37,6 +37,29 @@
 .sub 'get_offset_y' :method
 .end
 
+#Retrieve size of tiles in this map
+.sub 'get_tile_size' :method
+.end
+
+#Retrieve this map's width in tiles
+.sub 'get_width' :method
+.end
+
+#Retrieve this map's height in tiles
+.sub 'get_height' :method
+.end
+
+#Get the tile ID of the tile at (x,y)
+.sub 'get_tile_at' :method
+  .param int x
+  .param int y
+.end
+
+#Draw it
+.sub 'draw' :method
+  .param pmc game
+.end
+
 #Initialize this class.
 .sub TileMap_class_init :anon :load :init
   $P0 = subclass 'Wrapped','TileMap'

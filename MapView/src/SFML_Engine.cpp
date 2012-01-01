@@ -302,7 +302,7 @@ int gamemap_get_map_height(GameMap* item)
 
 //string gamemap_get_tile_palette_path(GameMap* item); //TODO
 
-int get_tile_at(GameMap* item, int x, int y)
+int gamemap_get_tile_at(GameMap* item, int x, int y)
 {
 	if (x<0 || y>0 || y>=item->maplayer.size() || x>=item->maplayer[0].size()) {
 		return -1;
@@ -339,6 +339,17 @@ int game_get_mouse_y()
 {
 	return myWindow.GetInput().GetMouseY();
 }
+
+int game_get_width()
+{
+	return myWindow.GetWidth();
+}
+
+int game_get_height()
+{
+	return myWindow.GetHeight();
+}
+
 
 sf::Shape* demo_init_poly()
 {

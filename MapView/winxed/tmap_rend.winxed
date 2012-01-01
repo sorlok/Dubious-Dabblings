@@ -18,18 +18,21 @@ class TileMapRendition : Rendition {
     self.drawables = [];
 
     #Now load our TMX map.
-    #self.currmap = new TileMap;
-    #self.currmap.load_file('map_test.tmx');
+    self.currmap = new SimpleTileMap;
+    self.currmap.load_file('map_test.tmx');
   }
 
   function update() {
     #Retrieve game timer
     float frameTimeS = self.game.get_frame_time_in_s();
 
-
+    #TODO
   }  
 
   function display() {
+    #Draw the map
+    self.currmap.draw(self.game);
+
     #Draw every item in our array.
     for (var dw in self.drawables) {
       self.game.draw_item(dw);
