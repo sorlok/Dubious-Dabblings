@@ -31,7 +31,7 @@ class SimpleTileSet : TileSet {
         spr.set_image(self.img);
 
         #Bound it, save it
-        spr.set_sub_rect(col*self.tileSize, row*self.tileSize, self.tileSize, self.tileSize);
+        spr.set_sub_rect(col*tileSize, row*tileSize, tileSize, tileSize);
         push(self.tiles, spr);
       }
     }
@@ -51,6 +51,7 @@ class SimpleTileSet : TileSet {
     spr.set_position(x, y);
     game.draw_item(spr);
   }
+
 
 }
 

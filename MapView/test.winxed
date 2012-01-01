@@ -3,6 +3,8 @@ $load 'pir/interfaces.pir';
 $include 'winxed/sample_rend.winxed';
 $include 'winxed/tmap_rend.winxed';
 $include 'winxed/simple_game.winxed';
+$include 'winxed/simple_tileset.winxed';
+$include 'winxed/simple_tilemap.winxed';
 
 
 #Main function

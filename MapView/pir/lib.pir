@@ -70,12 +70,14 @@
   .param int has_arg2  :opt_flag
   .param pmc     arg3  :optional
   .param int has_arg3  :opt_flag
+  .param pmc     arg4  :optional
+  .param int has_arg4  :opt_flag
 
   #Wrap the result?
   .param string     wrap :optional :named("wrap")
   .param int    has_wrap :opt_flag
 
-  .local pmc lib, func, ptr, args, res, ptr
+  .local pmc lib, func, ptr, args, res, ptr, bb
 
   #Args
   args = new 'ResizablePMCArray'
@@ -101,12 +103,6 @@ addargs:
   goto addarg1
 bufferarg1:
   $S0 = arg1
-
-  #Debug
-  say 'Wrapping String'
-  say $S0
-  #End Debug
-
   bb = new ['ByteBuffer']
   bb = $S0
   push bb, 0
@@ -150,6 +146,25 @@ bufferarg3:
   push bb, 0
   $P1 = bb
 addarg3:
+  push args, $P1
+
+  #Add arg4
+  unless has_arg4 goto call
+  $S0 = typeof arg4
+  if $S0 == 'String' goto bufferarg4 #Wrap strings in a buffer?
+  $P1 = arg4
+  $I0 = can arg4, 'get_ptr' #Dereference pointers?
+  unless $I0 goto addarg4
+  $P0 = find_method arg4, 'get_ptr'
+  $P1 = arg4.$P0()
+  goto addarg4
+bufferarg4:
+  $S0 = arg4
+  bb = new ['ByteBuffer']
+  bb = $S0
+  push bb, 0
+  $P1 = bb
+addarg4:
   push args, $P1
 
 call:
