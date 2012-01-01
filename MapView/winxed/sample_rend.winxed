@@ -1,0 +1,159 @@
+##Inherit from Rendition
+class SampleRendition : Rendition {
+  var polyScale;    #How much to scale the polygon by.
+  var polyScaleDec;   #Are we scaling up or down? (boolean)
+  var drawables;      #Array of items we plan on drawing.
+
+  var pfxShader;    #Our pixel shader
+  var personImg;    #Image of our person
+  var spr1;         #First person sprite
+  var spr2;         #Second person sprite
+  var polygon;      #Our cursor
+
+  var game;
+  var input;
+
+  function SampleRendition(var game) {
+    #Initialize our polyScale property
+    self.polyScale = 1.0;
+
+    #Initialize our polyScaleDec property
+    self.polyScaleDec = 1;
+
+    #Initialize our drawables array
+    self.drawables = [];
+
+    #New game object/input tracker
+    self.game = game;
+    self.input = new Input;
+
+    #Now, start assigning objects to that array.
+    int pfxEnabled = self.game.can_use_pfx();
+    if (pfxEnabled) {
+      #Load the shader
+      self.pfxShader = new PostFX;
+      self.pfxShader.load_file('colorize.sfx');  #TODO: This can fail
+      #if (self.pfxShader) {
+        #Set its properties (for now just use the defaults)
+        self.pfxShader.DEMO_set_default_pfx();  #Note: This is causing a problem.
+
+        #Save it in our array of objects
+        push(self.drawables, self.pfxShader);  #TODO: Re-enable later.
+      #}
+    }
+
+    #Images
+    self.personImg = new Image;
+    self.personImg.load_file('person.png');
+    #if (!self.personImg) {
+      #Error
+     # throw Error("Can't load image: person.png");
+    #}
+
+    #Retrieve the image's width/height, for later
+    int w = self.personImg.get_width() / 2;
+    int h = self.personImg.get_height() / 2;
+
+    #Make sprite 1, set its properties, save it.
+    self.spr1 = new Sprite;
+    self.spr1.set_image(self.personImg);
+    self.spr1.set_position(800/3, 600/2);
+    self.spr1.set_center(w, h);
+    push(self.drawables, self.spr1);
+
+    #Make sprite 2, set its properties, save it.
+    self.spr2 = new Sprite;
+    self.spr2.set_image(self.personImg);
+    self.spr2.set_position(2*800/3, 600/2);
+    self.spr2.set_center(w, h);
+    push(self.drawables, self.spr2);
+
+    #Make our cursor sprite
+    self.polygon = DEMO_InitPoly();
+    push(self.drawables, self.polygon);
+  }
+
+  function flip_poly_point(int id1, int id2) {
+    var clr0 = self.polygon.get_point_color(id1);
+    var clr1 = self.polygon.get_point_color(id2);
+    self.polygon.set_point_color(id1, clr1);
+    self.polygon.set_point_color(id2, clr0);
+#    GAME_DeleteColor(clr0);
+#    GAME_DeleteColor(clr1);
+  }
+
+  function update() {
+    #Retrieve game timer
+    float frameTimeS = self.game.get_frame_time_in_s();
+
+    #Retrieve mouse x,y
+    int mouseX = self.input.get_mouse_x();
+    int mouseY = self.input.get_mouse_y();
+
+    #Update our post-effect shader
+    if (self.pfxShader.get_ptr()) {
+      self.pfxShader.DEMO_update_pfx_color();
+    }
+
+    #Update sprite 1's rotation
+    float newRot = self.spr1.get_rotation();
+    newRot += 50 * frameTimeS;
+    self.spr1.set_rotation(newRot);
+
+    #Update sprite 1's colorization
+    var oldColor = self.spr1.get_color();
+    float invScale = 1.0 - self.polyScale;
+    invScale *= 255;
+    oldColor.set_blue(invScale);
+    self.spr1.set_color(oldColor);
+    #GAME_DeleteColor(oldColor);
+
+    #Update sprite 2's rotation
+    newRot = self.spr2.get_rotation() - 80 * frameTimeS;
+    self.spr2.set_rotation(newRot);
+
+    #Update sprite 1's colorization
+    oldColor = self.spr2.get_color();
+    invScale = self.polyScale;
+    invScale *= 255;
+    oldColor.set_alpha(invScale);
+    self.spr2.set_color(oldColor);
+    #GAME_DeleteColor(oldColor);
+
+    #Update our polygon's scale factor
+    if (self.polyScaleDec==1) {
+      self.polyScale -= frameTimeS;
+    } else {
+      self.polyScale += frameTimeS;
+    }
+
+    #Boundary conditions
+    if (self.polyScale < 0.0) {
+      self.polyScale = 0.0;
+      self.polyScaleDec = 0;
+      self.flip_poly_point(1, 5);
+      self.flip_poly_point(2, 4);
+    }
+    if (self.polyScale > 1.0) {
+      self.polyScale = 1.0;
+      self.polyScaleDec = 1;
+    }
+
+    #Set the polyline's x-scale
+    self.polygon.set_scale_x(self.polyScale);
+
+    #Set the polyline's position
+    self.polygon.set_pos_x(mouseX);
+    self.polygon.set_pos_y(mouseY);
+  }  
+
+  function display() {
+    #Draw every item in our array.
+    #TODO: I think we're actually supposed to iterate through this in reverse.
+    for (var dw in self.drawables) {
+      self.game.draw_item(dw);
+    }
+  }
+}
+
+
