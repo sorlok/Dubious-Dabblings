@@ -43,6 +43,7 @@ ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 include_directories("${PROJECT_SOURCE_DIR}/../phoenix")
 include_directories("${PROJECT_SOURCE_DIR}/..")
 include_directories("${PROJECT_SOURCE_DIR}/src")
+include_directories("/usr/local/include")
 
 #Link directories
 link_directories ("${PROJECT_SOURCE_DIR}/../phoenix/build")
