@@ -7,14 +7,15 @@
 
 .namespace ['DemoRendition']
 .sub 'init' :vtable
+.end
+
+.sub 'setup' :method
+  .param pmc game
   .local pmc personImg
   .local int w, h
   .local pmc game
 
-  #TODO: Currently testp.pir and test.pir both maintain their own game objects.
-  #      This isn't a problem (since Game has no state) but later we'll want to move
-  #      the remaining game loop code out of testp.
-  game = new 'Game'
+  #Save the game
   setattribute self, 'game', game
 
   #Initialize our polyScale property
@@ -249,13 +250,17 @@ savepoly:
 
 .sub 'run_game'
   .local int res
-  .param pmc currRend
+  .local pmc currRend
   .local pmc game
 
   #Start the game
   game = new 'Game'
   res = game.'init_game'(800, 600, 32)
   unless res goto done
+
+  #Create an object of the subclass.
+  currRend = new ['DemoRendition']
+  currRend.'setup'(game)
 
   say "Starting main loop"
 
@@ -296,13 +301,7 @@ savepoly:
 
 .namespace[]
 .sub 'main' :main
-    .local pmc currRend
-
-    #Create an object of the subclass.
-    currRend = new ['DemoRendition']
-
-    #Run it.
-    run_game(currRend)
+    run_game()
 .end
 
 
