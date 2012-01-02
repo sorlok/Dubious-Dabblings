@@ -266,6 +266,9 @@ savepoly:
 
   #Main Loop
   main_loop:
+    #Yield time quantum
+    #pass
+
     #Have our game handle expected events
     res = game.'process_events'()
 
@@ -302,6 +305,11 @@ savepoly:
 .namespace[]
 .sub 'main' :main
     run_game()
+
+#  $P0 = get_global 'run_game'
+#  $P1 = new 'Task', $P0
+#  schedule $P1
+
 .end
 
 
