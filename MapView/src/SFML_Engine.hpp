@@ -39,18 +39,18 @@ DLLEXPORT int can_use_postfx();
 //Demo
 DLLEXPORT sf::Shape* demo_init_poly();
 
-//Image
-DLLEXPORT sf::Image* new_image(const char* filename);
-DLLEXPORT sf::Image* image_init_empty(int width, int height, sf::Color* bkgrdColor);
-DLLEXPORT int image_get_width(const sf::Image* item);
-DLLEXPORT int image_get_height(const sf::Image* item);
-DLLEXPORT void image_set_smooth(sf::Image* item, int smooth);
-DLLEXPORT sf::Color* image_get_pixel(const sf::Image* item, int x, int y);
-DLLEXPORT void image_set_pixel(sf::Image* item, int x, int y, sf::Color* color);
+//Texture
+DLLEXPORT sf::Texture* new_texture(const char* filename);
+DLLEXPORT sf::Texture* image_init_empty(int width, int height, sf::Color* bkgrdColor);
+DLLEXPORT int image_get_width(const sf::Texture* item);
+DLLEXPORT int image_get_height(const sf::Texture* item);
+DLLEXPORT void image_set_smooth(sf::Texture* item, int smooth);
+//DLLEXPORT sf::Color* image_get_pixel(const sf::Texture* item, int x, int y);
+//DLLEXPORT void image_set_pixel(sf::Texture* item, int x, int y, sf::Color* color);
 
 //Sprite
 DLLEXPORT sf::Sprite* new_sprite();
-DLLEXPORT void sprite_set_image(sf::Sprite* item, const sf::Image* img);
+DLLEXPORT void sprite_set_image(sf::Sprite* item, const sf::Texture* img);
 DLLEXPORT void sprite_set_blend_off(sf::Sprite* item);
 DLLEXPORT void sprite_set_sub_rect(sf::Sprite* item, int x, int y, int width, int height);
 DLLEXPORT void sprite_set_position(sf::Sprite* item, int x, int y);

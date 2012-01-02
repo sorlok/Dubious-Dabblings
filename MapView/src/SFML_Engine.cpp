@@ -4,7 +4,7 @@
 sf::RenderWindow myWindow;
 
 //We could even remove this too, but I don't see the need right now.
-sf::String fps;
+sf::Text fps;
 
 //This should stay in the engine.
 RollingAverage framerate(1000);
@@ -48,7 +48,7 @@ int sfml_handle_events()
 {
 	bool doExit = false;
 	sf::Event event;
-	while (myWindow.GetEvent(event)) {
+	while (myWindow.PollEvent(event)) {
 		doExit = handleEvent(event) || doExit;
 	}
 	return doExit ? 1 : 0;
@@ -71,7 +71,7 @@ void demo_display()
 		frClock.Reset();
 		std::stringstream fpsStr;
 		fpsStr <<framerate.getAverage() <<" fps";
-		fps.SetText(fpsStr.str());
+		fps.SetString(fpsStr.str());
 	}
 
 	myWindow.Draw(fps);
@@ -112,9 +112,9 @@ int can_use_postfx()
 
 
 
-sf::Image* new_image(const char* filename)
+sf::Texture* new_texture(const char* filename)
 {
-	sf::Image* item = new sf::Image();
+	sf::Texture* item = new sf::Texture();
 	if (item->LoadFromFile(filename)) {
 		return item;
 	}
@@ -124,30 +124,30 @@ sf::Image* new_image(const char* filename)
 	return NULL;
 }
 
-int image_get_width(const sf::Image* item)
+int image_get_width(const sf::Texture* item)
 {
 	return item->GetWidth();
 }
 
 
-int image_get_height(const sf::Image* item)
+int image_get_height(const sf::Texture* item)
 {
 	return item->GetHeight();
 }
 
-sf::Color* image_get_pixel(const sf::Image* item, int x, int y)
+/*sf::Color* image_get_pixel(const sf::Texture* item, int x, int y)
 {
 	sf::Color* res = new sf::Color(item->GetPixel(x, y));
 	return res;
 }
 
-void image_set_pixel(sf::Image* item, int x, int y, sf::Color* color)
+void image_set_pixel(sf::Texture* item, int x, int y, sf::Color* color)
 {
 	item->SetPixel(x, y, *color);
-}
+}*/
 
 
-void image_set_smooth(sf::Image* item, int smooth)
+void image_set_smooth(sf::Texture* item, int smooth)
 {
 	item->SetSmooth(smooth==0?false:true);
 }
@@ -165,26 +165,28 @@ sf::Color* new_color(int red, int green, int blue)
 	return res;
 }
 
-sf::Image* image_init_empty(int width, int height, sf::Color* bkgrdColor)
+sf::Texture* image_init_empty(int width, int height, sf::Color* bkgrdColor)
 {
-	sf::Image* res = new sf::Image(width, height, *bkgrdColor);
+	sf::Texture* res = new sf::Texture();
+	res->Create(width, height/*, *bkgrdColor*/);
 	return res;
 }
 
-void sprite_set_image(sf::Sprite* item, const sf::Image* img)
+void sprite_set_image(sf::Sprite* item, const sf::Texture* img)
 {
-	item->SetImage(*img);
+	item->SetTexture(*img);
 }
 
 void sprite_set_blend_off(sf::Sprite* item)
 {
-	item->SetBlendMode(sf::Blend::None);
+	//TODO: Re-enable
+	//item->SetBlendMode(sf::Blend::None);
 }
 
 void sprite_set_sub_rect(sf::Sprite* item, int x, int y, int width, int height)
 {
 	sf::IntRect rect(x, y, x+width, y+height);
-	item->SetSubRect(rect);
+	item->SetTextureRect(rect);
 }
 
 void sprite_set_position(sf::Sprite* item, int x, int y)
@@ -194,17 +196,17 @@ void sprite_set_position(sf::Sprite* item, int x, int y)
 
 void sprite_set_center(sf::Sprite* item, int x, int y)
 {
-	item->SetCenter(x, y);
+	item->SetOrigin((float)x, (float)y);
 }
 
 int sprite_get_sub_rect_x(const sf::Sprite* item)
 {
-	return item->GetSubRect().Left;
+	return item->GetTextureRect().Left;
 }
 
 int sprite_get_sub_rect_y(const sf::Sprite* item)
 {
-	return item->GetSubRect().Top;
+	return item->GetTextureRect().Top;
 }
 
 float sprite_get_rotation(const sf::Sprite* item)
@@ -230,33 +232,36 @@ void sprite_set_color(sf::Sprite* item, sf::Color* color)
 
 sf::Color* poly_get_point_color(const sf::Shape* item, int pointID)
 {
-	sf::Color* res = new sf::Color(item->GetPointColor(pointID));
+	//TODO: re-enable later
+	//sf::Color* res = new sf::Color(item->GetPointColor(pointID));
+	sf::Color* res = new sf::Color(0x00, 0x00, 0x00);
 	return res;
 }
 
 void poly_set_point_color(sf::Shape* item, int pointID, const sf::Color* color)
 {
-	item->SetPointColor(pointID, *color);
+	//TODO: Re-enable later
+	//item->SetPointColor(pointID, *color);
 }
 
 void poly_set_scale_x(sf::Shape* item, float scale)
 {
-	item->SetScaleX(scale);
+	item->SetScale(scale, item->GetScale().y);
 }
 
 void poly_set_scale_y(sf::Shape* item, float scale)
 {
-	item->SetScaleY(scale);
+	item->SetScale(item->GetScale().x, scale);
 }
 
 void poly_set_pos_x(sf::Shape* item, int pos)
 {
-	item->SetX(pos);
+	item->SetPosition(pos, item->GetPosition().y);
 }
 
 void poly_set_pos_y(sf::Shape* item, int pos)
 {
-	item->SetY(pos);
+	item->SetPosition(item->GetPosition().x, pos);
 }
 
 void color_set_red(sf::Color* item, int red)
@@ -290,7 +295,7 @@ void game_del_color(sf::Color* color)
 	delete color;
 }
 
-void game_del_image(sf::Image* img)
+void game_del_image(sf::Texture* img)
 {
 	delete img;
 }
