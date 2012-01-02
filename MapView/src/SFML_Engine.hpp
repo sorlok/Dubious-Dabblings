@@ -87,6 +87,7 @@ DLLEXPORT int gamemap_get_tile_at(GameMap* item, int x, int y);
 
 //Game functionality
 //DLLEXPORT const sf::Mouse* game_get_input();
+DLLEXPORT void game_limit_framerate(int fps);
 DLLEXPORT int game_get_mouse_x();
 DLLEXPORT int game_get_mouse_y();
 DLLEXPORT int game_get_width();

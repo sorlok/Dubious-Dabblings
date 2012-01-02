@@ -2,6 +2,7 @@
 class SimpleGame : Game {
   function SimpleGame(int width, int height, int depth) {
     int res = self.init_game(width, height, depth);
+    self.limit_framerate(60);
     if (!res) {
       throw Error("Couldn't initialize game.");
     }

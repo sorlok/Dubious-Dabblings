@@ -43,6 +43,11 @@ int init_sfml(int width, int height, int depth)
 	return 1;
 }
 
+void game_limit_framerate(int fps)
+{
+	myWindow.SetFramerateLimit(fps);
+}
+
 
 int sfml_handle_events()
 {

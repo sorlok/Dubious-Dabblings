@@ -258,6 +258,9 @@ savepoly:
   res = game.'init_game'(800, 600, 32)
   unless res goto done
 
+  #Avoid annoying performance drags.
+  game.'limit_framerate'(60)
+
   #Create an object of the subclass.
   currRend = new ['DemoRendition']
   currRend.'setup'(game)

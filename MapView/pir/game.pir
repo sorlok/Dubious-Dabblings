@@ -23,6 +23,13 @@
   .return($I0)
 .end
 
+#Limit this game to a certain FPS
+.sub 'limit_framerate' :method
+  .param int fps
+  null $P0
+  LIB_dispatch_method($P0, 'game_limit_framerate', 'vi', fps)
+.end
+
 
 #Process all events from the engine.
 .sub 'process_events' :method
