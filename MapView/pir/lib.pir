@@ -42,10 +42,10 @@
 .end
 
 #Delete an image
-.sub 'LIB_delete_image'
+.sub 'LIB_delete_texture'
   .param pmc item
   null $P0
-  LIB_dispatch_method($P0, 'game_del_image', 'vp', item)
+  LIB_dispatch_method($P0, 'game_del_texture', 'vp', item)
 .end
 
 #Delete a game map

@@ -302,7 +302,7 @@ void game_del_color(sf::Color* color)
 	delete color;
 }
 
-void game_del_image(sf::Texture* img)
+void game_del_texture(sf::Texture* img)
 {
 	delete img;
 }

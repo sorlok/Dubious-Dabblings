@@ -3,7 +3,7 @@
 .include "pir/wrapped.pir"
 .include "pir/color.pir"
 .include "pir/input.pir"
-.include "pir/image.pir"
+.include "pir/texture.pir"
 .include "pir/offscreen_texture.pir"
 .include "pir/polygon.pir"
 .include "pir/sprite.pir"

@@ -98,7 +98,7 @@ DLLEXPORT void render_target_draw_item(sf::RenderTarget* canvas, sf::Drawable* i
 DLLEXPORT void game_del_rend_texture(sf::RenderTexture* item);
 DLLEXPORT void game_del_item(sf::Drawable* item);
 DLLEXPORT void game_del_color(sf::Color* color);
-DLLEXPORT void game_del_image(sf::Image* item);
+DLLEXPORT void game_del_texture(sf::Texture* item);
 DLLEXPORT void game_del_gamemap(GameMap* item);
 
 
