@@ -174,6 +174,17 @@ sf::RenderTexture* new_render_texture(int width, int height, sf::Color* bkgrdCol
 	return res;
 }
 
+void render_texture_flush(sf::RenderTexture* canvas)
+{
+	canvas->Display();
+}
+
+sf::Texture* render_texture_get_texture(sf::RenderTexture* canvas)
+{
+	sf::Texture* res = new sf::Texture(canvas->GetTexture());
+	return res;
+}
+
 void sprite_set_image(sf::Sprite* item, const sf::Texture* img)
 {
 	item->SetTexture(*img);

@@ -38,6 +38,17 @@
   LIB_dispatch_method(self, 'render_target_draw_item', 'vpp', item)
 .end
 
+#Done drawing
+.sub 'flush_drawing' :method
+  LIB_dispatch_method(self, 'render_texture_flush', 'vp')
+.end
+
+#Retrieve the texture; used for actually setting to a sprite.
+.sub 'get_texture' :method
+  $P0 = LIB_dispatch_method(self, 'render_texture_get_texture', 'pp', 'wrap'=>'Texture')
+  .return($P0)
+.end
+
 
 #Initialize this class.
 .sub OffscreenTexture_class_init :anon :load :init

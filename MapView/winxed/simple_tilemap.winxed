@@ -47,14 +47,13 @@ class SimpleTileMap : TileMap {
         #Draw onto the buffer
         self.tileset.stamp_image(buffer, tile_id, tx*ts, ty*ts);
       }
-
-      #Temp
-      say(ty + " => " + tileH);
     }
 
     #Save to a buffer sprite
+    buffer.flush_drawing();
+    var buffText = buffer.get_texture();
     self.bufferSprite = new Sprite;
-    self.bufferSprite.set_image(buffer);
+    self.bufferSprite.set_image(buffText);
   }
 
   #Load a map in the tmx format.

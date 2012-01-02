@@ -94,6 +94,8 @@ DLLEXPORT int game_get_height();
 DLLEXPORT float game_get_frame_time_s();
 DLLEXPORT sf::RenderWindow* game_get_window();
 DLLEXPORT void render_target_draw_item(sf::RenderTarget* canvas, sf::Drawable* item);
+DLLEXPORT void render_texture_flush(sf::RenderTexture* canvas);
+DLLEXPORT sf::Texture* render_texture_get_texture(sf::RenderTexture* canvas);
 
 //Cleanup
 DLLEXPORT void game_del_rend_texture(sf::RenderTexture* item);
