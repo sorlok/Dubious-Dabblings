@@ -42,8 +42,8 @@ class SampleRendition : Rendition {
       #}
     }
 
-    #Images
-    self.personImg = new Image;
+    #Texture
+    self.personImg = new Texture;
     self.personImg.load_file('person.png');
     #if (!self.personImg) {
       #Error

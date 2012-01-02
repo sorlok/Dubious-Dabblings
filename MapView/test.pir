@@ -38,19 +38,19 @@
   unless $I0 goto makeobjs
 
   #Load the shader
-  $P1 = new 'PostFX'
-  $P1.'load_file'('colorize.sfx')  #TODO: This can fail!
+  #$P1 = new 'PostFX'
+  #$P1.'load_file'('colorize.sfx')  #TODO: This can fail!
 
   #Set its properties (for now just use the defaults)
-  $P1.'DEMO_set_default_pfx'()
+  #$P1.'DEMO_set_default_pfx'()
 
   #Save it in our array of objects
-  $P0.'push'($P1)
-  setattribute self, 'pfxShader', $P1
+  #$P0.'push'($P1)
+  #setattribute self, 'pfxShader', $P1
 
 makeobjs:
-  #Images
-  personImg = new 'Image'
+  #Textures
+  personImg = new 'Texture'
   personImg.'load_file'('person.png')
 
   #Retrieve the image's width/height, for later
@@ -127,8 +127,8 @@ getinput:
   mouseY = $P0.'get_mouse_y'()
 
   #Update our post-effect shader
-  $P0 = getattribute self, 'pfxShader'
-  $P0.'DEMO_update_pfx_color'()
+  #$P0 = getattribute self, 'pfxShader'
+  #$P0.'DEMO_update_pfx_color'()
 
   #Update sprite 1's rotation
   $P1 = getattribute self, 'spr1'
@@ -267,11 +267,14 @@ savepoly:
     #Call our sample game object's update method
     currRend.'update'()
 
-    #Display what we've just rendered
-    DEMO_SampleDisplay()
+    #Clear
+    game.'clear_display'()
 
     #And here is where the real updating happens
     currRend.'display'()
+
+    #Display what we've just rendered
+    DEMO_SampleDisplay()
 
     #Here we go
     game.'display'()

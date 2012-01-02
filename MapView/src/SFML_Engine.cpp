@@ -63,8 +63,9 @@ void clear_display()
 
 void demo_display()
 {
-	if (myWindow.GetFrameTime()>0.0) {
-		framerate.addSample(1.0/myWindow.GetFrameTime());
+	float time_in_s = game_get_frame_time_s();
+	if (time_in_s>0.0) {
+		framerate.addSample(1.0/time_in_s);
 	}
 
 	if (frClock.GetElapsedTime()>0.5) {
@@ -124,13 +125,13 @@ sf::Texture* new_texture(const char* filename)
 	return NULL;
 }
 
-int image_get_width(const sf::Texture* item)
+int texture_get_width(const sf::Texture* item)
 {
 	return item->GetWidth();
 }
 
 
-int image_get_height(const sf::Texture* item)
+int texture_get_height(const sf::Texture* item)
 {
 	return item->GetHeight();
 }
@@ -147,7 +148,7 @@ void image_set_pixel(sf::Texture* item, int x, int y, sf::Color* color)
 }*/
 
 
-void image_set_smooth(sf::Texture* item, int smooth)
+void texture_set_smooth(sf::Texture* item, int smooth)
 {
 	item->SetSmooth(smooth==0?false:true);
 }
@@ -385,15 +386,17 @@ std::vector< std::vector<int> > maplayer;
 std::pair<unsigned int, unsigned int> mapSizeInTiles;
 
 
+sf::RenderWindow* game_get_window()
+{
+	//Sort of a hack, for now.
+	return &myWindow;
+}
+
 
 //If canvas is null, use the main window.
 void render_target_draw_item(sf::RenderTarget* canvas, sf::Drawable* item)
 {
-	if (canvas) {
-		canvas->Draw(*item);
-	} else {
-		myWindow.Draw(*item);
-	}
+	canvas->Draw(*item);
 }
 
 /*const sf::Mouse* game_get_input()
@@ -440,7 +443,7 @@ sf::Shape* demo_init_poly()
 
 float game_get_frame_time_s()
 {
-	return myWindow.GetFrameTime();
+	return myWindow.GetFrameTime()/1000.0;
 }
 
 

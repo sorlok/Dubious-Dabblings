@@ -13,7 +13,7 @@ class SimpleTileSet : TileSet {
   #Load a file as the tileset; check it fits within the given tileSize.
   function load_file(string filename, int tileSize) {
     #Load properties.
-    self.img = new Image;
+    self.img = new Texture;
     self.img.load_file(filename);
 
     #Save for later
