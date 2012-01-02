@@ -72,18 +72,10 @@ class SimpleTileSet : TileSet {
   function stamp_image(var img, int id, int destX, int destY) {
     self.check_tile_id(id);
 
-    #Turn the ID into x/y coordinates.
+    #Draw it
     var spr = self.tiles[id];
-    int srcX = spr.get_sub_rect_x();
-    int srcY = spr.get_sub_rect_y();
-
-    #Loop, draw
-    for (int y=0; y<self.tileSize; y++) {
-      for (int x=0; x<self.tileSize; x++) {
-        var clr = self.img.get_pixel(x+srcX, y+srcY);
-        img.set_pixel(x+destX, y+destY, clr);
-      }
-    }
+    spr.set_position(destX, destY);
+    img.draw_item(spr);
   }
 
 

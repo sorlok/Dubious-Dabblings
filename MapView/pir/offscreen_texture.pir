@@ -1,7 +1,7 @@
 #####################################################################
 # OffscreenTexture class; wraps a RenderTexture
 #####################################################################
-.namespace ['Game']
+.namespace ['OffscreenTexture']
 
 #Initialization code.
 .sub 'init' :vtable

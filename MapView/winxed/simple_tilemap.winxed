@@ -33,7 +33,7 @@ class SimpleTileMap : TileMap {
     var clr = new Color;
     clr.init_new(0x33, 0x33, 0x33);
     int ts = self.get_tile_size();
-    var buffer = new Image;
+    var buffer = new OffscreenTexture;
     buffer.init_empty_image(self.get_width()*ts, self.get_height()*ts, clr);
 
     #Draw
@@ -45,7 +45,6 @@ class SimpleTileMap : TileMap {
         if (tile_id<0) { continue; }
 
         #Draw onto the buffer
-        #NOTE: This is slow in SFML 1.6; better to use RenderImage and 2.0 if possible.
         self.tileset.stamp_image(buffer, tile_id, tx*ts, ty*ts);
       }
 
