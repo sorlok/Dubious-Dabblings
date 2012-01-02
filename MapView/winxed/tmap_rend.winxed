@@ -9,6 +9,11 @@ class TileMapRendition : Rendition {
   var game;
   var input;
 
+  #Draw a rotating person cursor to help convey lag.
+  #TODO: Lag meter...
+  var personImg;
+  var personSpr;
+
   function TileMapRendition(var game) {
     #New game object/input tracker
     self.game = game;
@@ -20,13 +25,29 @@ class TileMapRendition : Rendition {
     #Now load our TMX map.
     self.currmap = new SimpleTileMap;
     self.currmap.load_file('map_test.tmx');
+
+    #Our cursor too.
+    self.personImg = new Texture;
+    self.personImg.load_file('person.png');
+    self.personSpr = new Sprite;
+    self.personSpr.set_image(self.personImg);
+    self.personSpr.set_center(self.personImg.get_width()/2, self.personImg.get_height()/2);
+    push(self.drawables, self.personSpr);
   }
 
   function update() {
     #Retrieve game timer
     float frameTimeS = self.game.get_frame_time_in_s();
 
-    #TODO
+    #Retrieve mouse x,y
+    int mouseX = self.input.get_mouse_x();
+    int mouseY = self.input.get_mouse_y();
+
+    #Spin, cursor
+    float newRot = self.personSpr.get_rotation();
+    newRot += 50 * frameTimeS;
+    self.personSpr.set_rotation(newRot);
+    self.personSpr.set_position(mouseX, mouseY-self.personImg.get_height()/2);
   }  
 
   function display() {
