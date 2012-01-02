@@ -81,18 +81,8 @@
 #Generic delete/draw stuff
 .sub 'draw_item' :method
   .param pmc item
-
-  #De-pointerize (if needed)
-  #TODO: Can we do this with roles?
-  $P1 = item
-  $I0 = can item, 'get_ptr'
-  unless $I0 goto nowdraw
-  $P0 = find_method item, 'get_ptr'
-  $P1 = item.$P0()
-
-nowdraw:
   null $P0
-  LIB_dispatch_method($P0, 'game_draw_item', 'vp', $P1)
+  LIB_dispatch_method($P0, 'render_target_draw_item', 'vpp', $P0, item)
 .end
 
 

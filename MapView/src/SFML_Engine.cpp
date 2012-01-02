@@ -165,10 +165,11 @@ sf::Color* new_color(int red, int green, int blue)
 	return res;
 }
 
-sf::Texture* image_init_empty(int width, int height, sf::Color* bkgrdColor)
+sf::RenderTexture* new_render_texture(int width, int height, sf::Color* bkgrdColor)
 {
-	sf::Texture* res = new sf::Texture();
-	res->Create(width, height/*, *bkgrdColor*/);
+	sf::RenderTexture* res = new sf::RenderTexture();
+	res->Create(width, height);
+	res->Clear(*bkgrdColor);
 	return res;
 }
 
@@ -180,6 +181,8 @@ void sprite_set_image(sf::Sprite* item, const sf::Texture* img)
 void sprite_set_blend_off(sf::Sprite* item)
 {
 	//TODO: Re-enable
+	//NOTE: This is stored in the RenderStates class, which also applies shaders (which might be
+	//      used to re-enable our polygon vertex shading). So it's going to get slightly more complex.
 	//item->SetBlendMode(sf::Blend::None);
 }
 
@@ -284,6 +287,10 @@ void color_set_alpha(sf::Color* item, int alpha)
 	item->a = (alpha&0xFF);
 }
 
+void game_del_rend_texture(sf::RenderTexture* item)
+{
+	delete item;
+}
 
 void game_del_item(sf::Drawable* item)
 {
@@ -379,9 +386,14 @@ std::pair<unsigned int, unsigned int> mapSizeInTiles;
 
 
 
-void game_draw_item(sf::Drawable* item)
+//If canvas is null, use the main window.
+void render_target_draw_item(sf::RenderTarget* canvas, sf::Drawable* item)
 {
-	myWindow.Draw(*item);
+	if (canvas) {
+		canvas->Draw(*item);
+	} else {
+		myWindow.Draw(*item);
+	}
 }
 
 /*const sf::Mouse* game_get_input()

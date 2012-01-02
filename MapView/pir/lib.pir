@@ -55,6 +55,13 @@
   LIB_dispatch_method($P0, 'game_del_gamemap', 'vp', item)
 .end
 
+#Delete a render texture
+.sub 'LIB_delete_rend_texture'
+  .param pmc item
+  null $P0
+  LIB_dispatch_method($P0, 'game_del_rend_texture', 'vp', item)
+.end
+
 
 #Dispatch a method on _some_ library object. 
 .sub 'LIB_dispatch_method'

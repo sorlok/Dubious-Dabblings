@@ -41,7 +41,7 @@ DLLEXPORT sf::Shape* demo_init_poly();
 
 //Texture
 DLLEXPORT sf::Texture* new_texture(const char* filename);
-DLLEXPORT sf::Texture* image_init_empty(int width, int height, sf::Color* bkgrdColor);
+DLLEXPORT sf::RenderTexture* new_render_texture(int width, int height, sf::Color* bkgrdColor);
 DLLEXPORT int image_get_width(const sf::Texture* item);
 DLLEXPORT int image_get_height(const sf::Texture* item);
 DLLEXPORT void image_set_smooth(sf::Texture* item, int smooth);
@@ -92,9 +92,10 @@ DLLEXPORT int game_get_mouse_y();
 DLLEXPORT int game_get_width();
 DLLEXPORT int game_get_height();
 DLLEXPORT float game_get_frame_time_s();
-DLLEXPORT void game_draw_item(sf::Drawable* item);
+DLLEXPORT void render_target_draw_item(sf::RenderTarget* canvas, sf::Drawable* item);
 
 //Cleanup
+DLLEXPORT void game_del_rend_texture(sf::RenderTexture* item);
 DLLEXPORT void game_del_item(sf::Drawable* item);
 DLLEXPORT void game_del_color(sf::Color* color);
 DLLEXPORT void game_del_image(sf::Image* item);
