@@ -35,7 +35,7 @@
 #Draw onto this image
 .sub 'draw_item' :method
   .param pmc item
-  LIB_dispatch_method(self, 'render_target_draw_item', 'vpp', item)
+  LIB_dispatch_method(self, 'render_texture_draw_item', 'vpp', item)
 .end
 
 #Done drawing

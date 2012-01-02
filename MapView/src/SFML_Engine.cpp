@@ -404,8 +404,12 @@ sf::RenderWindow* game_get_window()
 }
 
 
-//If canvas is null, use the main window.
-void render_target_draw_item(sf::RenderTarget* canvas, sf::Drawable* item)
+void render_texture_draw_item(sf::RenderTexture* canvas, sf::Drawable* item)
+{
+	canvas->Draw(*item);
+}
+
+void game_draw_item(sf::RenderWindow* canvas, sf::Drawable* item)
 {
 	canvas->Draw(*item);
 }

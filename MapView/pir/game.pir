@@ -83,7 +83,7 @@
   .param pmc item
   null $P0
   $P1 = LIB_dispatch_method($P0, 'game_get_window', 'p')
-  LIB_dispatch_method($P0, 'render_target_draw_item', 'vpp', $P1, item)
+  LIB_dispatch_method($P0, 'game_draw_item', 'vpp', $P1, item)
 .end
 
 
