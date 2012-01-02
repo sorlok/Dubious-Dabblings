@@ -11,6 +11,7 @@ int main(int argc, char** argv)
 	int res = 0;
 	while (!res) {
 	    res = sfml_handle_events();
+	    clear_display();
 	    demo_display();
 	    sfml_display();
 	}
