@@ -200,7 +200,7 @@ void sprite_set_blend_off(sf::Sprite* item)
 
 void sprite_set_sub_rect(sf::Sprite* item, int x, int y, int width, int height)
 {
-	sf::IntRect rect(x, y, x+width, y+height);
+	sf::IntRect rect(x, y, width, height);
 	item->SetTextureRect(rect);
 }
 
