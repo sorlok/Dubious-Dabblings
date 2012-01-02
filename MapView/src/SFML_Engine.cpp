@@ -93,11 +93,12 @@ void close_sfml()
 
 int can_use_postfx()
 {
-	return sf::PostFX::CanUsePostFX()?1:0;
+	return sf::Shader::IsAvailable()?1:0;
+	//return sf::PostFX::CanUsePostFX()?1:0;
 }
 
 
-sf::PostFX* new_postfx(const char* filename)
+/*sf::PostFX* new_postfx(const char* filename)
 {
 	sf::PostFX* item = new sf::PostFX();
 	if (item->LoadFromFile(filename)) {
@@ -107,7 +108,7 @@ sf::PostFX* new_postfx(const char* filename)
 	//Else, cleanup and return null;
 	delete item;
 	return NULL;
-}
+}*/
 
 
 
@@ -302,7 +303,7 @@ void game_del_gamemap(GameMap* item)
 }
 
 
-void demo_set_default_postfx(sf::PostFX* item)
+/*void demo_set_default_postfx(sf::PostFX* item)
 {
 	item->SetParameter("color", 1.f, 1.f, 1.f);
 	item->SetTexture("framebuffer", NULL); //"NULL" means use the screen.
@@ -316,7 +317,7 @@ void demo_update_postfx_color(sf::PostFX* item)
 	float gPerc = framePerc;
 	float bPerc = 1.0 - framePerc;
 	item->SetParameter("color", rPerc, gPerc, bPerc);
-}
+}*/
 
 
 GameMap* new_tmx_map(const char* filename)
@@ -378,19 +379,19 @@ void game_draw_item(sf::Drawable* item)
 	myWindow.Draw(*item);
 }
 
-const sf::Input* game_get_input()
+/*const sf::Mouse* game_get_input()
 {
-	return &myWindow.GetInput();
-}
+	return NULL;
+}*/
 
 int game_get_mouse_x()
 {
-	return myWindow.GetInput().GetMouseX();
+	return sf::Mouse::GetPosition().x;
 }
 
 int game_get_mouse_y()
 {
-	return myWindow.GetInput().GetMouseY();
+	return sf::Mouse::GetPosition().y;
 }
 
 int game_get_width()
@@ -406,14 +407,17 @@ int game_get_height()
 
 sf::Shape* demo_init_poly()
 {
-	sf::Shape* poly = new sf::Shape();
-	poly->AddPoint(0, -50,  sf::Color(0xFF, 0, 0));
-	poly->AddPoint(50, 0,   sf::Color(0, 0xFF, 0));
-	poly->AddPoint(50, 50,  sf::Color(0, 0, 0xFF));
-	poly->AddPoint(0, 100,  sf::Color(0xFF, 0xFF, 0));
-	poly->AddPoint(-50, 50, sf::Color(0, 0xFF, 0xFF));
-	poly->AddPoint(-50, 0,  sf::Color(0xFF, 0, 0xFF));
+	sf::ConvexShape* poly = new sf::ConvexShape(6);
+	poly->SetPoint(0, sf::Vector2f(0, -50));//,  sf::Color(0xFF, 0, 0));
+	poly->SetPoint(1, sf::Vector2f(50, 0));//,   sf::Color(0, 0xFF, 0));
+	poly->SetPoint(2, sf::Vector2f(50, 50));//,  sf::Color(0, 0, 0xFF));
+	poly->SetPoint(3, sf::Vector2f(0, 100));//,  sf::Color(0xFF, 0xFF, 0));
+	poly->SetPoint(4, sf::Vector2f(-50, 50));//, sf::Color(0, 0xFF, 0xFF));
+	poly->SetPoint(5, sf::Vector2f(-50, 0));//,  sf::Color(0xFF, 0, 0xFF));
 	poly->SetPosition(800/2, 600/3);
+	poly->SetOutlineColor(sf::Color(0xFF, 0x00, 0x00));  //TEMP: Shade later
+	poly->SetFillColor(sf::Color(0xFF,0x00,0xFF));       //TEMP: Shade later
+	poly->SetOutlineThickness(1.0F);                     //TEMP: Shade later
 	return poly;
 }
 

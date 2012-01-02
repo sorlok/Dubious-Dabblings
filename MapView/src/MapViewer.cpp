@@ -51,7 +51,7 @@ const AnchorPoint Centered = Axis::Centered();
 nall::string testParrotTxts[] = {"Test Parrot VM", "Shutdown VM"};
 bool testIsRunning = false;
 void ParrotThread(void* userData);
-sf::Thread runningThread(&ParrotThread);
+//sf::Thread runningThread(&ParrotThread);
 sf::Mutex runningMutex;
 PMC* interp = nullptr;
 
@@ -91,7 +91,8 @@ void ParrotThread(void* userData)
 void testParrotVM()
 {
 	threadIsLooping = true;
-	runningThread.Launch();
+	throw 1;
+	//runningThread.Launch();
 }
 
 
@@ -102,7 +103,7 @@ void quitParrotVM()
 		if (interp) {
 			shutdownParrot(interp);
 		}
-		runningThread.Terminate();
+		//runningThread.Terminate();
 		std::cout <<"Forced shutdown.\n";
 	}
 }

@@ -30,11 +30,11 @@ DLLEXPORT void demo_display();
 DLLEXPORT void sfml_display();
 DLLEXPORT void close_sfml();
 
-//Post FX
+//Post FX (todo: update to shaders)
 DLLEXPORT int can_use_postfx();
-DLLEXPORT sf::PostFX* new_postfx(const char* filename);
-DLLEXPORT void demo_set_default_postfx(sf::PostFX* item);
-DLLEXPORT void demo_update_postfx_color(sf::PostFX* item);
+//DLLEXPORT sf::PostFX* new_postfx(const char* filename);
+//DLLEXPORT void demo_set_default_postfx(sf::PostFX* item);
+//DLLEXPORT void demo_update_postfx_color(sf::PostFX* item);
 
 //Demo
 DLLEXPORT sf::Shape* demo_init_poly();
@@ -86,7 +86,7 @@ DLLEXPORT const char* gamemap_get_tile_palette_path(GameMap* item);
 DLLEXPORT int gamemap_get_tile_at(GameMap* item, int x, int y);
 
 //Game functionality
-DLLEXPORT const sf::Input* game_get_input();
+//DLLEXPORT const sf::Mouse* game_get_input();
 DLLEXPORT int game_get_mouse_x();
 DLLEXPORT int game_get_mouse_y();
 DLLEXPORT int game_get_width();

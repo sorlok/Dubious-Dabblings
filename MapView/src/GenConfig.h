@@ -7,6 +7,6 @@
 #define MAPVIEW_VERSION_MINOR ""
 
 //Flags imported from cmake
-/* #undef BUILD_SHARED_LIBRARY */
+#define BUILD_SHARED_LIBRARY
 
 
