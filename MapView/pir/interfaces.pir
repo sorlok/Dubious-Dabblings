@@ -13,10 +13,17 @@
 .include "pir/tileset.pir"
 .include "pir/tilemap.pir"
 
-#####################################################################
-# Base classes, to be subclassed by our library.
-#####################################################################
+#NOTE: This code is generated. It should probably be included through some other mechanism
+.include "ruby/spinning_person_compiled.pir"
 
+
+#####################################################################
+# A Rendition is a way of viewing the game world. The Game Engine calls
+#   udpate() and display() every time tick.
+# An Rendition is sort of like a "mini" engine; e.g., we might have an 
+#   RPG Rendition, which itself contains Renditions for each minigame, and
+#   perhaps one for the menu.
+#####################################################################
 .namespace ['Rendition']
 .sub 'init' :vtable
 .end
@@ -30,6 +37,10 @@
 .sub Rendition_class_init :anon :load :init
     newclass $P0, [ 'Rendition' ]
 .end
+
+
+
+
 
 
 

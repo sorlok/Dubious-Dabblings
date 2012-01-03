@@ -52,6 +52,11 @@ done:
   .param pmc ptr
 .end
 
+#Our Wrapped items can also be Game Objects... we may need a clearer inheritance trail later.
+.sub 'update' :method 
+  .param num elapsed
+.end
+
 #Register this class
 .sub Wrapped_class_init :anon :load :init
   $P0 = newclass 'Wrapped'

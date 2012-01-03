@@ -1,0 +1,15 @@
+Ok, so cardinal is not really ready for production use yet, but I wanted to test interoperability with WinXed.
+
+So, you should load the file "spinning_person_compiled.pir" INSTEAD of "spinning_person.rb".
+
+You can rebuild the pir file via:
+  parrot-cardinal --target=pir --output=spinning_person_compiled.pir  spinning_person.rb 
+
+This approach should be generic enough for most Parrot languages that support inheritance (*grumble* lua *grumble*).
+
+#
+#NOTE: All cardinal files will try to load "cardinal.pbc", which must be placed in the root directory with all our other 
+#      top-level includes. There should be a better way to manage this (text replacement in source files?) but for now
+#      it's not such a big deal.
+#
+

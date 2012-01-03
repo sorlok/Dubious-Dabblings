@@ -13,6 +13,7 @@ class TileMapRendition : Rendition {
   #TODO: Lag meter...
   var personImg;
   var personSpr;
+  var rotateEngine; #Used to test ruby
 
   function TileMapRendition(var game) {
     #New game object/input tracker
@@ -25,6 +26,9 @@ class TileMapRendition : Rendition {
     #Now load our TMX map.
     self.currmap = new SimpleTileMap;
     self.currmap.load_file('map_test.tmx');
+
+    #Our rotate engine
+    self.rotateEngine = new SpinningPerson;
 
     #Our cursor too.
     self.personImg = new Texture;
@@ -39,15 +43,17 @@ class TileMapRendition : Rendition {
     #Retrieve game timer
     float frameTimeS = self.game.get_frame_time_in_s();
 
-    #Retrieve mouse x,y
+    #Retrieve mouse x,y, position at cursor.
     int mouseX = self.input.get_mouse_x();
     int mouseY = self.input.get_mouse_y();
-
-    #Spin, cursor
-    float newRot = self.personSpr.get_rotation();
-    newRot += 50 * frameTimeS;
-    self.personSpr.set_rotation(newRot);
     self.personSpr.set_position(mouseX, mouseY-self.personImg.get_height()/2);
+
+    #Spin
+    #float newRot = self.personSpr.get_rotation();
+    #newRot += 50 * frameTimeS;
+    float newRot = self.rotateEngine.update(frameTimeS);
+    self.personSpr.set_rotation(newRot);
+
   }  
 
   function display() {
