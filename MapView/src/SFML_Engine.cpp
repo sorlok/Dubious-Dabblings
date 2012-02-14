@@ -426,12 +426,12 @@ void game_draw_item(sf::RenderWindow* canvas, sf::Drawable* item)
 
 int game_get_mouse_x()
 {
-	return sf::Mouse::GetPosition().x;
+	return sf::Mouse::GetPosition(myWindow).x;
 }
 
 int game_get_mouse_y()
 {
-	return sf::Mouse::GetPosition().y;
+	return sf::Mouse::GetPosition(myWindow).y;
 }
 
 int game_get_width()
