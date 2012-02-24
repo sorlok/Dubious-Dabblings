@@ -1,5 +1,4 @@
 #include "GenConfig.h"
-#ifndef BUILD_SHARED_LIBRARY
 
 
 //Turn on debugging info  --note: This won't actually matter later when
@@ -21,8 +20,13 @@
 //Tests for the BSNES config menu via AttachLayout
 //#include "BsnesMockup.hpp"
 
+//Whatever we're currently debugging
+#include "CurrentDebug.hpp"
+
+#ifndef BUILD_SHARED_LIBRARY
+
 //Main code (comment out if using one of the header-style tests, above.
-#include <iostream>
+/*#include <iostream>
 #include <sstream>
 
 #include <dlfcn.h>
@@ -58,13 +62,6 @@ PMC* interp = nullptr;
 
 //Helper directory loader:
 //This is undefined; we can play with Windows compatibility later.
-/*#ifdef WINDOWS
-    #include <direct.h>
-    #define GetCurrentDir _getcwd
-#else
-    #include <unistd.h>
-    #define GetCurrentDir getcwd
- #endif*/
 std::string GetCurrentDir() {
 	char* res = get_current_dir_name();
 	std::string resStr(res);
@@ -328,5 +325,6 @@ int main(int argc, char* argv[])
   OS::main();
   return 0;
 }
+*/
 
 #endif //BUILD_SHARED_LIBRARY

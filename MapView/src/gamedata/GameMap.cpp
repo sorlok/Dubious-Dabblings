@@ -144,7 +144,8 @@ void GameMap::PaintTile(size_t tileX, size_t tileY, int tileID, PremultImage& im
 }
 
 
-void GameMap::PaintImage(PremultImage& image)
+//TODO: Fix later.
+/*void GameMap::PaintImage(PremultImage& image)
 {
 	//Time to generate! Wheee~~~~
 	size_t tileW = mapSizeInTiles.width;
@@ -160,7 +161,7 @@ void GameMap::PaintImage(PremultImage& image)
 			}
 		}
 	}
-}
+}*/
 #endif
 
 
